@@ -1,0 +1,134 @@
+name: CI
+concurrency: ci-${{ github.ref }}
+on:
+  push:
+    tags-ignore:
+      - "*"
+    branches:
+      - "main"
+  pull_request:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+env:
+  REPOSITORY: ${{ github.repository }}
+
+jobs:
+  # generate-docs:
+  #   runs-on: ubuntu-20.04
+  #   if: (github.event_name == 'push' && github.ref == 'refs/heads/main')
+  #   steps:
+  #     - name: trigger docs update in sum.golang.org and pkg.go.dev
+  #       uses: essentialkaos/godoc-action@v1
+
+  static-analysis:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: 1.22
+      - uses: actions/cache@v4.0.2
+        id: go-cache
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+      - name: go vet check
+        run: make vet-check
+      - name: go fmt check
+        run: make fmt-check
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: v1.59.1
+          skip-cache: true
+          args: "--timeout=3m"
+
+  test:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: 1.22
+      - uses: actions/cache@v4.0.2
+        id: go-cache
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+      - name: test
+        run: make test-coverage
+      # - name: install goveralls
+      #   run: go install github.com/mattn/goveralls@latest
+      # - name: send coverage
+      #   env:
+      #     COVERALLS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   run: goveralls -coverprofile=covprofile -service=github
+
+  build-static-binary:
+    runs-on: ubuntu-20.04
+    needs: [static-analysis, test]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-go@v5
+        with:
+          go-version: 1.22
+      - uses: actions/cache@v4.0.2
+        id: go-cache
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+      - name: build
+        run: make -j4 cross-compiled
+      - name: compress
+        run: |
+          set -x
+          find ./build -maxdepth 1 -mindepth 1 -type d -exec sh -c 'tar -zcf build/workbench-$(basename {}).tgz -C {} workbench' \;
+      - uses: actions/upload-artifact@v4
+        with:
+          name: workbench-binaries
+          path: |
+            build/workbench-amd64.tgz
+            build/workbench-arm64.tgz
+
+  release-rolling:
+    needs: [build-static-binary]
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: workbench-binaries
+      - uses: "marvinpinto/action-automatic-releases@v1.2.1"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: "rolling"
+          prerelease: true
+          title: "Cutting Edge"
+          files: |
+            workbench-amd64.tgz
+            workbench-arm64.tgz
+
+  # This job doesn't actually make release, but rather reacts to a manual one, made via the GitHub UI.
+  # In the future, we might want to reuse the same mechanism of the rolling ones to automate everything here as well.
+  release-tag:
+    needs: [build-static-binary]
+    if: github.event.release
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: workbench-binaries
+      - uses: AButler/upload-release-assets@v3.0
+        with:
+          files: "workbench-*"
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
