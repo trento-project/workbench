@@ -6,14 +6,14 @@ import (
 	"github.com/trento-project/workbench/internal/support"
 )
 
-type SaptuneApplyOption func(*SaptuneApply)
+type SaptuneApplyOption Option[SaptuneApply]
 
 type SaptuneApply struct {
-	Base
+	base
 	executor support.CmdExecutor
 }
 
-func WithCustomSaptuneExecutor(executor support.CmdExecutor) SaptuneApplyOption {
+func WithCustomSaptuneExecutor(executor support.CmdExecutor) Option[SaptuneApply] {
 	return func(o *SaptuneApply) {
 		o.executor = executor
 	}
@@ -22,18 +22,14 @@ func WithCustomSaptuneExecutor(executor support.CmdExecutor) SaptuneApplyOption 
 func NewSaptuneApply(
 	arguments OperatorArguments,
 	operationID string,
-	options ...SaptuneApplyOption,
+	options OperatorOptions[SaptuneApply],
 ) *SaptuneApply {
 	saptuneApply := &SaptuneApply{
-		Base: Base{
-			operationID:   operationID,
-			arguments:     arguments,
-			planResources: make(map[string]any),
-		},
+		base:     newBaseOperator(operationID, arguments, options.BaseOperatorOptions...),
 		executor: support.Executor{},
 	}
 
-	for _, opt := range options {
+	for _, opt := range options.OperatorOptions {
 		opt(saptuneApply)
 	}
 
@@ -72,5 +68,8 @@ func (sa *SaptuneApply) Run(ctx context.Context) *ExecutionReport {
 }
 
 func (sa *SaptuneApply) plan(_ context.Context) error {
+	sa.logger.Debug(
+		"printing infos",
+	)
 	return nil
 }
