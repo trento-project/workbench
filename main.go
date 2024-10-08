@@ -1,7 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"github.com/trento-project/workbench/cmd"
+)
 
 func main() {
-	fmt.Println("hello moto")
+	cmd.Execute()
 }

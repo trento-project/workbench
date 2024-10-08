@@ -6,6 +6,9 @@ import (
 
 type OPERATION_PHASES string
 
+type OperationsArguments map[string]any
+type Option[T any] func(*T)
+
 const (
 	PLAN     OPERATION_PHASES = "PLAN"
 	COMMIT   OPERATION_PHASES = "COMMIT"
@@ -13,15 +16,13 @@ const (
 	ROLLBACK OPERATION_PHASES = "ROLLBACK"
 )
 
-type OperatorArguments map[string]any
+type OperatorArguments OperationsArguments
 
-type Operator interface {
+type Runner interface {
 	Run(ctx context.Context) *ExecutionReport
 }
 
-type Option[T any] func(*T)
-
 type OperatorOptions[T any] struct {
-	BaseOperatorOptions []BaseOption
+	BaseOperatorOptions []BaseOperationOption
 	OperatorOptions     []Option[T]
 }
