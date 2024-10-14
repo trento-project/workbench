@@ -16,7 +16,7 @@ var rootCmd = &cobra.Command{
 
 func Execute() {
 	executeCmd.Flags().StringVarP(&arguments, "arguments", "a", "", "arguments as json object (required)")
-	executeCmd.MarkFlagRequired("arguments")
+	_ = executeCmd.MarkFlagRequired("arguments")
 
 	rootCmd.AddCommand(executeCmd)
 	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "verbose output")
