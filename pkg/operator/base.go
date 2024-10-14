@@ -13,10 +13,17 @@ const (
 
 type BaseOperationOption Option[baseOperation]
 
+func WithCustomLogger(logger *logrus.Logger) BaseOperationOption {
+	return func(b *baseOperation) {
+		b.loggerInstance = logger
+	}
+}
+
 type baseOperation struct {
-	arguments OperatorArguments
-	resources map[string]any
-	logger    *logrus.Entry
+	arguments      OperatorArguments
+	resources      map[string]any
+	loggerInstance *logrus.Logger
+	logger         *logrus.Entry
 }
 
 func newBaseOperator(
@@ -25,14 +32,16 @@ func newBaseOperator(
 	options ...BaseOperationOption,
 ) baseOperation {
 	base := &baseOperation{
-		arguments: arguments,
-		resources: make(map[string]any),
-		logger:    logrus.StandardLogger().WithField("operation_id", operationID),
+		arguments:      arguments,
+		resources:      make(map[string]any),
+		loggerInstance: logrus.StandardLogger(),
 	}
 
 	for _, opt := range options {
 		opt(base)
 	}
+
+	base.logger = base.loggerInstance.WithField("operation_id", operationID)
 
 	return *base
 }
@@ -42,5 +51,5 @@ func (b *baseOperation) standardDiff(_ context.Context) map[string]any {
 	diff["before"] = b.resources[beforeDiffField]
 	diff["after"] = b.resources[afterFieldDiff]
 
-	return nil
+	return diff
 }

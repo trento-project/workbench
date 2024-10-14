@@ -83,7 +83,7 @@ func (sa *saptuneApplySolution) plan(_ context.Context) error {
 		return errors.New("could not call saptune solution applied")
 	}
 
-	sa.resources["planSolutionAppliedOutput"] = solutionAppliedOutput
+	sa.resources[beforeDiffField] = solutionAppliedOutput
 
 	return nil
 }
@@ -124,7 +124,7 @@ func (sa *saptuneApplySolution) verify(_ context.Context) error {
 	}
 
 	if alreadyApplied := isSaptuneSolutionAlreadyApplied(solutionAppliedOutput, sa.parsedArguments.solution); alreadyApplied {
-		sa.resources["verifySolutionAppliedOutput"] = solutionAppliedOutput
+		sa.resources[afterFieldDiff] = solutionAppliedOutput
 		return nil
 	}
 
@@ -147,7 +147,7 @@ func (sa *saptuneApplySolution) rollback(_ context.Context) error {
 }
 
 func (sa *saptuneApplySolution) operationDiff(ctx context.Context) map[string]any {
-	return sa.operationDiff(ctx)
+	return sa.standardDiff(ctx)
 }
 
 func isSaptuneVersionSupported(version string) bool {

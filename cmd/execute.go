@@ -29,10 +29,7 @@ var executeCmd = &cobra.Command{
 			logger.SetLevel(logrus.DebugLevel)
 		}
 
-		solution := args[0]
-		if solution != "saptunesolutionapply" {
-			return fmt.Errorf("solution %s provided as argument, is invalid", solution)
-		}
+		operatorName := args[0]
 
 		opArgs := make(operator.OperatorArguments)
 		err := json.Unmarshal([]byte(arguments), &opArgs)
@@ -40,9 +37,14 @@ var executeCmd = &cobra.Command{
 			return fmt.Errorf("could not unmarhsal %s into arguments", arguments)
 		}
 
-		op := operator.NewSaptuneApplySolution(opArgs, "test-cli", operator.OperatorOptions[operator.SaptuneApplySolution]{
-			BaseOperatorOptions: []operator.BaseOption{operator.WithLogger(logger)},
-		})
+		registry := operator.StandardRegistry(operator.WithCustomLogger(logger))
+
+		builder, err := registry.GetOperatorBuilder(operatorName)
+		if err != nil {
+			return err
+		}
+
+		op := builder("test-cli", opArgs)
 
 		report := op.Run(context.Background())
 		if report.Error != nil {
