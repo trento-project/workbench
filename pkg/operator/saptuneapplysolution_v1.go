@@ -40,7 +40,7 @@ func NewSaptuneApplySolution(
 ) *Executor {
 	saptuneApply := &saptuneApplySolution{
 		baseOperation: newBaseOperator(operationID, arguments, options.BaseOperatorOptions...),
-		executor:      support.Executor{},
+		executor:      support.CliExecutor{},
 	}
 
 	for _, opt := range options.OperatorOptions {

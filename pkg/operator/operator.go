@@ -6,7 +6,7 @@ import (
 
 type OPERATION_PHASES string
 
-type OperationsArguments map[string]any
+type OperatorArguments map[string]any
 type Option[T any] func(*T)
 
 const (
@@ -16,9 +16,7 @@ const (
 	ROLLBACK OPERATION_PHASES = "ROLLBACK"
 )
 
-type OperatorArguments OperationsArguments
-
-type Runner interface {
+type Operator interface {
 	Run(ctx context.Context) *ExecutionReport
 }
 

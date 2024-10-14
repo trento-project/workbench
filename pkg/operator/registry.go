@@ -14,32 +14,32 @@ func (e *OperatorNotFoundError) Error() string {
 	return fmt.Sprintf("operator %s not found", e.Name)
 }
 
-type RunnerBuilderFunction func(arguments OperatorArguments, operationID string) *Runner
+type OperatorBuilder func(operationID string, arguments OperatorArguments) Operator
 
-// map[operatorName]map[operatorVersion]RunnerBuilderFunction
-type OperatorsTree map[string]map[string]RunnerBuilderFunction
+// map[operatorName]map[operatorVersion]OperatorBuilder
+type operatorBuildersTree map[string]map[string]OperatorBuilder
 
-func extractVersionAndRunnerName(gathererName string) (string, string, error) {
-	parts := strings.Split(gathererName, "@")
+func extractOperatorNameAndVersion(operatorName string) (string, string, error) {
+	parts := strings.Split(operatorName, "@")
 	if len(parts) == 1 {
-		// no version found, just gatherer name
+		// no version found, just operator name
 		return parts[0], "", nil
 	}
 	if len(parts) != 2 {
 		return "", "", fmt.Errorf(
-			"could not extract the runner version from %s, version should follow <operatorName>@<version> syntax",
-			gathererName,
+			"could not extract the operator version from %s, version should follow <operatorName>@<version> syntax",
+			operatorName,
 		)
 	}
 	return parts[0], parts[1], nil
 }
 
 type Registry struct {
-	operators OperatorsTree
+	operators operatorBuildersTree
 }
 
-func (m *Registry) GetOperatorRunnerBuilder(name string) (RunnerBuilderFunction, error) {
-	operatorName, version, err := extractVersionAndRunnerName(name)
+func (m *Registry) GetOperatorBuilder(name string) (OperatorBuilder, error) {
+	operatorName, version, err := extractOperatorNameAndVersion(name)
 	if err != nil {
 		return nil, err
 	}
@@ -58,7 +58,7 @@ func (m *Registry) GetOperatorRunnerBuilder(name string) (RunnerBuilderFunction,
 }
 
 func (m *Registry) AvailableOperators() []string {
-	gatherersList := []string{}
+	operatorList := []string{}
 
 	for operatorName, versions := range m.operators {
 		operatorVersions := []string{}
@@ -66,13 +66,13 @@ func (m *Registry) AvailableOperators() []string {
 			operatorVersions = append(operatorVersions, v)
 		}
 		sort.Strings(operatorVersions)
-		gatherersList = append(
-			gatherersList,
+		operatorList = append(
+			operatorList,
 			fmt.Sprintf("%s - %s", operatorName, strings.Join(operatorVersions, "/")),
 		)
 	}
 
-	return gatherersList
+	return operatorList
 }
 
 func (m *Registry) getLatestVersionForOperator(name string) (string, error) {
@@ -88,4 +88,18 @@ func (m *Registry) getLatestVersionForOperator(name string) (string, error) {
 	sort.Strings(versions)
 
 	return versions[len(versions)-1], nil
+}
+
+func StandardRegistry(options ...BaseOperationOption) *Registry {
+	return &Registry{
+		operators: operatorBuildersTree{
+			SaptuneApplySolutionOperatorName: map[string]OperatorBuilder{
+				"v1": func(operationID string, arguments OperatorArguments) Operator {
+					return NewSaptuneApplySolution(arguments, operationID, OperatorOptions[saptuneApplySolution]{
+						BaseOperatorOptions: options,
+					})
+				},
+			},
+		},
+	}
 }

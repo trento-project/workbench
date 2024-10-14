@@ -8,9 +8,9 @@ type CmdExecutor interface {
 	Exec(name string, arg ...string) ([]byte, error)
 }
 
-type Executor struct{}
+type CliExecutor struct{}
 
-func (e Executor) Exec(name string, arg ...string) ([]byte, error) {
+func (e CliExecutor) Exec(name string, arg ...string) ([]byte, error) {
 	cmd := exec.Command(name, arg...)
 	return cmd.Output()
 }
