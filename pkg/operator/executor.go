@@ -30,9 +30,9 @@ func (e *Executor) Run(ctx context.Context) *ExecutionReport {
 
 	err = e.phaser.commit(ctx)
 	if err != nil {
-		e.currentPhase = ROLLBACK
 		rollbackError := e.phaser.rollback(ctx)
 		if rollbackError != nil {
+			e.currentPhase = ROLLBACK
 			return executionReportWithError(
 				wrapRollbackError(err, rollbackError),
 				e.currentPhase,
@@ -46,9 +46,9 @@ func (e *Executor) Run(ctx context.Context) *ExecutionReport {
 	e.currentPhase = VERIFY
 	err = e.phaser.verify(ctx)
 	if err != nil {
-		e.currentPhase = ROLLBACK
 		rollbackError := e.phaser.rollback(ctx)
 		if rollbackError != nil {
+			e.currentPhase = ROLLBACK
 			return executionReportWithError(
 				wrapRollbackError(err, rollbackError),
 				e.currentPhase,
