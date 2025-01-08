@@ -7,3 +7,7 @@ packages:
           dir: "pkg/operator"
         interfaces:
             phaser:
+            Operator:
+              config:
+                outpkg: "mocks"
+                dir: "pkg/operator/mocks"

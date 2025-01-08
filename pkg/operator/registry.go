@@ -17,7 +17,7 @@ func (e *OperatorNotFoundError) Error() string {
 type OperatorBuilder func(operationID string, arguments OperatorArguments) Operator
 
 // map[operatorName]map[operatorVersion]OperatorBuilder
-type operatorBuildersTree map[string]map[string]OperatorBuilder
+type OperatorBuildersTree map[string]map[string]OperatorBuilder
 
 func extractOperatorNameAndVersion(operatorName string) (string, string, error) {
 	parts := strings.Split(operatorName, "@")
@@ -35,7 +35,13 @@ func extractOperatorNameAndVersion(operatorName string) (string, string, error) 
 }
 
 type Registry struct {
-	operators operatorBuildersTree
+	operators OperatorBuildersTree
+}
+
+func NewRegistry(operators OperatorBuildersTree) *Registry {
+	return &Registry{
+		operators: operators,
+	}
 }
 
 func (m *Registry) GetOperatorBuilder(name string) (OperatorBuilder, error) {
@@ -92,7 +98,7 @@ func (m *Registry) getLatestVersionForOperator(name string) (string, error) {
 
 func StandardRegistry(options ...BaseOperationOption) *Registry {
 	return &Registry{
-		operators: operatorBuildersTree{
+		operators: OperatorBuildersTree{
 			SaptuneApplySolutionOperatorName: map[string]OperatorBuilder{
 				"v1": func(operationID string, arguments OperatorArguments) Operator {
 					return NewSaptuneApplySolution(arguments, operationID, OperatorOptions[saptuneApplySolution]{
