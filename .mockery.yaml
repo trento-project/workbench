@@ -1,0 +1,9 @@
+with-expecter: true
+keeptree: False
+packages:
+    github.com/trento-project/workbench/pkg/operator:
+        config:
+          outpkg: "operator"
+          dir: "pkg/operator"
+        interfaces:
+            phaser:
