@@ -53,7 +53,7 @@ func NewSaptuneApplySolution(
 	}
 }
 
-func (sa *saptuneApplySolution) plan(_ context.Context) error {
+func (sa *saptuneApplySolution) plan(ctx context.Context) error {
 	opArguments, err := parseSaptuneApplyArguments(sa.arguments)
 	if err != nil {
 		return err
@@ -61,7 +61,7 @@ func (sa *saptuneApplySolution) plan(_ context.Context) error {
 	sa.parsedArguments = opArguments
 
 	// check saptune version
-	versionOutput, err := sa.executor.Exec("rpm", "-q", "--qf", "%{VERSION}", "saptune")
+	versionOutput, err := sa.executor.Exec(ctx, "rpm", "-q", "--qf", "%{VERSION}", "saptune")
 	if err != nil {
 		return fmt.Errorf(
 			"could not get the installed saptune version: %w",
@@ -78,7 +78,7 @@ func (sa *saptuneApplySolution) plan(_ context.Context) error {
 		)
 	}
 
-	solutionAppliedOutput, err := sa.executor.Exec("saptune", "--format", "json", "solution", "applied")
+	solutionAppliedOutput, err := sa.executor.Exec(ctx, "saptune", "--format", "json", "solution", "applied")
 	if err != nil {
 		return errors.New("could not call saptune solution applied")
 	}
@@ -88,9 +88,9 @@ func (sa *saptuneApplySolution) plan(_ context.Context) error {
 	return nil
 }
 
-func (sa *saptuneApplySolution) commit(_ context.Context) error {
+func (sa *saptuneApplySolution) commit(ctx context.Context) error {
 	// check if solution is already applied
-	solutionAppliedOutput, err := sa.executor.Exec("saptune", "--format", "json", "solution", "applied")
+	solutionAppliedOutput, err := sa.executor.Exec(ctx, "saptune", "--format", "json", "solution", "applied")
 	if err != nil {
 		return errors.New("could not call saptune solution applied")
 	}
@@ -100,7 +100,7 @@ func (sa *saptuneApplySolution) commit(_ context.Context) error {
 		return nil
 	}
 
-	applyOutput, err := sa.executor.Exec("saptune", "solution", "apply", sa.parsedArguments.solution)
+	applyOutput, err := sa.executor.Exec(ctx, "saptune", "solution", "apply", sa.parsedArguments.solution)
 	if err != nil {
 		sa.logger.Errorf(
 			"could not perform saptune solution apply %s, error output: %s",
@@ -117,8 +117,8 @@ func (sa *saptuneApplySolution) commit(_ context.Context) error {
 	return nil
 }
 
-func (sa *saptuneApplySolution) verify(_ context.Context) error {
-	solutionAppliedOutput, err := sa.executor.Exec("saptune", "--format", "json", "solution", "applied")
+func (sa *saptuneApplySolution) verify(ctx context.Context) error {
+	solutionAppliedOutput, err := sa.executor.Exec(ctx, "saptune", "--format", "json", "solution", "applied")
 	if err != nil {
 		return errors.New("could not call saptune solution applied")
 	}
@@ -134,8 +134,8 @@ func (sa *saptuneApplySolution) verify(_ context.Context) error {
 	)
 }
 
-func (sa *saptuneApplySolution) rollback(_ context.Context) error {
-	revertOutput, err := sa.executor.Exec("saptune", "solution", "revert", sa.parsedArguments.solution)
+func (sa *saptuneApplySolution) rollback(ctx context.Context) error {
+	revertOutput, err := sa.executor.Exec(ctx, "saptune", "solution", "revert", sa.parsedArguments.solution)
 	if err != nil {
 		return fmt.Errorf("coult not revert saptune solution %s during rollback, error: %s",
 			sa.parsedArguments.solution,
