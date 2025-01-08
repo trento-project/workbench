@@ -18,13 +18,13 @@ default: clean mod-tidy fmt vet-check test build
 .PHONY: build
 build: workbench
 workbench:
-	$(GO_BUILD) -o workbench
+	$(GO_BUILD) -o workbench cmd/workbench.go
 
 .PHONY: cross-compiled $(ARCHS)
 cross-compiled: $(ARCHS)
 $(ARCHS):
 	@mkdir -p build/$@
-	GOOS=linux GOARCH=$@ $(GO_BUILD) -o build/$@/workbench
+	GOOS=linux GOARCH=$@ $(GO_BUILD) -o build/$@/workbench cmd/workbench.go
 
 .PHONY: clean
 clean: clean-binary
