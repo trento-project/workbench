@@ -11,6 +11,8 @@ import (
 	"github.com/trento-project/workbench/pkg/operator"
 )
 
+var Version string
+
 type cliOptions struct {
 	Arguments string `long:"arguments" short:"a" description:"Json arguments of an operator" required:"true"`
 	Verbose   bool   `long:"verbose" short:"v" description:"Log verbosity"`
@@ -31,6 +33,11 @@ func main() {
 	if options.Verbose {
 		logger.SetLevel(logrus.DebugLevel)
 	}
+
+	logger.Infof(
+		"starting workbench CLI, version: %s",
+		Version,
+	)
 
 	operatorName := args[0]
 	registry := operator.StandardRegistry(operator.WithCustomLogger(logger))

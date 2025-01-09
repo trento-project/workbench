@@ -1,7 +1,5 @@
 VERSION ?= $(shell ./hack/get_version_from_git.sh)
-INSTALLATIONSOURCE ?= "Community"
-LDFLAGS = -X github.com/trento-project/workbench/version.Version="$(VERSION)"
-LDFLAGS := $(LDFLAGS) -X github.com/trento-project/workbench/version.InstallationSource="$(INSTALLATIONSOURCE)"
+LDFLAGS = -X main.Version="$(VERSION)"
 ARCHS ?= amd64 arm64
 DEBUG ?= 0
 
