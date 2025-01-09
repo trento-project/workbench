@@ -101,7 +101,7 @@ func StandardRegistry(options ...BaseOperationOption) *Registry {
 		operators: OperatorBuildersTree{
 			SaptuneApplySolutionOperatorName: map[string]OperatorBuilder{
 				"v1": func(operationID string, arguments OperatorArguments) Operator {
-					return NewSaptuneApplySolution(arguments, operationID, OperatorOptions[saptuneApplySolution]{
+					return NewSaptuneApplySolution(arguments, operationID, OperatorOptions[SaptuneApplySolution]{
 						BaseOperatorOptions: options,
 					})
 				},

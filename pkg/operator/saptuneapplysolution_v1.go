@@ -15,20 +15,20 @@ const (
 	SaptuneApplySolutionOperatorName = "saptuneapplysolution"
 )
 
-type SaptuneApplySolutionOption Option[saptuneApplySolution]
+type SaptuneApplySolutionOption Option[SaptuneApplySolution]
 
 type saptuneApplySolutionArguments struct {
 	solution string
 }
 
-type saptuneApplySolution struct {
+type SaptuneApplySolution struct {
 	baseOperation
 	executor        support.CmdExecutor
 	parsedArguments *saptuneApplySolutionArguments
 }
 
 func WithCustomSaptuneExecutor(executor support.CmdExecutor) SaptuneApplySolutionOption {
-	return func(o *saptuneApplySolution) {
+	return func(o *SaptuneApplySolution) {
 		o.executor = executor
 	}
 }
@@ -36,9 +36,9 @@ func WithCustomSaptuneExecutor(executor support.CmdExecutor) SaptuneApplySolutio
 func NewSaptuneApplySolution(
 	arguments OperatorArguments,
 	operationID string,
-	options OperatorOptions[saptuneApplySolution],
+	options OperatorOptions[SaptuneApplySolution],
 ) *Executor {
-	saptuneApply := &saptuneApplySolution{
+	saptuneApply := &SaptuneApplySolution{
 		baseOperation: newBaseOperator(operationID, arguments, options.BaseOperatorOptions...),
 		executor:      support.CliExecutor{},
 	}
@@ -53,7 +53,7 @@ func NewSaptuneApplySolution(
 	}
 }
 
-func (sa *saptuneApplySolution) plan(ctx context.Context) error {
+func (sa *SaptuneApplySolution) plan(ctx context.Context) error {
 	opArguments, err := parseSaptuneApplyArguments(sa.arguments)
 	if err != nil {
 		return err
@@ -83,12 +83,12 @@ func (sa *saptuneApplySolution) plan(ctx context.Context) error {
 		return errors.New("could not call saptune solution applied")
 	}
 
-	sa.resources[beforeDiffField] = solutionAppliedOutput
+	sa.resources[beforeDiffField] = string(solutionAppliedOutput)
 
 	return nil
 }
 
-func (sa *saptuneApplySolution) commit(ctx context.Context) error {
+func (sa *SaptuneApplySolution) commit(ctx context.Context) error {
 	// check if solution is already applied
 	solutionAppliedOutput, err := sa.executor.Exec(ctx, "saptune", "--format", "json", "solution", "applied")
 	if err != nil {
@@ -117,14 +117,14 @@ func (sa *saptuneApplySolution) commit(ctx context.Context) error {
 	return nil
 }
 
-func (sa *saptuneApplySolution) verify(ctx context.Context) error {
+func (sa *SaptuneApplySolution) verify(ctx context.Context) error {
 	solutionAppliedOutput, err := sa.executor.Exec(ctx, "saptune", "--format", "json", "solution", "applied")
 	if err != nil {
 		return errors.New("could not call saptune solution applied")
 	}
 
 	if alreadyApplied := isSaptuneSolutionAlreadyApplied(solutionAppliedOutput, sa.parsedArguments.solution); alreadyApplied {
-		sa.resources[afterFieldDiff] = solutionAppliedOutput
+		sa.resources[afterFieldDiff] = string(solutionAppliedOutput)
 		return nil
 	}
 
@@ -134,10 +134,10 @@ func (sa *saptuneApplySolution) verify(ctx context.Context) error {
 	)
 }
 
-func (sa *saptuneApplySolution) rollback(ctx context.Context) error {
+func (sa *SaptuneApplySolution) rollback(ctx context.Context) error {
 	revertOutput, err := sa.executor.Exec(ctx, "saptune", "solution", "revert", sa.parsedArguments.solution)
 	if err != nil {
-		return fmt.Errorf("coult not revert saptune solution %s during rollback, error: %s",
+		return fmt.Errorf("could not revert saptune solution %s during rollback, error: %s",
 			sa.parsedArguments.solution,
 			revertOutput,
 		)
@@ -146,7 +146,7 @@ func (sa *saptuneApplySolution) rollback(ctx context.Context) error {
 	return nil
 }
 
-func (sa *saptuneApplySolution) operationDiff(ctx context.Context) map[string]any {
+func (sa *SaptuneApplySolution) operationDiff(ctx context.Context) map[string]any {
 	return sa.standardDiff(ctx)
 }
 

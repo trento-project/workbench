@@ -1,6 +1,12 @@
 with-expecter: true
 keeptree: False
 packages:
+    github.com/trento-project/workbench/internal/support:
+        config:
+          outpkg: "mocks"
+          dir: "internal/support/mocks"
+        interfaces:
+          CmdExecutor:
     github.com/trento-project/workbench/pkg/operator:
         config:
           outpkg: "operator"
