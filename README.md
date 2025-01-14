@@ -32,6 +32,9 @@ It follows a transactional approach, where each operation has distinct stages:
 - VERIFY  
 - ROLLBACK  
 
+
+The documentation for each of the operators can be found in the operators go source.
+
 #### PLAN
 
 The goal of the PLAN stage is to collect information about the operations and verify prerequisites.  
