@@ -22,7 +22,7 @@ Install the cli tool
 ![flowchart](./flow_chart.png)
 
 An operator is a unit of code that can perform write operations on target machines.  
-A write operation can either fail or succeed. If it succeeds, the operation will display a diff highlighting the changes before and after the commit phase.
+A write operation can either fail or succeed. If it succeeds, the operation displays a diff highlighting the changes before and after the commit phase.
 
 The operator accepts arguments to specify how to perform the operations. The arguments are in the form of a `map[string]any`, and each operator knows how to extract and validate them.  
 It follows a transactional approach, where each operation has distinct stages:
@@ -47,10 +47,10 @@ If an error occurs during the PLAN phase, no rollback is needed; the operation i
 #### COMMIT
 
 The COMMIT phase executes the actual write operations on the system, utilizing the information collected during the PLAN phase.  
-If an error occurs during this phase, a rollback will be triggered.
+If an error occurs during this phase, a rollback is triggered.
 
 The COMMIT phase should be idempotent. If a requested change has already been applied, the commit operation is simply skipped without returning an error.  
-Maintaining idempotency should be implemented appropriately based on the type of operations to be performed.
+Idempotency should be implemented appropriately based on the type of operations to be performed.
 
 #### VERIFY
 
