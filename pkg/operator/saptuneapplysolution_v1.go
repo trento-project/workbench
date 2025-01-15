@@ -21,6 +21,33 @@ type saptuneApplySolutionArguments struct {
 	solution string
 }
 
+// SaptuneApplySolution is an operator responsible for applying a saptune solution.
+//
+// The operator requires an argument in the form of a map containing a key named "solution".
+// This value will be passed to the saptune command-line tool.
+//
+// All considerations related to applying a solution using the saptune CLI apply here as well.
+//
+// # Execution Phases
+//
+// - PLAN:
+//   The operator checks for the presence of the saptune binary and verifies its version.
+//   The minimum required version is 3.1.0. If saptune is not installed or the version does not meet the minimum requirement,
+//   the operation will fail. The current state of the applied saptune solution is collected as the "before" diff.
+//
+// - COMMIT:
+//   The operator checks if the requested solution is already applied. If it is, no action is taken,
+//   ensuring idempotency without returning an error. If the solution is not applied, the saptune command
+//   to apply the solution will be executed.
+//
+// - VERIFY:
+//   The operator verifies whether the solution has been correctly applied to the system.
+//   If not, an error is raised. If successful, the current state of the applied solution is collected as the "after" diff.
+//
+// - ROLLBACK:
+//   If an error occurs during the COMMIT or VERIFY phase, the saptune revert command is executed
+//   to undo the applied solution.
+
 type SaptuneApplySolution struct {
 	baseOperation
 	executor        support.CmdExecutor
