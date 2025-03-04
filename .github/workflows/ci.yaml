@@ -16,14 +16,14 @@ env:
 
 jobs:
   # generate-docs:
-  #   runs-on: ubuntu-20.04
+  #   runs-on: ubuntu-24.04
   #   if: (github.event_name == 'push' && github.ref == 'refs/heads/main')
   #   steps:
   #     - name: trigger docs update in sum.golang.org and pkg.go.dev
   #       uses: essentialkaos/godoc-action@v1
 
   static-analysis:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
@@ -48,7 +48,7 @@ jobs:
           args: "--timeout=3m"
 
   test:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
@@ -71,7 +71,7 @@ jobs:
       #   run: goveralls -coverprofile=covprofile -service=github
 
   build-static-binary:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     needs: [static-analysis, test]
     steps:
       - uses: actions/checkout@v4
@@ -103,7 +103,7 @@ jobs:
   release-rolling:
     needs: [build-static-binary]
     if: (github.event_name == 'push' && github.ref == 'refs/heads/main')
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/download-artifact@v4
         with:
@@ -123,7 +123,7 @@ jobs:
   release-tag:
     needs: [build-static-binary]
     if: github.event.release
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/download-artifact@v4
         with:
