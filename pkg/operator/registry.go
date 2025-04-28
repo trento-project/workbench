@@ -99,6 +99,13 @@ func (m *Registry) getLatestVersionForOperator(name string) (string, error) {
 func StandardRegistry(options ...BaseOperatorOption) *Registry {
 	return &Registry{
 		operators: OperatorBuildersTree{
+			ClusterMaintenanceChangeOperatorName: map[string]OperatorBuilder{
+				"v1": func(operationID string, arguments OperatorArguments) Operator {
+					return NewClusterMaintenanceChange(arguments, operationID, OperatorOptions[ClusterMaintenanceChange]{
+						BaseOperatorOptions: options,
+					})
+				},
+			},
 			SaptuneApplySolutionOperatorName: map[string]OperatorBuilder{
 				"v1": func(operationID string, arguments OperatorArguments) Operator {
 					return NewSaptuneApplySolution(arguments, operationID, OperatorOptions[SaptuneApplySolution]{
