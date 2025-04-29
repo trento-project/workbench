@@ -42,6 +42,7 @@ type diffOutput struct {
 //
 // Find some helpful references about maintenance transitions and used commands:
 // - https://www.suse.com/c/sles-for-sap-hana-maintenance-procedures-part-1-pre-maintenance-checks/
+// - https://www.suse.com/c/sles-for-sap-hana-maintenance-procedures-part-2-manual-administrative-tasks-os-reboots-and-updation-of-os-and-hana/
 // - https://crmsh.github.io/man-4.6/
 // - https://crmsh.github.io/man-4.6/#cmdhelp_root_status
 // - https://crmsh.github.io/man-4.6/#cmdhelp_maintenance
