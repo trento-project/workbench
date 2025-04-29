@@ -49,7 +49,7 @@ type saptuneApplySolutionArguments struct {
 //   to undo the applied solution.
 
 type SaptuneApplySolution struct {
-	baseOperation
+	baseOperator
 	executor        support.CmdExecutor
 	parsedArguments *saptuneApplySolutionArguments
 }
@@ -66,8 +66,8 @@ func NewSaptuneApplySolution(
 	options OperatorOptions[SaptuneApplySolution],
 ) *Executor {
 	saptuneApply := &SaptuneApplySolution{
-		baseOperation: newBaseOperator(operationID, arguments, options.BaseOperatorOptions...),
-		executor:      support.CliExecutor{},
+		baseOperator: newBaseOperator(operationID, arguments, options.BaseOperatorOptions...),
+		executor:     support.CliExecutor{},
 	}
 
 	for _, opt := range options.OperatorOptions {

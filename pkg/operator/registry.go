@@ -96,7 +96,7 @@ func (m *Registry) getLatestVersionForOperator(name string) (string, error) {
 	return versions[len(versions)-1], nil
 }
 
-func StandardRegistry(options ...BaseOperationOption) *Registry {
+func StandardRegistry(options ...BaseOperatorOption) *Registry {
 	return &Registry{
 		operators: OperatorBuildersTree{
 			SaptuneApplySolutionOperatorName: map[string]OperatorBuilder{
