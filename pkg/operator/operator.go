@@ -21,6 +21,6 @@ type Operator interface {
 }
 
 type OperatorOptions[T any] struct {
-	BaseOperatorOptions []BaseOperationOption
+	BaseOperatorOptions []BaseOperatorOption
 	OperatorOptions     []Option[T]
 }

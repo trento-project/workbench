@@ -11,15 +11,15 @@ const (
 	afterFieldDiff  = "after"
 )
 
-type BaseOperationOption Option[baseOperation]
+type BaseOperatorOption Option[baseOperator]
 
-func WithCustomLogger(logger *logrus.Logger) BaseOperationOption {
-	return func(b *baseOperation) {
+func WithCustomLogger(logger *logrus.Logger) BaseOperatorOption {
+	return func(b *baseOperator) {
 		b.loggerInstance = logger
 	}
 }
 
-type baseOperation struct {
+type baseOperator struct {
 	arguments      OperatorArguments
 	resources      map[string]any
 	loggerInstance *logrus.Logger
@@ -29,9 +29,9 @@ type baseOperation struct {
 func newBaseOperator(
 	operationID string,
 	arguments OperatorArguments,
-	options ...BaseOperationOption,
-) baseOperation {
-	base := &baseOperation{
+	options ...BaseOperatorOption,
+) baseOperator {
+	base := &baseOperator{
 		arguments:      arguments,
 		resources:      make(map[string]any),
 		loggerInstance: logrus.StandardLogger(),
@@ -46,7 +46,7 @@ func newBaseOperator(
 	return *base
 }
 
-func (b *baseOperation) standardDiff(_ context.Context) map[string]any {
+func (b *baseOperator) standardDiff(_ context.Context) map[string]any {
 	diff := make(map[string]any)
 	diff["before"] = b.resources[beforeDiffField]
 	diff["after"] = b.resources[afterFieldDiff]
