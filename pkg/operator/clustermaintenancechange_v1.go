@@ -77,7 +77,7 @@ type ClusterMaintenanceChange struct {
 	parsedArguments *clusterMaintenanceChangeArguments
 }
 
-func WithCustomExecutor(executor support.CmdExecutor) ClusterMaintenanceChangeOption {
+func WithCustomClusterMaintenanceExecutor(executor support.CmdExecutor) ClusterMaintenanceChangeOption {
 	return func(o *ClusterMaintenanceChange) {
 		o.executor = executor
 	}
