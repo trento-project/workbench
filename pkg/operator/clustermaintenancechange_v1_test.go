@@ -44,7 +44,6 @@ func TestClusterMaintenanceChangeSuccessOn(t *testing.T) {
 		"crm",
 		"maintenance",
 		"on",
-		"",
 	).Return([]byte("ok"), nil)
 
 	mockCmdExecutor.On(
@@ -124,7 +123,6 @@ func TestClusterMaintenanceChangeSuccessOff(t *testing.T) {
 		"crm",
 		"maintenance",
 		"off",
-		"",
 	).Return([]byte("ok"), nil)
 
 	mockCmdExecutor.On(
@@ -215,6 +213,7 @@ func TestClusterMaintenanceChangeResourceSuccess(t *testing.T) {
 		operator.OperatorArguments{
 			"maintenance": true,
 			"resource_id": resourceID,
+			"node_id":     "unknown",
 		},
 		"test-op",
 		operator.OperatorOptions[operator.ClusterMaintenanceChange]{
@@ -410,6 +409,246 @@ func TestClusterMaintenanceChangeResourceDefaultSuccess(t *testing.T) {
 	assert.EqualValues(t, report.Success.Diff, expectedDiff)
 }
 
+func TestClusterMaintenanceChangeNodeSuccessOn(t *testing.T) {
+	mockCmdExecutor := mocks.NewMockCmdExecutor(t)
+	ctx := context.Background()
+	nodeID := "some-id"
+
+	mockCmdExecutor.On(
+		"Exec",
+		ctx,
+		"crm",
+		"status",
+	).Return([]byte("ok"), nil)
+
+	mockCmdExecutor.On(
+		"Exec",
+		ctx,
+		"crm",
+		"node",
+		"attribute",
+		nodeID,
+		"show",
+		"maintenance",
+	).Return([]byte("scope=nodes  name=maintenance value=off"), nil).Once()
+
+	mockCmdExecutor.On(
+		"Exec",
+		ctx,
+		"cs_clusterstate",
+		"-i",
+	).Return([]byte("S_IDLE"), nil)
+
+	mockCmdExecutor.On(
+		"Exec",
+		ctx,
+		"crm",
+		"--force",
+		"node",
+		"maintenance",
+		nodeID,
+	).Return([]byte("ok"), nil)
+
+	mockCmdExecutor.On(
+		"Exec",
+		ctx,
+		"crm",
+		"node",
+		"attribute",
+		nodeID,
+		"show",
+		"maintenance",
+	).Return([]byte("scope=nodes  name=maintenance value=true"), nil)
+
+	clusterMaintenanceChangeOperator := operator.NewClusterMaintenanceChange(
+		operator.OperatorArguments{
+			"maintenance": true,
+			"node_id":     nodeID,
+		},
+		"test-op",
+		operator.OperatorOptions[operator.ClusterMaintenanceChange]{
+			OperatorOptions: []operator.Option[operator.ClusterMaintenanceChange]{
+				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(mockCmdExecutor)),
+			},
+		},
+	)
+
+	report := clusterMaintenanceChangeOperator.Run(ctx)
+
+	expectedDiff := map[string]any{
+		"before": "{\"maintenance\":false,\"node_id\":\"some-id\"}",
+		"after":  "{\"maintenance\":true,\"node_id\":\"some-id\"}",
+	}
+
+	assert.Nil(t, report.Error)
+	assert.Equal(t, report.Success.LastPhase, operator.VERIFY)
+	assert.EqualValues(t, report.Success.Diff, expectedDiff)
+}
+
+func TestClusterMaintenanceChangeNodeSuccessOnWithoutPreviousState(t *testing.T) {
+	mockCmdExecutor := mocks.NewMockCmdExecutor(t)
+	ctx := context.Background()
+	nodeID := "some-id"
+
+	mockCmdExecutor.On(
+		"Exec",
+		ctx,
+		"crm",
+		"status",
+	).Return([]byte("ok"), nil)
+
+	mockCmdExecutor.On(
+		"Exec",
+		ctx,
+		"crm",
+		"node",
+		"attribute",
+		nodeID,
+		"show",
+		"maintenance",
+	).Return(
+		[]byte("scope=nodes  name=maintenance value=(null)"),
+		errors.New("error getting node state"),
+	).Once()
+
+	mockCmdExecutor.On(
+		"Exec",
+		ctx,
+		"cs_clusterstate",
+		"-i",
+	).Return([]byte("S_IDLE"), nil)
+
+	mockCmdExecutor.On(
+		"Exec",
+		ctx,
+		"crm",
+		"--force",
+		"node",
+		"maintenance",
+		nodeID,
+	).Return([]byte("ok"), nil)
+
+	mockCmdExecutor.On(
+		"Exec",
+		ctx,
+		"crm",
+		"node",
+		"attribute",
+		nodeID,
+		"show",
+		"maintenance",
+	).Return([]byte("scope=nodes  name=maintenance value=true"), nil)
+
+	clusterMaintenanceChangeOperator := operator.NewClusterMaintenanceChange(
+		operator.OperatorArguments{
+			"maintenance": true,
+			"node_id":     nodeID,
+		},
+		"test-op",
+		operator.OperatorOptions[operator.ClusterMaintenanceChange]{
+			OperatorOptions: []operator.Option[operator.ClusterMaintenanceChange]{
+				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(mockCmdExecutor)),
+			},
+		},
+	)
+
+	report := clusterMaintenanceChangeOperator.Run(ctx)
+
+	expectedDiff := map[string]any{
+		"before": "{\"maintenance\":false,\"node_id\":\"some-id\"}",
+		"after":  "{\"maintenance\":true,\"node_id\":\"some-id\"}",
+	}
+
+	assert.Nil(t, report.Error)
+	assert.Equal(t, report.Success.LastPhase, operator.VERIFY)
+	assert.EqualValues(t, report.Success.Diff, expectedDiff)
+}
+
+func TestClusterMaintenanceChangeNodeSuccessOff(t *testing.T) {
+	mockCmdExecutor := mocks.NewMockCmdExecutor(t)
+	ctx := context.Background()
+	nodeID := "some-id"
+
+	mockCmdExecutor.On(
+		"Exec",
+		ctx,
+		"crm",
+		"status",
+	).Return([]byte("ok"), nil)
+
+	mockCmdExecutor.On(
+		"Exec",
+		ctx,
+		"crm",
+		"node",
+		"attribute",
+		nodeID,
+		"show",
+		"maintenance",
+	).Return([]byte("scope=nodes  name=maintenance value=true"), nil).Once()
+
+	mockCmdExecutor.On(
+		"Exec",
+		ctx,
+		"cs_clusterstate",
+		"-i",
+	).Return([]byte("S_IDLE"), nil)
+
+	mockCmdExecutor.On(
+		"Exec",
+		ctx,
+		"crm",
+		"resource",
+		"refresh",
+		"",
+	).Return([]byte("ok"), nil)
+
+	mockCmdExecutor.On(
+		"Exec",
+		ctx,
+		"crm",
+		"--force",
+		"node",
+		"ready",
+		nodeID,
+	).Return([]byte("ok"), nil)
+
+	mockCmdExecutor.On(
+		"Exec",
+		ctx,
+		"crm",
+		"node",
+		"attribute",
+		nodeID,
+		"show",
+		"maintenance",
+	).Return([]byte("scope=nodes  name=maintenance value=off"), nil)
+
+	clusterMaintenanceChangeOperator := operator.NewClusterMaintenanceChange(
+		operator.OperatorArguments{
+			"maintenance": false,
+			"node_id":     nodeID,
+		},
+		"test-op",
+		operator.OperatorOptions[operator.ClusterMaintenanceChange]{
+			OperatorOptions: []operator.Option[operator.ClusterMaintenanceChange]{
+				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(mockCmdExecutor)),
+			},
+		},
+	)
+
+	report := clusterMaintenanceChangeOperator.Run(ctx)
+
+	expectedDiff := map[string]any{
+		"before": "{\"maintenance\":true,\"node_id\":\"some-id\"}",
+		"after":  "{\"maintenance\":false,\"node_id\":\"some-id\"}",
+	}
+
+	assert.Nil(t, report.Error)
+	assert.Equal(t, report.Success.LastPhase, operator.VERIFY)
+	assert.EqualValues(t, report.Success.Diff, expectedDiff)
+}
+
 func TestClusterMaintenanceChangeMissingArgument(t *testing.T) {
 	mockCmdExecutor := mocks.NewMockCmdExecutor(t)
 	ctx := context.Background()
@@ -476,6 +715,30 @@ func TestClusterMaintenanceChangeInvalidResourceIDArgument(t *testing.T) {
 	assert.Nil(t, report.Success)
 	assert.Equal(t, report.Error.ErrorPhase, operator.PLAN)
 	assert.EqualValues(t, "could not parse resource_id argument as string, argument provided: 1", report.Error.Message)
+}
+
+func TestClusterMaintenanceChangeInvalidNodeIDArgument(t *testing.T) {
+	mockCmdExecutor := mocks.NewMockCmdExecutor(t)
+	ctx := context.Background()
+
+	clusterMaintenanceChangeOperator := operator.NewClusterMaintenanceChange(
+		operator.OperatorArguments{
+			"maintenance": true,
+			"node_id":     1,
+		},
+		"test-op",
+		operator.OperatorOptions[operator.ClusterMaintenanceChange]{
+			OperatorOptions: []operator.Option[operator.ClusterMaintenanceChange]{
+				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(mockCmdExecutor)),
+			},
+		},
+	)
+
+	report := clusterMaintenanceChangeOperator.Run(ctx)
+
+	assert.Nil(t, report.Success)
+	assert.Equal(t, report.Error.ErrorPhase, operator.PLAN)
+	assert.EqualValues(t, "could not parse node_id argument as string, argument provided: 1", report.Error.Message)
 }
 
 func TestClusterMaintenanceChangePlanClusterNotFound(t *testing.T) {
@@ -588,6 +851,49 @@ func TestClusterMaintenanceChangePlanEmptyMaintenanceState(t *testing.T) {
 	assert.EqualValues(t, "error decoding maintenance-mode attribute: empty command output", report.Error.Message)
 }
 
+func TestClusterMaintenanceChangePlanNodeNotFound(t *testing.T) {
+	mockCmdExecutor := mocks.NewMockCmdExecutor(t)
+	ctx := context.Background()
+	nodeID := "some-id"
+
+	mockCmdExecutor.On(
+		"Exec",
+		ctx,
+		"crm",
+		"status",
+	).Return([]byte("ok"), nil)
+
+	mockCmdExecutor.On(
+		"Exec",
+		ctx,
+		"crm",
+		"node",
+		"attribute",
+		nodeID,
+		"show",
+		"maintenance",
+	).Return([]byte("Could not map name=some-id to a UUID"), errors.New("error getting node"))
+
+	clusterMaintenanceChangeOperator := operator.NewClusterMaintenanceChange(
+		operator.OperatorArguments{
+			"maintenance": true,
+			"node_id":     nodeID,
+		},
+		"test-op",
+		operator.OperatorOptions[operator.ClusterMaintenanceChange]{
+			OperatorOptions: []operator.Option[operator.ClusterMaintenanceChange]{
+				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(mockCmdExecutor)),
+			},
+		},
+	)
+
+	report := clusterMaintenanceChangeOperator.Run(ctx)
+
+	assert.Nil(t, report.Success)
+	assert.Equal(t, report.Error.ErrorPhase, operator.PLAN)
+	assert.EqualValues(t, "error getting node maintenance attribute: error getting node", report.Error.Message)
+}
+
 func TestClusterMaintenanceChangeCommitAlreadyApplied(t *testing.T) {
 	mockCmdExecutor := mocks.NewMockCmdExecutor(t)
 	ctx := context.Background()
@@ -674,7 +980,6 @@ func TestClusterMaintenanceChangeCommitNotIdle(t *testing.T) {
 		"crm",
 		"maintenance",
 		"off",
-		"",
 	).Return([]byte("ok"), nil)
 
 	clusterMaintenanceChangeOperator := operator.NewClusterMaintenanceChange(
@@ -730,7 +1035,6 @@ func TestClusterMaintenanceChangeVerifyError(t *testing.T) {
 		"crm",
 		"maintenance",
 		"on",
-		"",
 	).Return([]byte("ok"), nil).Once()
 
 	mockCmdExecutor.On(
@@ -749,7 +1053,6 @@ func TestClusterMaintenanceChangeVerifyError(t *testing.T) {
 		"crm",
 		"maintenance",
 		"off",
-		"",
 	).Return([]byte("ok"), nil)
 
 	clusterMaintenanceChangeOperator := operator.NewClusterMaintenanceChange(
@@ -805,7 +1108,6 @@ func TestClusterMaintenanceChangeRollbackNotIdle(t *testing.T) {
 		"crm",
 		"maintenance",
 		"on",
-		"",
 	).Return([]byte("error"), errors.New("error changing"))
 
 	mockCmdExecutor.On(
@@ -868,7 +1170,6 @@ func TestClusterMaintenanceChangeRollbackErrorReverting(t *testing.T) {
 		"crm",
 		"maintenance",
 		"on",
-		"",
 	).Return([]byte("error"), errors.New("error changing"))
 
 	mockCmdExecutor.On(
@@ -877,7 +1178,6 @@ func TestClusterMaintenanceChangeRollbackErrorReverting(t *testing.T) {
 		"crm",
 		"maintenance",
 		"off",
-		"",
 	).Return([]byte("error"), errors.New("error reverting"))
 
 	clusterMaintenanceChangeOperator := operator.NewClusterMaintenanceChange(
