@@ -6,7 +6,6 @@ import (
 	"fmt"
 
 	"github.com/tidwall/gjson"
-	"github.com/trento-project/workbench/internal/support"
 	"golang.org/x/mod/semver"
 )
 
@@ -50,14 +49,7 @@ type saptuneApplySolutionArguments struct {
 
 type SaptuneApplySolution struct {
 	baseOperator
-	executor        support.CmdExecutor
 	parsedArguments *saptuneApplySolutionArguments
-}
-
-func WithCustomSaptuneExecutor(executor support.CmdExecutor) SaptuneApplySolutionOption {
-	return func(o *SaptuneApplySolution) {
-		o.executor = executor
-	}
 }
 
 func NewSaptuneApplySolution(
@@ -67,7 +59,6 @@ func NewSaptuneApplySolution(
 ) *Executor {
 	saptuneApply := &SaptuneApplySolution{
 		baseOperator: newBaseOperator(operationID, arguments, options.BaseOperatorOptions...),
-		executor:     support.CliExecutor{},
 	}
 
 	for _, opt := range options.OperatorOptions {

@@ -71,8 +71,8 @@ func TestSaptuneApplySolutionSuccess(t *testing.T) {
 		},
 		"test-op",
 		operator.OperatorOptions[operator.SaptuneApplySolution]{
-			OperatorOptions: []operator.Option[operator.SaptuneApplySolution]{
-				operator.Option[operator.SaptuneApplySolution](operator.WithCustomSaptuneExecutor(mockCmdExecutor)),
+			BaseOperatorOptions: []operator.BaseOperatorOption{
+				operator.WithCustomExecutor(mockCmdExecutor),
 			},
 		},
 	)
@@ -121,8 +121,8 @@ func TestSaptuneApplySolutionSuccessSolutionAlreadyApplied(t *testing.T) {
 		},
 		"test-op",
 		operator.OperatorOptions[operator.SaptuneApplySolution]{
-			OperatorOptions: []operator.Option[operator.SaptuneApplySolution]{
-				operator.Option[operator.SaptuneApplySolution](operator.WithCustomSaptuneExecutor(mockCmdExecutor)),
+			BaseOperatorOptions: []operator.BaseOperatorOption{
+				operator.WithCustomExecutor(mockCmdExecutor),
 			},
 		},
 	)
@@ -159,8 +159,8 @@ func TestSaptuneApplySolutionPlanError(t *testing.T) {
 		},
 		"test-op",
 		operator.OperatorOptions[operator.SaptuneApplySolution]{
-			OperatorOptions: []operator.Option[operator.SaptuneApplySolution]{
-				operator.Option[operator.SaptuneApplySolution](operator.WithCustomSaptuneExecutor(mockCmdExecutor)),
+			BaseOperatorOptions: []operator.BaseOperatorOption{
+				operator.WithCustomExecutor(mockCmdExecutor),
 			},
 		},
 	)
@@ -224,8 +224,8 @@ func TestSaptuneApplySolutionCommitErrorSuccessfulRollback(t *testing.T) {
 		},
 		"test-op",
 		operator.OperatorOptions[operator.SaptuneApplySolution]{
-			OperatorOptions: []operator.Option[operator.SaptuneApplySolution]{
-				operator.Option[operator.SaptuneApplySolution](operator.WithCustomSaptuneExecutor(mockCmdExecutor)),
+			BaseOperatorOptions: []operator.BaseOperatorOption{
+				operator.WithCustomExecutor(mockCmdExecutor),
 			},
 		},
 	)
@@ -289,8 +289,8 @@ func TestSaptuneApplySolutionCommitErrorFailedRollback(t *testing.T) {
 		},
 		"test-op",
 		operator.OperatorOptions[operator.SaptuneApplySolution]{
-			OperatorOptions: []operator.Option[operator.SaptuneApplySolution]{
-				operator.Option[operator.SaptuneApplySolution](operator.WithCustomSaptuneExecutor(mockCmdExecutor)),
+			BaseOperatorOptions: []operator.BaseOperatorOption{
+				operator.WithCustomExecutor(mockCmdExecutor),
 			},
 		},
 	)
@@ -353,8 +353,8 @@ func TestSaptuneApplySolutionVerifyErrorSuccessfulRollback(t *testing.T) {
 		},
 		"test-op",
 		operator.OperatorOptions[operator.SaptuneApplySolution]{
-			OperatorOptions: []operator.Option[operator.SaptuneApplySolution]{
-				operator.Option[operator.SaptuneApplySolution](operator.WithCustomSaptuneExecutor(mockCmdExecutor)),
+			BaseOperatorOptions: []operator.BaseOperatorOption{
+				operator.WithCustomExecutor(mockCmdExecutor),
 			},
 		},
 	)
@@ -417,8 +417,8 @@ func TestSaptuneApplySolutionVerifyErrorFailedRollback(t *testing.T) {
 		},
 		"test-op",
 		operator.OperatorOptions[operator.SaptuneApplySolution]{
-			OperatorOptions: []operator.Option[operator.SaptuneApplySolution]{
-				operator.Option[operator.SaptuneApplySolution](operator.WithCustomSaptuneExecutor(mockCmdExecutor)),
+			BaseOperatorOptions: []operator.BaseOperatorOption{
+				operator.WithCustomExecutor(mockCmdExecutor),
 			},
 		},
 	)

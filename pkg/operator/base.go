@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/sirupsen/logrus"
+	"github.com/trento-project/workbench/internal/support"
 )
 
 const (
@@ -19,9 +20,16 @@ func WithCustomLogger(logger *logrus.Logger) BaseOperatorOption {
 	}
 }
 
+func WithCustomExecutor(executor support.CmdExecutor) BaseOperatorOption {
+	return func(b *baseOperator) {
+		b.executor = executor
+	}
+}
+
 type baseOperator struct {
 	arguments      OperatorArguments
 	resources      map[string]any
+	executor       support.CmdExecutor
 	loggerInstance *logrus.Logger
 	logger         *logrus.Entry
 }
@@ -34,6 +42,7 @@ func newBaseOperator(
 	base := &baseOperator{
 		arguments:      arguments,
 		resources:      make(map[string]any),
+		executor:       support.CliExecutor{},
 		loggerInstance: logrus.StandardLogger(),
 	}
 

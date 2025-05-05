@@ -73,14 +73,7 @@ type diffOutput struct {
 
 type ClusterMaintenanceChange struct {
 	baseOperator
-	executor        support.CmdExecutor
 	parsedArguments *clusterMaintenanceChangeArguments
-}
-
-func WithCustomClusterMaintenanceExecutor(executor support.CmdExecutor) ClusterMaintenanceChangeOption {
-	return func(o *ClusterMaintenanceChange) {
-		o.executor = executor
-	}
 }
 
 func NewClusterMaintenanceChange(
@@ -90,7 +83,6 @@ func NewClusterMaintenanceChange(
 ) *Executor {
 	clusterMaintenance := &ClusterMaintenanceChange{
 		baseOperator: newBaseOperator(operationID, arguments, options.BaseOperatorOptions...),
-		executor:     support.CliExecutor{},
 	}
 
 	for _, opt := range options.OperatorOptions {
