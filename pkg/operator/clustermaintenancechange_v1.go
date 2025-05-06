@@ -62,11 +62,12 @@ type diffOutput struct {
 // - https://crmsh.github.io/man-4.6/#cmdhelp_node
 //
 // The operator accepts the next arguments:
-// - maintenance (bool): The desired maintenance state for the cluster or cluster resource.
-//                       If true, the cluster, cluster resource or cluster node are set in maintenance mode.
-// - resource_id (string): If given, the operator changes the maintenance state of the resource. It has precedence over node_id argument.
+// - maintenance (bool): The desired maintenance state for the cluster, resource or node.
+//                       If true, the cluster, resource or node are set in maintenance mode.
+// - resource_id (string): If given, the operator changes the maintenance state of the resource.
 // - node_id (string): If given, the operator changes the maintenance state of the node.
 // If resource_id or node_id are not given the operator changes the general maintenance state of the cluster.
+// resource_id and node_id mutually exclusive.
 
 //
 // # Execution Phases
@@ -400,8 +401,14 @@ func parseClusterMaintenanceArguments(rawArguments OperatorArguments) (*clusterM
 		)
 	}
 
-	// resource_id has preference over node_id
-	if resourceIDArgument, found := rawArguments["resource_id"]; found {
+	resourceIDArgument, resourceIDfound := rawArguments["resource_id"]
+	nodeIDArgument, nodeIDfound := rawArguments["node_id"]
+
+	if resourceIDfound && nodeIDfound {
+		return nil, errors.New("resource_id and node_id arguments are mutually exclusive, use only one of them")
+	}
+
+	if resourceIDfound {
 		resourceID, ok = resourceIDArgument.(string)
 		if !ok {
 			return nil, fmt.Errorf(
@@ -409,7 +416,9 @@ func parseClusterMaintenanceArguments(rawArguments OperatorArguments) (*clusterM
 				resourceIDArgument,
 			)
 		}
-	} else if nodeIDArgument, found := rawArguments["node_id"]; found {
+	}
+
+	if nodeIDfound {
 		nodeID, ok = nodeIDArgument.(string)
 		if !ok {
 			return nil, fmt.Errorf(

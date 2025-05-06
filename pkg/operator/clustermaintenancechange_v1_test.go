@@ -213,7 +213,6 @@ func TestClusterMaintenanceChangeResourceSuccess(t *testing.T) {
 		operator.OperatorArguments{
 			"maintenance": true,
 			"resource_id": resourceID,
-			"node_id":     "unknown",
 		},
 		"test-op",
 		operator.OperatorOptions[operator.ClusterMaintenanceChange]{
@@ -739,6 +738,31 @@ func TestClusterMaintenanceChangeInvalidNodeIDArgument(t *testing.T) {
 	assert.Nil(t, report.Success)
 	assert.Equal(t, report.Error.ErrorPhase, operator.PLAN)
 	assert.EqualValues(t, "could not parse node_id argument as string, argument provided: 1", report.Error.Message)
+}
+
+func TestClusterMaintenanceChangeMutuallyExclusiveArgument(t *testing.T) {
+	mockCmdExecutor := mocks.NewMockCmdExecutor(t)
+	ctx := context.Background()
+
+	clusterMaintenanceChangeOperator := operator.NewClusterMaintenanceChange(
+		operator.OperatorArguments{
+			"maintenance": true,
+			"resource_id": "some-resource",
+			"node_id":     "some-node",
+		},
+		"test-op",
+		operator.OperatorOptions[operator.ClusterMaintenanceChange]{
+			OperatorOptions: []operator.Option[operator.ClusterMaintenanceChange]{
+				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(mockCmdExecutor)),
+			},
+		},
+	)
+
+	report := clusterMaintenanceChangeOperator.Run(ctx)
+
+	assert.Nil(t, report.Success)
+	assert.Equal(t, report.Error.ErrorPhase, operator.PLAN)
+	assert.EqualValues(t, "resource_id and node_id arguments are mutually exclusive, use only one of them", report.Error.Message)
 }
 
 func TestClusterMaintenanceChangePlanClusterNotFound(t *testing.T) {
