@@ -257,7 +257,7 @@ func TestClusterMaintenanceChangeResourceWithIsManagedSuccess(t *testing.T) {
 		"maintenance",
 	).Return([]byte("not found"), nil)
 
-	// is-managed has the reverse boolean logic than `maintnance`
+	// is-managed has the reverse boolean logic than `maintenance`
 	// so is-managed=true means maintenance=false
 	mockCmdExecutor.On(
 		"Exec",

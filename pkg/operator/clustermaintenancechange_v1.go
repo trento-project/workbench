@@ -47,10 +47,10 @@ type diffOutput struct {
 	NodeID      string `json:"node_id,omitempty"`
 }
 
-// ClusterMaintenanceChange is an operator responsible for changing cluster maintenance
-// ,cluster resources or cluster node managed state. `crmsh` is the tool used to apply the write and most of
+// ClusterMaintenanceChange is an operator responsible for changing cluster maintenance,
+// cluster resources or cluster node managed state. `crmsh` is the tool used to apply the write and most of
 // the read operations in the cluster.
-// The used commands differ if the the state to change is the whole cluster, a particular resource or node.
+// The used commands differ if the state to change is the whole cluster, a particular resource or node.
 //
 // Find some helpful references about maintenance transitions and used commands:
 // - https://www.suse.com/c/sles-for-sap-hana-maintenance-procedures-part-1-pre-maintenance-checks/
@@ -363,8 +363,10 @@ func isIdle(ctx context.Context, executor support.CmdExecutor) error {
 	return nil
 }
 
-// depending on the queried resource, the crm command might print some "debug" lines
-// before returning the actual state of the attribute. That's why it needs some cleanup
+// Depending on the queried resource, the crm command might print some "debug" lines
+// before returning the actual state of the attribute.
+// The actual state is always a boolean value, either 'true' or 'false'
+// The debug lines are cleaned up before parsing the final boolean state of the attribute.
 // Example output:
 // linux # crm resource meta msl_SAPHana_PRD_HDB00 show maintenance
 // msl_SAPHana_PRD_HDB00 is active on more than one node, returning the default value for maintenance
