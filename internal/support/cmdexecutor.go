@@ -5,8 +5,6 @@ import (
 	"os/exec"
 )
 
-//go:generate mockery --name=CommandExecutor
-
 type CmdExecutor interface {
 	Exec(ctx context.Context, name string, arg ...string) ([]byte, error)
 }
