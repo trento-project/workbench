@@ -7,6 +7,12 @@ packages:
           dir: "internal/support/mocks"
         interfaces:
           CmdExecutor:
+    github.com/trento-project/workbench/internal/sapcontrol:
+        config:
+          outpkg: "mocks"
+          dir: "internal/sapcontrol/mocks"
+        interfaces:
+          SAPControlConnector:
     github.com/trento-project/workbench/pkg/operator:
         config:
           outpkg: "operator"

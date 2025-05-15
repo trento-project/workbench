@@ -53,7 +53,7 @@ endif
 ifeq (, $(shell command -v swag 2> /dev/null))
 	$(error "'swag' command not found. You can install it locally with 'go install github.com/swaggo/swag/cmd/swag'.")
 endif
-	go generate ./...
+	mockery
 
 .PHONY: mod-tidy
 mod-tidy:
