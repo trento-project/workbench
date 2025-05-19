@@ -151,7 +151,7 @@ func (sa *SaptuneApplySolution) verify(ctx context.Context) error {
 	}
 
 	if alreadyApplied := isSaptuneSolutionAlreadyApplied(solutionAppliedOutput, sa.parsedArguments.solution); alreadyApplied {
-		sa.resources[afterFieldDiff] = string(solutionAppliedOutput)
+		sa.resources[afterDiffField] = string(solutionAppliedOutput)
 		return nil
 	}
 
@@ -171,10 +171,6 @@ func (sa *SaptuneApplySolution) rollback(ctx context.Context) error {
 	}
 
 	return nil
-}
-
-func (sa *SaptuneApplySolution) operationDiff(ctx context.Context) map[string]any {
-	return sa.standardDiff(ctx)
 }
 
 func isSaptuneVersionSupported(version string) bool {
