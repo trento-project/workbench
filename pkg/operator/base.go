@@ -8,7 +8,7 @@ import (
 
 const (
 	beforeDiffField = "before"
-	afterFieldDiff  = "after"
+	afterDiffField  = "after"
 )
 
 type BaseOperatorOption Option[baseOperator]
@@ -49,7 +49,7 @@ func newBaseOperator(
 func (b *baseOperator) operationDiff(_ context.Context) map[string]any {
 	diff := make(map[string]any)
 	diff[beforeDiffField] = b.resources[beforeDiffField]
-	diff[afterFieldDiff] = b.resources[afterFieldDiff]
+	diff[afterDiffField] = b.resources[afterDiffField]
 
 	return diff
 }

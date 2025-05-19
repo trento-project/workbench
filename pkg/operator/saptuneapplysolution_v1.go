@@ -151,7 +151,7 @@ func (sa *SaptuneApplySolution) verify(ctx context.Context) error {
 	}
 
 	if alreadyApplied := isSaptuneSolutionAlreadyApplied(solutionAppliedOutput, sa.parsedArguments.solution); alreadyApplied {
-		sa.resources[afterFieldDiff] = string(solutionAppliedOutput)
+		sa.resources[afterDiffField] = string(solutionAppliedOutput)
 		return nil
 	}
 

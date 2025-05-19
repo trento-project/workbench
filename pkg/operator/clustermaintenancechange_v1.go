@@ -185,7 +185,7 @@ func (c *ClusterMaintenanceChange) verify(ctx context.Context) error {
 	}
 
 	if c.parsedArguments.maintenance == currentState {
-		c.resources[afterFieldDiff] = currentState
+		c.resources[afterDiffField] = currentState
 		return nil
 	}
 
@@ -221,7 +221,7 @@ func (c *ClusterMaintenanceChange) operationDiff(ctx context.Context) map[string
 	diff["before"] = string(before)
 
 	afterDiffOutput := diffOutput{
-		Maintenance: c.resources[afterFieldDiff].(bool),
+		Maintenance: c.resources[afterDiffField].(bool),
 		ResourceID:  c.parsedArguments.resourceID,
 		NodeID:      c.parsedArguments.nodeID,
 	}
