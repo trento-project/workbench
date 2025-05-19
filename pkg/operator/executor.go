@@ -30,37 +30,31 @@ func (e *Executor) Run(ctx context.Context) *ExecutionReport {
 
 	err = e.phaser.commit(ctx)
 	if err != nil {
-		rollbackError := e.phaser.rollback(ctx)
-		if rollbackError != nil {
-			e.currentPhase = ROLLBACK
-			return executionReportWithError(
-				wrapRollbackError(err, rollbackError),
-				e.currentPhase,
-				e.operationID,
-			)
-
-		}
-		return executionReportWithError(err, e.currentPhase, e.operationID)
+		return e.handleRollback(ctx, err)
 	}
 
 	e.currentPhase = VERIFY
 	err = e.phaser.verify(ctx)
 	if err != nil {
-		rollbackError := e.phaser.rollback(ctx)
-		if rollbackError != nil {
-			e.currentPhase = ROLLBACK
-			return executionReportWithError(
-				wrapRollbackError(err, rollbackError),
-				e.currentPhase,
-				e.operationID,
-			)
-		}
-		return executionReportWithError(err, e.currentPhase, e.operationID)
+		return e.handleRollback(ctx, err)
 	}
 
 	diff := e.phaser.operationDiff(ctx)
 
 	return executionReportWithSuccess(diff, e.currentPhase, e.operationID)
+}
+
+func (e *Executor) handleRollback(ctx context.Context, err error) *ExecutionReport {
+	rollbackError := e.phaser.rollback(ctx)
+	if rollbackError != nil {
+		e.currentPhase = ROLLBACK
+		return executionReportWithError(
+			wrapRollbackError(err, rollbackError),
+			e.currentPhase,
+			e.operationID,
+		)
+	}
+	return executionReportWithError(err, e.currentPhase, e.operationID)
 }
 
 func wrapRollbackError(phaseError error, rollbackError error) error {
