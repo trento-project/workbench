@@ -1,0 +1,12 @@
+{
+    "$schema": "file:///usr/share/saptune/schemas/1.0/saptune_solution_applied.schema.json",
+    "publish time": "2025-01-09 14:50:06.131",
+    "argv": "saptune --format json solution applied",
+    "pid": 303,
+    "command": "solution applied",
+    "exit code": 0,
+    "result": {
+        "Solution applied": []
+    },
+    "messages": []
+}

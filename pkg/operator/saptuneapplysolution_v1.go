@@ -7,11 +7,9 @@ import (
 
 	"github.com/tidwall/gjson"
 	"github.com/trento-project/workbench/internal/support"
-	"golang.org/x/mod/semver"
 )
 
 const (
-	minimalSaptuneVersion            = "v3.1.0"
 	SaptuneApplySolutionOperatorName = "saptuneapplysolution"
 )
 
@@ -50,6 +48,7 @@ type saptuneApplySolutionArguments struct {
 
 type SaptuneApplySolution struct {
 	baseOperator
+	saptune         Saptune
 	executor        support.CmdExecutor
 	parsedArguments *saptuneApplySolutionArguments
 }
@@ -74,6 +73,11 @@ func NewSaptuneApplySolution(
 		opt(saptuneApply)
 	}
 
+	saptuneApply.saptune = NewSaptuneClient(
+		saptuneApply.executor,
+		saptuneApply.logger,
+	)
+
 	return &Executor{
 		phaser:      saptuneApply,
 		operationID: operationID,
@@ -87,22 +91,10 @@ func (sa *SaptuneApplySolution) plan(ctx context.Context) error {
 	}
 	sa.parsedArguments = opArguments
 
-	// check saptune version
-	versionOutput, err := sa.executor.Exec(ctx, "rpm", "-q", "--qf", "%{VERSION}", "saptune")
-	if err != nil {
-		return fmt.Errorf(
-			"could not get the installed saptune version: %w",
-			err,
-		)
-	}
-	sa.logger.Debugf("installed saptune version: %s", string(versionOutput))
+	err = sa.saptune.CheckVersionSupport(ctx)
 
-	if supported := isSaptuneVersionSupported(string(versionOutput)); !supported {
-		return fmt.Errorf(
-			"saptune version not supported, installed: %s, minimum supported: %s",
-			versionOutput,
-			minimalSaptuneVersion,
-		)
+	if err != nil {
+		return err
 	}
 
 	solutionAppliedOutput, err := sa.executor.Exec(ctx, "saptune", "--format", "json", "solution", "applied")
@@ -127,21 +119,7 @@ func (sa *SaptuneApplySolution) commit(ctx context.Context) error {
 		return nil
 	}
 
-	applyOutput, err := sa.executor.Exec(ctx, "saptune", "solution", "apply", sa.parsedArguments.solution)
-	if err != nil {
-		sa.logger.Errorf(
-			"could not perform saptune solution apply %s, error output: %s",
-			sa.parsedArguments.solution,
-			applyOutput,
-		)
-
-		return fmt.Errorf("could not perform the saptune apply solution %s, error: %s",
-			sa.parsedArguments.solution,
-			err,
-		)
-	}
-
-	return nil
+	return sa.saptune.ApplySolution(ctx, sa.parsedArguments.solution)
 }
 
 func (sa *SaptuneApplySolution) verify(ctx context.Context) error {
@@ -176,13 +154,6 @@ func (sa *SaptuneApplySolution) rollback(ctx context.Context) error {
 func (sa *SaptuneApplySolution) operationDiff(ctx context.Context) map[string]any {
 	return sa.standardDiff(ctx)
 }
-
-func isSaptuneVersionSupported(version string) bool {
-	compareOutput := semver.Compare(minimalSaptuneVersion, "v"+version)
-
-	return compareOutput != 1
-}
-
 func isSaptuneSolutionAlreadyApplied(saptuneOutput []byte, solution string) bool {
 	return gjson.GetBytes(saptuneOutput, fmt.Sprintf(`result.Solution applied.#(Solution ID=="%s")`, solution)).Exists()
 }
