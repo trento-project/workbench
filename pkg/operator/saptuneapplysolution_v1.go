@@ -173,10 +173,6 @@ func (sa *SaptuneApplySolution) rollback(ctx context.Context) error {
 	return nil
 }
 
-func (sa *SaptuneApplySolution) operationDiff(ctx context.Context) map[string]any {
-	return sa.standardDiff(ctx)
-}
-
 func isSaptuneVersionSupported(version string) bool {
 	compareOutput := semver.Compare(minimalSaptuneVersion, "v"+version)
 
