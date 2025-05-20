@@ -98,7 +98,7 @@ func (suite *SaptuneClientTestSuite) TestGettingAppliedSolutionFailure() {
 	appliedSolution, err := saptuneClient.GetAppliedSolution(ctx)
 
 	suite.Error(err)
-	suite.ErrorContains(err, "could not call saptune")
+	suite.ErrorContains(err, "could not call saptune solution applied: error calling saptune")
 	suite.Empty(appliedSolution)
 }
 

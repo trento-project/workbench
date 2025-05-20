@@ -2,8 +2,8 @@ package saptune
 
 import (
 	"context"
-	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/sirupsen/logrus"
 	"github.com/tidwall/gjson"
@@ -88,13 +88,13 @@ func (saptune *saptuneClient) ApplySolution(ctx context.Context, solution string
 func (saptune *saptuneClient) appliedSolution(ctx context.Context) ([]byte, error) {
 	solutionAppliedOutput, err := saptune.executor.Exec(ctx, "saptune", "--format", "json", "solution", "applied")
 	if err != nil {
-		return []byte{}, errors.New("could not call saptune solution applied")
+		return nil, fmt.Errorf("could not call saptune solution applied: %w", err)
 	}
 	return solutionAppliedOutput, nil
 }
 
 func isSaptuneVersionSupported(version string) bool {
-	compareOutput := semver.Compare(minimalSaptuneVersion, "v"+version)
+	compareOutput := semver.Compare(minimalSaptuneVersion, "v"+strings.TrimSpace(version))
 
 	return compareOutput != 1
 }
