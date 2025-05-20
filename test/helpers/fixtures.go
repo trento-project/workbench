@@ -4,20 +4,27 @@ import (
 	"os"
 	"path"
 	"runtime"
+	"sync"
 )
 
-var fixturesFolder = "" // nolint:gochecknoglobals
+var (
+	fixturesFolder     string
+	fixturesFolderOnce sync.Once
+)
 
-func init() {
-	_, filename, _, ok := runtime.Caller(0)
-	if !ok {
-		panic("error recovering caller information in test helper")
-	}
-	fixturesFolder = path.Join(path.Dir(filename), "../fixtures")
+func getFixturesFolder() string {
+	fixturesFolderOnce.Do(func() {
+		_, filename, _, ok := runtime.Caller(0)
+		if !ok {
+			panic("error recovering caller information in test helper")
+		}
+		fixturesFolder = path.Join(path.Dir(filename), "../fixtures")
+	})
+	return fixturesFolder
 }
 
 func GetFixturePath(name string) string {
-	return path.Join(fixturesFolder, name)
+	return path.Join(getFixturesFolder(), name)
 }
 
 func ReadFixture(name string) []byte {
