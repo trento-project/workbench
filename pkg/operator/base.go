@@ -46,6 +46,10 @@ func newBaseOperator(
 	return *base
 }
 
+func (b *baseOperator) rollback(ctx context.Context) error {
+	return nil
+}
+
 func (b *baseOperator) operationDiff(_ context.Context) map[string]any {
 	diff := make(map[string]any)
 	diff[beforeDiffField] = b.resources[beforeDiffField]
