@@ -23,3 +23,9 @@ packages:
               config:
                 outpkg: "mocks"
                 dir: "pkg/operator/mocks"
+    github.com/trento-project/workbench/internal/saptune:
+        config:
+          outpkg: "mocks"
+          dir: "internal/saptune/mocks"
+        interfaces:
+          Saptune:
