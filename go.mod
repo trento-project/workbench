@@ -3,6 +3,7 @@ module github.com/trento-project/workbench
 go 1.23.4
 
 require (
+	github.com/hooklift/gowsdl v0.5.0
 	github.com/jessevdk/go-flags v1.6.1
 	github.com/sirupsen/logrus v1.9.3
 	github.com/stretchr/testify v1.9.0
