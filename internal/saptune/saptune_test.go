@@ -191,7 +191,7 @@ func (suite *SaptuneClientTestSuite) TestApplySolutionFailureBecauseCommandFails
 	err := saptuneClient.ApplySolution(ctx, "HANA")
 
 	suite.Error(err)
-	suite.ErrorContains(err, `could not perform saptune apply solution HANA`)
+	suite.ErrorContains(err, `could not perform saptune solution apply HANA`)
 }
 
 func (suite *SaptuneClientTestSuite) TestApplySolutionFailureBecauseAnAlreadyAppliedSolution() {
@@ -215,7 +215,7 @@ func (suite *SaptuneClientTestSuite) TestApplySolutionFailureBecauseAnAlreadyApp
 	err := saptuneClient.ApplySolution(ctx, "HANA")
 
 	suite.Error(err)
-	suite.ErrorContains(err, `could not perform saptune apply solution HANA`)
+	suite.ErrorContains(err, `could not perform saptune solution apply HANA`)
 }
 
 func (suite *SaptuneClientTestSuite) TestApplySolutionSuccess() {
@@ -239,4 +239,63 @@ func (suite *SaptuneClientTestSuite) TestApplySolutionSuccess() {
 	err := saptuneClient.ApplySolution(ctx, "HANA")
 
 	suite.NoError(err)
+}
+
+func (suite *SaptuneClientTestSuite) TestRevertSolutionFailureBecauseCommandFails() {
+	ctx := context.Background()
+
+	suite.mockExecutor.On(
+		"Exec",
+		ctx,
+		"saptune",
+		"solution",
+		"revert",
+		"HANA",
+	).Return(nil, errors.New("error calling saptune"))
+
+	saptuneClient := saptune.NewSaptuneClient(
+		suite.mockExecutor,
+		suite.logger,
+	)
+	err := saptuneClient.RevertSolution(ctx, "HANA")
+
+	suite.Error(err)
+	suite.ErrorContains(err, `could not perform saptune solution revert HANA, error: error calling saptune`)
+}
+
+func (suite *SaptuneClientTestSuite) TestRevertSolutionSuccess() {
+	scenarios := []struct {
+		name          string
+		commandOutput []byte
+	}{
+		{
+			name:          "reverting applied solution",
+			commandOutput: helpers.ReadFixture("saptune/revert_solution_success.output"),
+		},
+		{
+			name:          "reverting not applied solution",
+			commandOutput: helpers.ReadFixture("saptune/revert_not_applied_solution.output"),
+		},
+	}
+
+	for _, scenario := range scenarios {
+		ctx := context.Background()
+
+		suite.mockExecutor.On(
+			"Exec",
+			ctx,
+			"saptune",
+			"solution",
+			"revert",
+			"HANA",
+		).Return(scenario.commandOutput, nil)
+
+		saptuneClient := saptune.NewSaptuneClient(
+			suite.mockExecutor,
+			suite.logger,
+		)
+		err := saptuneClient.RevertSolution(ctx, "HANA")
+
+		suite.NoError(err)
+	}
 }

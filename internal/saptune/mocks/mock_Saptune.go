@@ -158,6 +158,49 @@ func (_c *MockSaptune_GetAppliedSolution_Call) RunAndReturn(run func(context.Con
 	return _c
 }
 
+// RevertSolution provides a mock function with given fields: ctx, solution
+func (_m *MockSaptune) RevertSolution(ctx context.Context, solution string) error {
+	ret := _m.Called(ctx, solution)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) error); ok {
+		r0 = rf(ctx, solution)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// MockSaptune_RevertSolution_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'RevertSolution'
+type MockSaptune_RevertSolution_Call struct {
+	*mock.Call
+}
+
+// RevertSolution is a helper method to define mock.On call
+//   - ctx context.Context
+//   - solution string
+func (_e *MockSaptune_Expecter) RevertSolution(ctx interface{}, solution interface{}) *MockSaptune_RevertSolution_Call {
+	return &MockSaptune_RevertSolution_Call{Call: _e.mock.On("RevertSolution", ctx, solution)}
+}
+
+func (_c *MockSaptune_RevertSolution_Call) Run(run func(ctx context.Context, solution string)) *MockSaptune_RevertSolution_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *MockSaptune_RevertSolution_Call) Return(_a0 error) *MockSaptune_RevertSolution_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *MockSaptune_RevertSolution_Call) RunAndReturn(run func(context.Context, string) error) *MockSaptune_RevertSolution_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // NewMockSaptune creates a new instance of MockSaptune. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewMockSaptune(t interface {

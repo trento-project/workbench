@@ -18,6 +18,7 @@ type Saptune interface {
 	CheckVersionSupport(ctx context.Context) error
 	ApplySolution(ctx context.Context, solution string) error
 	GetAppliedSolution(ctx context.Context) (string, error)
+	RevertSolution(ctx context.Context, solution string) error
 }
 
 type saptuneClient struct {
@@ -76,7 +77,25 @@ func (saptune *saptuneClient) ApplySolution(ctx context.Context, solution string
 			applyOutput,
 		)
 
-		return fmt.Errorf("could not perform saptune apply solution %s, error: %s",
+		return fmt.Errorf("could not perform saptune solution apply %s, error: %s",
+			solution,
+			err,
+		)
+	}
+
+	return nil
+}
+
+func (saptune *saptuneClient) RevertSolution(ctx context.Context, solution string) error {
+	revertOutput, err := saptune.executor.Exec(ctx, "saptune", "solution", "revert", solution)
+	if err != nil {
+		saptune.logger.Errorf(
+			"could not perform saptune solution revert %s, error output: %s",
+			solution,
+			revertOutput,
+		)
+
+		return fmt.Errorf("could not perform saptune solution revert %s, error: %s",
 			solution,
 			err,
 		)
