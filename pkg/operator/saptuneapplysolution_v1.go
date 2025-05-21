@@ -62,11 +62,8 @@ type SaptuneApplySolutionOption Option[SaptuneApplySolution]
 //   If not, an error is raised. If successful, the current state of the applied solution is collected as the "after" diff.
 //
 // - ROLLBACK:
-//   There is nothing to rollback in this operator.
-//   If the COMMIT phase fails before attempting to apply the solution, it would not make sense to revert a not applied solution.
-//   If the COMMIT phase fails when applying the solution, again it would not make sense to revert a solution that was not applied.
-//   If the VERIFY phase fails when retrieving the applied solution, it might be risky to revert the solution that possibly should be applied.
-//   If the VERIFY phase fails when because the solution requested to be applied is not the resulting applied one, it might still be risky to revert the solution that possibly should be applied.
+//   If an error occurs during the COMMIT or VERIFY phase, the saptune revert command is executed
+//   to undo the applied solution.
 
 type SaptuneApplySolution struct {
 	baseOperator
@@ -163,6 +160,6 @@ func (sa *SaptuneApplySolution) verify(ctx context.Context) error {
 	return nil
 }
 
-func (b *baseOperator) rollback(ctx context.Context) error {
-	return nil
+func (sa *SaptuneApplySolution) rollback(ctx context.Context) error {
+	return sa.saptune.RevertSolution(ctx, sa.parsedArguments.solution)
 }
