@@ -5,29 +5,12 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/sirupsen/logrus"
 	"github.com/trento-project/workbench/internal/saptune"
 	"github.com/trento-project/workbench/internal/support"
 )
 
-type saptuneOperator struct {
-	saptune saptune.Saptune
-}
-
 type saptuneSolutionArguments struct {
 	solution string
-}
-
-func newSaptuneOperator(
-	executor support.CmdExecutor,
-	logger *logrus.Entry,
-) saptuneOperator {
-	return saptuneOperator{
-		saptune: saptune.NewSaptuneClient(
-			executor,
-			logger,
-		),
-	}
 }
 
 func parseSaptuneSolutionArguments(rawArguments OperatorArguments) (*saptuneSolutionArguments, error) {
@@ -87,13 +70,13 @@ type SaptuneApplySolutionOption Option[SaptuneApplySolution]
 
 type SaptuneApplySolution struct {
 	baseOperator
-	saptuneOperator
+	saptune         saptune.Saptune
 	parsedArguments *saptuneSolutionArguments
 }
 
 func WithSaptuneClient(saptuneClient saptune.Saptune) SaptuneApplySolutionOption {
 	return func(o *SaptuneApplySolution) {
-		o.saptuneOperator.saptune = saptuneClient
+		o.saptune = saptuneClient
 	}
 }
 
@@ -106,7 +89,7 @@ func NewSaptuneApplySolution(
 		baseOperator: newBaseOperator(operationID, arguments, options.BaseOperatorOptions...),
 	}
 
-	saptuneApply.saptuneOperator = newSaptuneOperator(
+	saptuneApply.saptune = saptune.NewSaptuneClient(
 		support.CliExecutor{},
 		saptuneApply.logger,
 	)
@@ -177,5 +160,9 @@ func (sa *SaptuneApplySolution) verify(ctx context.Context) error {
 		)
 	}
 	sa.resources[afterDiffField] = appliedSolution
+	return nil
+}
+
+func (b *baseOperator) rollback(ctx context.Context) error {
 	return nil
 }
