@@ -64,9 +64,6 @@ func (saptune *saptuneClient) GetAppliedSolution(ctx context.Context) (string, e
 	if err != nil {
 		return "", fmt.Errorf("could not call saptune solution applied: %w", err)
 	}
-	if err != nil {
-		return "", err
-	}
 	return gjson.GetBytes(solutionAppliedOutput, "result.Solution applied.0.Solution ID").String(), nil
 }
 
