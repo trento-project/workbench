@@ -32,7 +32,12 @@ func (suite *SaptuneClientTestSuite) TestVersionCheckFailureBecauseUnableToDetec
 
 	suite.mockExecutor.On(
 		"Exec",
-		saptuneVersionRetrieverCommandArguments(ctx)...,
+		ctx,
+		"rpm",
+		"-q",
+		"--qf",
+		"%{VERSION}",
+		"saptune",
 	).Return(
 		[]byte("package saptune is not installed"),
 		errors.New("exit status 1"),
@@ -53,7 +58,12 @@ func (suite *SaptuneClientTestSuite) TestUnsupportedSaptuneVersionCheck() {
 
 	suite.mockExecutor.On(
 		"Exec",
-		saptuneVersionRetrieverCommandArguments(ctx)...,
+		ctx,
+		"rpm",
+		"-q",
+		"--qf",
+		"%{VERSION}",
+		"saptune",
 	).Return([]byte("3.0.2"), nil)
 
 	saptuneClient := saptune.NewSaptuneClient(
@@ -71,7 +81,12 @@ func (suite *SaptuneClientTestSuite) TestSuccessfulSaptuneVersionCheck() {
 
 	suite.mockExecutor.On(
 		"Exec",
-		saptuneVersionRetrieverCommandArguments(ctx)...,
+		ctx,
+		"rpm",
+		"-q",
+		"--qf",
+		"%{VERSION}",
+		"saptune",
 	).Return([]byte("3.1.0"), nil)
 
 	saptuneClient := saptune.NewSaptuneClient(
@@ -88,7 +103,12 @@ func (suite *SaptuneClientTestSuite) TestGettingAppliedSolutionFailure() {
 
 	suite.mockExecutor.On(
 		"Exec",
-		saptuneAppliedSolutionCommandArguments(ctx)...,
+		ctx,
+		"saptune",
+		"--format",
+		"json",
+		"solution",
+		"applied",
 	).Return(nil, errors.New("error calling saptune"))
 
 	saptuneClient := saptune.NewSaptuneClient(
@@ -109,7 +129,12 @@ func (suite *SaptuneClientTestSuite) TestGettingNoSolutionApplied() {
 
 	suite.mockExecutor.On(
 		"Exec",
-		saptuneAppliedSolutionCommandArguments(ctx)...,
+		ctx,
+		"saptune",
+		"--format",
+		"json",
+		"solution",
+		"applied",
 	).Return(noSolutionApplied, nil)
 
 	saptuneClient := saptune.NewSaptuneClient(
@@ -129,7 +154,12 @@ func (suite *SaptuneClientTestSuite) TestGettingAppliedSolution() {
 
 	suite.mockExecutor.On(
 		"Exec",
-		saptuneAppliedSolutionCommandArguments(ctx)...,
+		ctx,
+		"saptune",
+		"--format",
+		"json",
+		"solution",
+		"applied",
 	).Return(hanaSolutionApplied, nil)
 
 	saptuneClient := saptune.NewSaptuneClient(
@@ -147,7 +177,11 @@ func (suite *SaptuneClientTestSuite) TestApplySolutionFailureBecauseCommandFails
 
 	suite.mockExecutor.On(
 		"Exec",
-		saptuneApplySolutionCommandArguments(ctx, "HANA")...,
+		ctx,
+		"saptune",
+		"solution",
+		"apply",
+		"HANA",
 	).Return(nil, errors.New("error calling saptune"))
 
 	saptuneClient := saptune.NewSaptuneClient(
@@ -163,12 +197,16 @@ func (suite *SaptuneClientTestSuite) TestApplySolutionFailureBecauseCommandFails
 func (suite *SaptuneClientTestSuite) TestApplySolutionFailureBecauseAnAlreadyAppliedSolution() {
 	ctx := context.Background()
 
-	alreadyAppliedSolution := helpers.ReadFixtureString("saptune/apply_already_applied_solution.output")
+	alreadyAppliedSolution := helpers.ReadFixture("saptune/apply_already_applied_solution.output")
 
 	suite.mockExecutor.On(
 		"Exec",
-		saptuneApplySolutionCommandArguments(ctx, "HANA")...,
-	).Return(nil, errors.New(alreadyAppliedSolution))
+		ctx,
+		"saptune",
+		"solution",
+		"apply",
+		"HANA",
+	).Return(alreadyAppliedSolution, errors.New("exit status 1"))
 
 	saptuneClient := saptune.NewSaptuneClient(
 		suite.mockExecutor,
@@ -187,7 +225,11 @@ func (suite *SaptuneClientTestSuite) TestApplySolutionSuccess() {
 
 	suite.mockExecutor.On(
 		"Exec",
-		saptuneApplySolutionCommandArguments(ctx, "HANA")...,
+		ctx,
+		"saptune",
+		"solution",
+		"apply",
+		"HANA",
 	).Return(applySolutionSuccess, nil)
 
 	saptuneClient := saptune.NewSaptuneClient(
@@ -197,36 +239,4 @@ func (suite *SaptuneClientTestSuite) TestApplySolutionSuccess() {
 	err := saptuneClient.ApplySolution(ctx, "HANA")
 
 	suite.NoError(err)
-}
-
-func saptuneVersionRetrieverCommandArguments(ctx context.Context) []any {
-	return []any{
-		ctx,
-		"rpm",
-		"-q",
-		"--qf",
-		"%{VERSION}",
-		"saptune",
-	}
-}
-
-func saptuneAppliedSolutionCommandArguments(ctx context.Context) []any {
-	return []any{
-		ctx,
-		"saptune",
-		"--format",
-		"json",
-		"solution",
-		"applied",
-	}
-}
-
-func saptuneApplySolutionCommandArguments(ctx context.Context, solution string) []any {
-	return []any{
-		ctx,
-		"saptune",
-		"solution",
-		"apply",
-		solution,
-	}
 }

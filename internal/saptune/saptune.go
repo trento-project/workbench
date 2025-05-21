@@ -60,7 +60,10 @@ func (saptune *saptuneClient) CheckVersionSupport(ctx context.Context) error {
 }
 
 func (saptune *saptuneClient) GetAppliedSolution(ctx context.Context) (string, error) {
-	solutionAppliedOutput, err := saptune.appliedSolution(ctx)
+	solutionAppliedOutput, err := saptune.executor.Exec(ctx, "saptune", "--format", "json", "solution", "applied")
+	if err != nil {
+		return "", fmt.Errorf("could not call saptune solution applied: %w", err)
+	}
 	if err != nil {
 		return "", err
 	}
@@ -83,14 +86,6 @@ func (saptune *saptuneClient) ApplySolution(ctx context.Context, solution string
 	}
 
 	return nil
-}
-
-func (saptune *saptuneClient) appliedSolution(ctx context.Context) ([]byte, error) {
-	solutionAppliedOutput, err := saptune.executor.Exec(ctx, "saptune", "--format", "json", "solution", "applied")
-	if err != nil {
-		return nil, fmt.Errorf("could not call saptune solution applied: %w", err)
-	}
-	return solutionAppliedOutput, nil
 }
 
 func isSaptuneVersionSupported(version string) bool {
