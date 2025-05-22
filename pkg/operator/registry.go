@@ -113,6 +113,13 @@ func StandardRegistry(options ...BaseOperatorOption) *Registry {
 					})
 				},
 			},
+			SaptuneChangeSolutionOperatorName: map[string]OperatorBuilder{
+				"v1": func(operationID string, arguments OperatorArguments) Operator {
+					return NewSaptuneChangeSolution(arguments, operationID, OperatorOptions[SaptuneChangeSolution]{
+						BaseOperatorOptions: options,
+					})
+				},
+			},
 		},
 	}
 }
