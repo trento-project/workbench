@@ -2,6 +2,7 @@ package operator
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 
@@ -69,6 +70,10 @@ type SaptuneApplySolution struct {
 	baseOperator
 	saptune         saptune.Saptune
 	parsedArguments *saptuneSolutionArguments
+}
+
+type saptuneOperationDiffOutput struct {
+	Solution string `json:"solution"`
 }
 
 func WithSaptuneClient(saptuneClient saptune.Saptune) SaptuneApplySolutionOption {
@@ -165,4 +170,22 @@ func (sa *SaptuneApplySolution) rollback(ctx context.Context) error {
 	}
 
 	return sa.saptune.RevertSolution(ctx, sa.parsedArguments.solution)
+}
+
+func (sa *SaptuneApplySolution) operationDiff(_ context.Context) map[string]any {
+	diff := make(map[string]any)
+
+	beforeDiffOutput := saptuneOperationDiffOutput{
+		Solution: sa.resources[beforeDiffField].(string),
+	}
+	before, _ := json.Marshal(beforeDiffOutput)
+	diff[beforeDiffField] = string(before)
+
+	afterDiffOutput := saptuneOperationDiffOutput{
+		Solution: sa.resources[afterDiffField].(string),
+	}
+	after, _ := json.Marshal(afterDiffOutput)
+	diff[afterDiffField] = string(after)
+
+	return diff
 }

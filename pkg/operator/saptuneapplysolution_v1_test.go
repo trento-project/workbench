@@ -544,8 +544,8 @@ func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionSucc
 	report := saptuneSolutionApplyOperator.Run(ctx)
 
 	expectedDiff := map[string]any{
-		"before": "",
-		"after":  "HANA",
+		"before": `{"solution":""}`,
+		"after":  `{"solution":"HANA"}`,
 	}
 
 	suite.Nil(report.Error)
@@ -584,8 +584,8 @@ func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionSucc
 	report := saptuneSolutionApplyOperator.Run(ctx)
 
 	expectedDiff := map[string]any{
-		"before": "HANA",
-		"after":  "HANA",
+		"before": `{"solution":"HANA"}`,
+		"after":  `{"solution":"HANA"}`,
 	}
 
 	suite.Nil(report.Error)
