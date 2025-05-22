@@ -113,20 +113,11 @@ func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionComm
 	).Return(nil).
 		Once()
 
-	getAppliedSolutionCall := suite.mockSaptuneClient.On(
+	suite.mockSaptuneClient.On(
 		"GetAppliedSolution",
 		ctx,
 	).Return("HANA", nil).
 		NotBefore(checkSaptuneVersionCall).
-		Once()
-
-	suite.mockSaptuneClient.On(
-		"RevertSolution",
-		ctx,
-		"S4HANA-DBSERVER",
-	).Return(nil).
-		NotBefore(checkSaptuneVersionCall).
-		NotBefore(getAppliedSolutionCall).
 		Once()
 
 	saptuneSolutionApplyOperator := operator.NewSaptuneApplySolution(
@@ -146,51 +137,6 @@ func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionComm
 	suite.Nil(report.Success)
 	suite.Equal(operator.COMMIT, report.Error.ErrorPhase)
 	suite.EqualValues("cannot apply solution S4HANA-DBSERVER because another solution HANA is already applied", report.Error.Message)
-}
-
-func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionCommitErrorAnotherSolutionAlreadyAppliedWithFailingRollback() {
-	ctx := context.Background()
-
-	checkSaptuneVersionCall := suite.mockSaptuneClient.On(
-		"CheckVersionSupport",
-		ctx,
-	).Return(nil).
-		Once()
-
-	getAppliedSolutionCall := suite.mockSaptuneClient.On(
-		"GetAppliedSolution",
-		ctx,
-	).Return("HANA", nil).
-		NotBefore(checkSaptuneVersionCall).
-		Once()
-
-	suite.mockSaptuneClient.On(
-		"RevertSolution",
-		ctx,
-		"S4HANA-DBSERVER",
-	).Return(errors.New("failed to revert solution")).
-		NotBefore(checkSaptuneVersionCall).
-		NotBefore(getAppliedSolutionCall).
-		Once()
-
-	saptuneSolutionApplyOperator := operator.NewSaptuneApplySolution(
-		operator.OperatorArguments{
-			"solution": "S4HANA-DBSERVER",
-		},
-		"test-op",
-		operator.OperatorOptions[operator.SaptuneApplySolution]{
-			OperatorOptions: []operator.Option[operator.SaptuneApplySolution]{
-				operator.Option[operator.SaptuneApplySolution](operator.WithSaptuneClient(suite.mockSaptuneClient)),
-			},
-		},
-	)
-
-	report := saptuneSolutionApplyOperator.Run(ctx)
-
-	suite.Nil(report.Success)
-	suite.Equal(operator.ROLLBACK, report.Error.ErrorPhase)
-	suite.Contains(report.Error.Message, "failed to revert solution")
-	suite.Contains(report.Error.Message, "cannot apply solution S4HANA-DBSERVER because another solution HANA is already applied")
 }
 
 func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionCommitErrorApplyingSolutionWithSuccessfulRollback() {

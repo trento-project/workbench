@@ -123,10 +123,7 @@ func (sa *SaptuneApplySolution) plan(ctx context.Context) error {
 }
 
 func (sa *SaptuneApplySolution) commit(ctx context.Context) error {
-	initiallyAppliedSolution, ok := sa.resources[beforeDiffField].(string)
-	if !ok {
-		return fmt.Errorf("expected a string for initiallyAppliedSolution, but got %T", sa.resources[beforeDiffField])
-	}
+	initiallyAppliedSolution, _ := sa.resources[beforeDiffField].(string)
 
 	if sa.parsedArguments.solution == initiallyAppliedSolution {
 		sa.logger.Infof("solution %s is already applied, skipping commit phase", sa.parsedArguments.solution)
@@ -161,5 +158,11 @@ func (sa *SaptuneApplySolution) verify(ctx context.Context) error {
 }
 
 func (sa *SaptuneApplySolution) rollback(ctx context.Context) error {
+	initiallyAppliedSolution, _ := sa.resources[beforeDiffField].(string)
+
+	if initiallyAppliedSolution != "" {
+		return nil
+	}
+
 	return sa.saptune.RevertSolution(ctx, sa.parsedArguments.solution)
 }
