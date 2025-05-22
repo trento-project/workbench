@@ -23,7 +23,7 @@ func (suite *SaptuneApplySolutionOperatorTestSuite) SetupTest() {
 	suite.mockSaptuneClient = mocks.NewMockSaptune(suite.T())
 }
 
-func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionPlanErrorBecauseFailingToParseArguments() {
+func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionPlanErrorParsingArguments() {
 	ctx := context.Background()
 
 	saptuneSolutionApplyOperator := operator.NewSaptuneApplySolution(
@@ -41,7 +41,7 @@ func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionPlan
 	suite.EqualValues("argument solution not provided, could not use the operator", report.Error.Message)
 }
 
-func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionPlanErrorBecauseFailingVersionCheck() {
+func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionPlanErrorVersionCheck() {
 	ctx := context.Background()
 
 	suite.mockSaptuneClient.On(
@@ -69,7 +69,7 @@ func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionPlan
 	suite.EqualValues("saptune version not supported", report.Error.Message)
 }
 
-func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionPlanErrorBecauseFailingToDetermineInitiallyAppliedSolution() {
+func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionPlanErrorGettingSolution() {
 	ctx := context.Background()
 
 	checkSaptuneVersionCall := suite.mockSaptuneClient.On(
@@ -104,7 +104,7 @@ func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionPlan
 	suite.EqualValues("failed to determine initially applied solution", report.Error.Message)
 }
 
-func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionCommitFailingBecauseAnotherSolutionIsAlreadyAppliedWithSuccessfulRollback() {
+func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionCommitErrorAnotherSolutionAlreadyAppliedWithSuccessfulRollback() {
 	ctx := context.Background()
 
 	checkSaptuneVersionCall := suite.mockSaptuneClient.On(
@@ -148,7 +148,7 @@ func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionComm
 	suite.EqualValues("cannot apply solution S4HANA-DBSERVER because another solution HANA is already applied", report.Error.Message)
 }
 
-func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionCommitFailingBecauseAnotherSolutionIsAlreadyAppliedWithFailingRollback() {
+func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionCommitErrorAnotherSolutionAlreadyAppliedWithFailingRollback() {
 	ctx := context.Background()
 
 	checkSaptuneVersionCall := suite.mockSaptuneClient.On(
@@ -193,7 +193,7 @@ func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionComm
 	suite.Contains(report.Error.Message, "cannot apply solution S4HANA-DBSERVER because another solution HANA is already applied")
 }
 
-func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionCommitFailingBecauseApplyErrorWithSuccessfulRollback() {
+func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionCommitErrorApplyingSolutionWithSuccessfulRollback() {
 	ctx := context.Background()
 
 	checkVersionSupportCall := suite.mockSaptuneClient.On(
@@ -247,7 +247,7 @@ func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionComm
 	suite.EqualValues("failed to apply solution", report.Error.Message)
 }
 
-func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionCommitFailingBecauseApplyErrorWithFailingRollback() {
+func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionCommitErrorApplyingSolutionWithFailingRollback() {
 	ctx := context.Background()
 
 	checkVersionSupportCall := suite.mockSaptuneClient.On(
@@ -302,7 +302,7 @@ func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionComm
 	suite.Contains(report.Error.Message, "failed to revert solution")
 }
 
-func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionVerifyFailingBecauseUnableToDetermineAppliedSolutionWithSuccessfulRollback() {
+func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionVerifyErrorDeterminingAppliedSolutionWithSuccessfulRollback() {
 	ctx := context.Background()
 
 	checkVersionSupportCall := suite.mockSaptuneClient.On(
@@ -362,7 +362,7 @@ func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionVeri
 	suite.EqualValues("failed to determine applied solution during verify", report.Error.Message)
 }
 
-func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionVerifyFailingBecauseUnableToDetermineAppliedSolutionWithFailingRollback() {
+func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionVerifyErrorDeterminingAppliedSolutionWithFailingRollback() {
 	ctx := context.Background()
 
 	checkVersionSupportCall := suite.mockSaptuneClient.On(
@@ -423,7 +423,7 @@ func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionVeri
 	suite.Contains(report.Error.Message, "failed to revert solution")
 }
 
-func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionVerifyFailingBecauseDetectedAppliedSolutionDiffersFromRequestedWithSuccessfulRollback() {
+func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionVerifyErrorAppliedSolutionDiffersFromRequestedWithSuccessfulRollback() {
 	ctx := context.Background()
 
 	checkVersionSupportCall := suite.mockSaptuneClient.On(
@@ -487,7 +487,7 @@ func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionVeri
 	suite.EqualValues("verify saptune apply failing, the solution HANA was not applied in commit phase", report.Error.Message)
 }
 
-func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionVerifyFailingBecauseDetectedAppliedSolutionDiffersFromRequestedWithFailingRollback() {
+func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionErrorDetectedAppliedSolutionDiffersFromRequestedWithFailingRollback() {
 	ctx := context.Background()
 
 	checkVersionSupportCall := suite.mockSaptuneClient.On(
