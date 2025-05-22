@@ -28,6 +28,10 @@ func parseSaptuneSolutionArguments(rawArguments OperatorArguments) (*saptuneSolu
 		)
 	}
 
+	if solution == "" {
+		return nil, errors.New("solution argument is empty")
+	}
+
 	return &saptuneSolutionArguments{
 		solution: solution,
 	}, nil

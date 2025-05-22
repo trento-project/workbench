@@ -41,6 +41,24 @@ func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionPlan
 	suite.EqualValues("argument solution not provided, could not use the operator", report.Error.Message)
 }
 
+func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionPlanErrorEmptySolutionRequested() {
+	ctx := context.Background()
+
+	saptuneSolutionApplyOperator := operator.NewSaptuneApplySolution(
+		operator.OperatorArguments{
+			"solution": "",
+		},
+		"test-op",
+		operator.OperatorOptions[operator.SaptuneApplySolution]{},
+	)
+
+	report := saptuneSolutionApplyOperator.Run(ctx)
+
+	suite.Nil(report.Success)
+	suite.Equal(operator.PLAN, report.Error.ErrorPhase)
+	suite.EqualValues("solution argument is empty", report.Error.Message)
+}
+
 func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionPlanErrorVersionCheck() {
 	ctx := context.Background()
 
