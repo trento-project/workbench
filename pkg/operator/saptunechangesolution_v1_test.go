@@ -183,16 +183,6 @@ func (suite *SaptuneChangeSolutionOperatorTestSuite) TestSaptuneChangeSolutionCo
 		NotBefore(getAppliedSolutionCall).
 		Once()
 
-	revertSolutionCall := suite.mockSaptuneClient.On(
-		"RevertSolution",
-		ctx,
-		"HANA",
-	).Return(nil).
-		NotBefore(checkSaptuneVersionCall).
-		NotBefore(getAppliedSolutionCall).
-		NotBefore(changeSolutionCall).
-		Once()
-
 	suite.mockSaptuneClient.On(
 		"ChangeSolution",
 		ctx,
@@ -201,7 +191,6 @@ func (suite *SaptuneChangeSolutionOperatorTestSuite) TestSaptuneChangeSolutionCo
 		NotBefore(checkSaptuneVersionCall).
 		NotBefore(getAppliedSolutionCall).
 		NotBefore(changeSolutionCall).
-		NotBefore(revertSolutionCall).
 		Once()
 
 	saptuneSolutionChangeOperator := operator.NewSaptuneChangeSolution(
@@ -222,7 +211,7 @@ func (suite *SaptuneChangeSolutionOperatorTestSuite) TestSaptuneChangeSolutionCo
 
 }
 
-func (suite *SaptuneChangeSolutionOperatorTestSuite) TestSaptuneChangeSolutionCommitErrorChangeSolutionFailingRollbackRevert() {
+func (suite *SaptuneChangeSolutionOperatorTestSuite) TestSaptuneChangeSolutionCommitErrorChangeSolutionFailingRollback() {
 	ctx := context.Background()
 
 	checkSaptuneVersionCall := suite.mockSaptuneClient.On(
@@ -245,69 +234,6 @@ func (suite *SaptuneChangeSolutionOperatorTestSuite) TestSaptuneChangeSolutionCo
 	).Return(errors.New("failed to change solution")).
 		NotBefore(checkSaptuneVersionCall).
 		NotBefore(getAppliedSolutionCall).
-		Once()
-
-	suite.mockSaptuneClient.On(
-		"RevertSolution",
-		ctx,
-		"HANA",
-	).Return(errors.New("failed to revert solution")).
-		NotBefore(checkSaptuneVersionCall).
-		NotBefore(getAppliedSolutionCall).
-		NotBefore(changeSolutionCall).
-		Once()
-
-	saptuneSolutionChangeOperator := operator.NewSaptuneChangeSolution(
-		operator.OperatorArguments{
-			"solution": "HANA",
-		},
-		"test-op",
-		operator.OperatorOptions[operator.SaptuneChangeSolution]{
-			OperatorOptions: []operator.Option[operator.SaptuneChangeSolution]{
-				operator.Option[operator.SaptuneChangeSolution](operator.WithSaptuneClientChange(suite.mockSaptuneClient)),
-			},
-		},
-	)
-	report := saptuneSolutionChangeOperator.Run(ctx)
-	suite.Nil(report.Success)
-	suite.Equal(operator.ROLLBACK, report.Error.ErrorPhase)
-	suite.Contains(report.Error.Message, "failed to change solution")
-	suite.Contains(report.Error.Message, "failed to revert solution")
-}
-
-func (suite *SaptuneChangeSolutionOperatorTestSuite) TestSaptuneChangeSolutionCommitErrorChangeSolutionFailingRollbackChange() {
-	ctx := context.Background()
-
-	checkSaptuneVersionCall := suite.mockSaptuneClient.On(
-		"CheckVersionSupport",
-		ctx,
-	).Return(nil).
-		Once()
-
-	getAppliedSolutionCall := suite.mockSaptuneClient.On(
-		"GetAppliedSolution",
-		ctx,
-	).Return("FOO", nil).
-		NotBefore(checkSaptuneVersionCall).
-		Once()
-
-	changeSolutionCall := suite.mockSaptuneClient.On(
-		"ChangeSolution",
-		ctx,
-		"HANA",
-	).Return(errors.New("failed to change solution")).
-		NotBefore(checkSaptuneVersionCall).
-		NotBefore(getAppliedSolutionCall).
-		Once()
-
-	revertSolutionCall := suite.mockSaptuneClient.On(
-		"RevertSolution",
-		ctx,
-		"HANA",
-	).Return(nil).
-		NotBefore(checkSaptuneVersionCall).
-		NotBefore(getAppliedSolutionCall).
-		NotBefore(changeSolutionCall).
 		Once()
 
 	suite.mockSaptuneClient.On(
@@ -318,7 +244,6 @@ func (suite *SaptuneChangeSolutionOperatorTestSuite) TestSaptuneChangeSolutionCo
 		NotBefore(checkSaptuneVersionCall).
 		NotBefore(getAppliedSolutionCall).
 		NotBefore(changeSolutionCall).
-		NotBefore(revertSolutionCall).
 		Once()
 
 	saptuneSolutionChangeOperator := operator.NewSaptuneChangeSolution(
@@ -373,16 +298,6 @@ func (suite *SaptuneChangeSolutionOperatorTestSuite) TestSaptuneChangeSolutionVe
 		NotBefore(initialChangeSolutionCall).
 		Once()
 
-	revertSolutionCall := suite.mockSaptuneClient.On(
-		"RevertSolution",
-		ctx,
-		"HANA",
-	).Return(nil).
-		NotBefore(checkSaptuneVersionCall).
-		NotBefore(getAppliedSolutionCall).
-		NotBefore(initialChangeSolutionCall).
-		Once()
-
 	suite.mockSaptuneClient.On(
 		"ChangeSolution",
 		ctx,
@@ -391,7 +306,6 @@ func (suite *SaptuneChangeSolutionOperatorTestSuite) TestSaptuneChangeSolutionVe
 		NotBefore(checkSaptuneVersionCall).
 		NotBefore(getAppliedSolutionCall).
 		NotBefore(initialChangeSolutionCall).
-		NotBefore(revertSolutionCall).
 		Once()
 
 	saptuneSolutionChangeOperator := operator.NewSaptuneChangeSolution(
@@ -412,7 +326,7 @@ func (suite *SaptuneChangeSolutionOperatorTestSuite) TestSaptuneChangeSolutionVe
 	suite.Contains(report.Error.Message, "failed to determine currently applied solution in verify")
 }
 
-func (suite *SaptuneChangeSolutionOperatorTestSuite) TestSaptuneChangeSolutionVerifyErrorGetAppliedSolutionFailingRollbackRevert() {
+func (suite *SaptuneChangeSolutionOperatorTestSuite) TestSaptuneChangeSolutionVerifyErrorGetAppliedSolutionFailingRollback() {
 	ctx := context.Background()
 
 	checkSaptuneVersionCall := suite.mockSaptuneClient.On(
@@ -441,79 +355,6 @@ func (suite *SaptuneChangeSolutionOperatorTestSuite) TestSaptuneChangeSolutionVe
 		"GetAppliedSolution",
 		ctx,
 	).Return("", errors.New("failed to determine currently applied solution in verify")).
-		NotBefore(checkSaptuneVersionCall).
-		NotBefore(getAppliedSolutionCall).
-		NotBefore(initialChangeSolutionCall).
-		Once()
-
-	suite.mockSaptuneClient.On(
-		"RevertSolution",
-		ctx,
-		"HANA",
-	).Return(errors.New("failed to revert solution")).
-		NotBefore(checkSaptuneVersionCall).
-		NotBefore(getAppliedSolutionCall).
-		NotBefore(initialChangeSolutionCall).
-		Once()
-
-	saptuneSolutionChangeOperator := operator.NewSaptuneChangeSolution(
-		operator.OperatorArguments{
-			"solution": "HANA",
-		},
-		"test-op",
-		operator.OperatorOptions[operator.SaptuneChangeSolution]{
-			OperatorOptions: []operator.Option[operator.SaptuneChangeSolution]{
-				operator.Option[operator.SaptuneChangeSolution](operator.WithSaptuneClientChange(suite.mockSaptuneClient)),
-			},
-		},
-	)
-	report := saptuneSolutionChangeOperator.Run(ctx)
-
-	suite.Nil(report.Success)
-	suite.Equal(operator.ROLLBACK, report.Error.ErrorPhase)
-	suite.Contains(report.Error.Message, "failed to determine currently applied solution in verify")
-	suite.Contains(report.Error.Message, "failed to revert solution")
-}
-
-func (suite *SaptuneChangeSolutionOperatorTestSuite) TestSaptuneChangeSolutionVerifyErrorGetAppliedSolutionFailingRollbackChange() {
-	ctx := context.Background()
-
-	checkSaptuneVersionCall := suite.mockSaptuneClient.On(
-		"CheckVersionSupport",
-		ctx,
-	).Return(nil).
-		Once()
-
-	getAppliedSolutionCall := suite.mockSaptuneClient.On(
-		"GetAppliedSolution",
-		ctx,
-	).Return("FOO", nil).
-		NotBefore(checkSaptuneVersionCall).
-		Once()
-
-	initialChangeSolutionCall := suite.mockSaptuneClient.On(
-		"ChangeSolution",
-		ctx,
-		"HANA",
-	).Return(nil).
-		NotBefore(checkSaptuneVersionCall).
-		NotBefore(getAppliedSolutionCall).
-		Once()
-
-	suite.mockSaptuneClient.On(
-		"GetAppliedSolution",
-		ctx,
-	).Return("", errors.New("failed to determine currently applied solution in verify")).
-		NotBefore(checkSaptuneVersionCall).
-		NotBefore(getAppliedSolutionCall).
-		NotBefore(initialChangeSolutionCall).
-		Once()
-
-	revertSolutionCall := suite.mockSaptuneClient.On(
-		"RevertSolution",
-		ctx,
-		"HANA",
-	).Return(nil).
 		NotBefore(checkSaptuneVersionCall).
 		NotBefore(getAppliedSolutionCall).
 		NotBefore(initialChangeSolutionCall).
@@ -527,7 +368,6 @@ func (suite *SaptuneChangeSolutionOperatorTestSuite) TestSaptuneChangeSolutionVe
 		NotBefore(checkSaptuneVersionCall).
 		NotBefore(getAppliedSolutionCall).
 		NotBefore(initialChangeSolutionCall).
-		NotBefore(revertSolutionCall).
 		Once()
 
 	saptuneSolutionChangeOperator := operator.NewSaptuneChangeSolution(
@@ -583,16 +423,6 @@ func (suite *SaptuneChangeSolutionOperatorTestSuite) TestSaptuneChangeSolutionVe
 		NotBefore(initialChangeSolutionCall).
 		Once()
 
-	revertSolutionCall := suite.mockSaptuneClient.On(
-		"RevertSolution",
-		ctx,
-		"HANA",
-	).Return(nil).
-		NotBefore(checkSaptuneVersionCall).
-		NotBefore(getAppliedSolutionCall).
-		NotBefore(initialChangeSolutionCall).
-		Once()
-
 	suite.mockSaptuneClient.On(
 		"ChangeSolution",
 		ctx,
@@ -601,7 +431,6 @@ func (suite *SaptuneChangeSolutionOperatorTestSuite) TestSaptuneChangeSolutionVe
 		NotBefore(checkSaptuneVersionCall).
 		NotBefore(getAppliedSolutionCall).
 		NotBefore(initialChangeSolutionCall).
-		NotBefore(revertSolutionCall).
 		Once()
 
 	saptuneSolutionChangeOperator := operator.NewSaptuneChangeSolution(
@@ -622,7 +451,7 @@ func (suite *SaptuneChangeSolutionOperatorTestSuite) TestSaptuneChangeSolutionVe
 	suite.Contains(report.Error.Message, "verify saptune apply failing, the solution HANA was not applied in commit phase")
 }
 
-func (suite *SaptuneChangeSolutionOperatorTestSuite) TestSaptuneChangeSolutionVerifyErrorNonMatchingFailingRollbackRevert() {
+func (suite *SaptuneChangeSolutionOperatorTestSuite) TestSaptuneChangeSolutionVerifyErrorNonMatchingFailingRollback() {
 	ctx := context.Background()
 
 	checkSaptuneVersionCall := suite.mockSaptuneClient.On(
@@ -651,79 +480,6 @@ func (suite *SaptuneChangeSolutionOperatorTestSuite) TestSaptuneChangeSolutionVe
 		"GetAppliedSolution",
 		ctx,
 	).Return("NOT_HANA", nil).
-		NotBefore(checkSaptuneVersionCall).
-		NotBefore(getAppliedSolutionCall).
-		NotBefore(initialChangeSolutionCall).
-		Once()
-
-	suite.mockSaptuneClient.On(
-		"RevertSolution",
-		ctx,
-		"HANA",
-	).Return(errors.New("failed to revert solution")).
-		NotBefore(checkSaptuneVersionCall).
-		NotBefore(getAppliedSolutionCall).
-		NotBefore(initialChangeSolutionCall).
-		Once()
-
-	saptuneSolutionChangeOperator := operator.NewSaptuneChangeSolution(
-		operator.OperatorArguments{
-			"solution": "HANA",
-		},
-		"test-op",
-		operator.OperatorOptions[operator.SaptuneChangeSolution]{
-			OperatorOptions: []operator.Option[operator.SaptuneChangeSolution]{
-				operator.Option[operator.SaptuneChangeSolution](operator.WithSaptuneClientChange(suite.mockSaptuneClient)),
-			},
-		},
-	)
-	report := saptuneSolutionChangeOperator.Run(ctx)
-
-	suite.Nil(report.Success)
-	suite.Equal(operator.ROLLBACK, report.Error.ErrorPhase)
-	suite.Contains(report.Error.Message, "verify saptune apply failing, the solution HANA was not applied in commit phase")
-	suite.Contains(report.Error.Message, "failed to revert solution")
-}
-
-func (suite *SaptuneChangeSolutionOperatorTestSuite) TestSaptuneChangeSolutionVerifyErrorNonMatchingFailingRollbackChange() {
-	ctx := context.Background()
-
-	checkSaptuneVersionCall := suite.mockSaptuneClient.On(
-		"CheckVersionSupport",
-		ctx,
-	).Return(nil).
-		Once()
-
-	getAppliedSolutionCall := suite.mockSaptuneClient.On(
-		"GetAppliedSolution",
-		ctx,
-	).Return("FOO", nil).
-		NotBefore(checkSaptuneVersionCall).
-		Once()
-
-	initialChangeSolutionCall := suite.mockSaptuneClient.On(
-		"ChangeSolution",
-		ctx,
-		"HANA",
-	).Return(nil).
-		NotBefore(checkSaptuneVersionCall).
-		NotBefore(getAppliedSolutionCall).
-		Once()
-
-	suite.mockSaptuneClient.On(
-		"GetAppliedSolution",
-		ctx,
-	).Return("NOT_HANA", nil).
-		NotBefore(checkSaptuneVersionCall).
-		NotBefore(getAppliedSolutionCall).
-		NotBefore(initialChangeSolutionCall).
-		Once()
-
-	revertSolutionCall := suite.mockSaptuneClient.On(
-		"RevertSolution",
-		ctx,
-		"HANA",
-	).Return(nil).
 		NotBefore(checkSaptuneVersionCall).
 		NotBefore(getAppliedSolutionCall).
 		NotBefore(initialChangeSolutionCall).
@@ -737,7 +493,6 @@ func (suite *SaptuneChangeSolutionOperatorTestSuite) TestSaptuneChangeSolutionVe
 		NotBefore(checkSaptuneVersionCall).
 		NotBefore(getAppliedSolutionCall).
 		NotBefore(initialChangeSolutionCall).
-		NotBefore(revertSolutionCall).
 		Once()
 
 	saptuneSolutionChangeOperator := operator.NewSaptuneChangeSolution(

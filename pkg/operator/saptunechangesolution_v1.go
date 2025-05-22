@@ -33,7 +33,7 @@ type SaptuneChangeSolutionOption Option[SaptuneChangeSolution]
 //   On success, the current state of the applied solution is collected as the "after" diff.
 //
 // - ROLLBACK:
-//   TBD
+//   If an error occurs during the COMMIT or VERIFY phase, the saptune solution is changed back to the initially applied one.
 
 type SaptuneChangeSolution struct {
 	baseOperator
@@ -138,11 +138,6 @@ func (sc *SaptuneChangeSolution) rollback(ctx context.Context) error {
 
 	if initiallyAppliedSolution == "" {
 		return nil
-	}
-
-	sc.logger.Infof("Reverting the requested solution: %s", sc.parsedArguments.solution)
-	if err := sc.saptune.RevertSolution(ctx, sc.parsedArguments.solution); err != nil {
-		return err
 	}
 
 	sc.logger.Infof("Changing solution to the initially applied one: %s", initiallyAppliedSolution)
