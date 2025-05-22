@@ -1,8 +1,6 @@
 package operator
 
 import (
-	"context"
-
 	"github.com/sirupsen/logrus"
 )
 
@@ -44,12 +42,4 @@ func newBaseOperator(
 	base.logger = base.loggerInstance.WithField("operation_id", operationID)
 
 	return *base
-}
-
-func (b *baseOperator) operationDiff(_ context.Context) map[string]any {
-	diff := make(map[string]any)
-	diff[beforeDiffField] = b.resources[beforeDiffField]
-	diff[afterDiffField] = b.resources[afterDiffField]
-
-	return diff
 }

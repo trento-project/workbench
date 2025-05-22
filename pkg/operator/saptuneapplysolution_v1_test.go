@@ -5,65 +5,529 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-	"github.com/trento-project/workbench/internal/support/mocks"
+	"github.com/stretchr/testify/suite"
+	"github.com/trento-project/workbench/internal/saptune/mocks"
 	"github.com/trento-project/workbench/pkg/operator"
 )
 
-const saptuneSolutionAppliedNoSolutionOutput = `
-{"$schema":"file:///usr/share/saptune/schemas/1.0/saptune_solution_applied.schema.json","publish time":"2025-01-09 14:50:06.131","argv":"saptune --format json solution applied","pid":303,"command":"solution applied","exit code":0,"result":{"Solution applied":[]},"messages":[]}
-`
-const saptuneSolutionAppliedHanaSolutionOutput = `
-{"$schema":"file:///usr/share/saptune/schemas/1.0/saptune_solution_applied.schema.json","publish time":"2025-01-09 14:52:39.641","argv":"saptune --format json solution applied","pid":826,"command":"solution applied","exit code":0,"result":{"Solution applied":[{"Solution ID":"HANA","applied partially":false}]},"messages":[]}
-`
+type SaptuneApplySolutionOperatorTestSuite struct {
+	suite.Suite
+	mockSaptuneClient *mocks.MockSaptune
+}
 
-func TestSaptuneApplySolutionSuccess(t *testing.T) {
-	mockCmdExecutor := mocks.NewMockCmdExecutor(t)
+func TestSaptuneApplySolutionOperator(t *testing.T) {
+	suite.Run(t, new(SaptuneApplySolutionOperatorTestSuite))
+}
+
+func (suite *SaptuneApplySolutionOperatorTestSuite) SetupTest() {
+	suite.mockSaptuneClient = mocks.NewMockSaptune(suite.T())
+}
+
+func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionPlanErrorParsingArguments() {
 	ctx := context.Background()
 
-	checkSaptuneVersionCall := mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"rpm",
-		"-q",
-		"--qf",
-		"%{VERSION}",
-		"saptune",
-	).Return([]byte("3.1.0"), nil)
+	saptuneSolutionApplyOperator := operator.NewSaptuneApplySolution(
+		operator.OperatorArguments{
+			"foo": "HANA",
+		},
+		"test-op",
+		operator.OperatorOptions[operator.SaptuneApplySolution]{},
+	)
 
-	solutionAppliedCall := mockCmdExecutor.On(
-		"Exec",
+	report := saptuneSolutionApplyOperator.Run(ctx)
+
+	suite.Nil(report.Success)
+	suite.Equal(operator.PLAN, report.Error.ErrorPhase)
+	suite.EqualValues("argument solution not provided, could not use the operator", report.Error.Message)
+}
+
+func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionPlanErrorVersionCheck() {
+	ctx := context.Background()
+
+	suite.mockSaptuneClient.On(
+		"CheckVersionSupport",
 		ctx,
-		"saptune",
-		"--format",
-		"json",
-		"solution",
-		"applied",
-	).Return([]byte(saptuneSolutionAppliedNoSolutionOutput), nil).
+	).Return(errors.New("saptune version not supported")).
+		Once()
+
+	saptuneSolutionApplyOperator := operator.NewSaptuneApplySolution(
+		operator.OperatorArguments{
+			"solution": "HANA",
+		},
+		"test-op",
+		operator.OperatorOptions[operator.SaptuneApplySolution]{
+			OperatorOptions: []operator.Option[operator.SaptuneApplySolution]{
+				operator.Option[operator.SaptuneApplySolution](operator.WithSaptuneClient(suite.mockSaptuneClient)),
+			},
+		},
+	)
+
+	report := saptuneSolutionApplyOperator.Run(ctx)
+
+	suite.Nil(report.Success)
+	suite.Equal(operator.PLAN, report.Error.ErrorPhase)
+	suite.EqualValues("saptune version not supported", report.Error.Message)
+}
+
+func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionPlanErrorGettingSolution() {
+	ctx := context.Background()
+
+	checkSaptuneVersionCall := suite.mockSaptuneClient.On(
+		"CheckVersionSupport",
+		ctx,
+	).Return(nil).
+		Once()
+
+	suite.mockSaptuneClient.On(
+		"GetAppliedSolution",
+		ctx,
+	).Return("", errors.New("failed to determine initially applied solution")).
 		NotBefore(checkSaptuneVersionCall).
-		Twice() // it's called two times
+		Once()
 
-	solutionApplyCall := mockCmdExecutor.On(
-		"Exec",
+	saptuneSolutionApplyOperator := operator.NewSaptuneApplySolution(
+		operator.OperatorArguments{
+			"solution": "HANA",
+		},
+		"test-op",
+		operator.OperatorOptions[operator.SaptuneApplySolution]{
+			OperatorOptions: []operator.Option[operator.SaptuneApplySolution]{
+				operator.Option[operator.SaptuneApplySolution](operator.WithSaptuneClient(suite.mockSaptuneClient)),
+			},
+		},
+	)
+
+	report := saptuneSolutionApplyOperator.Run(ctx)
+
+	suite.Nil(report.Success)
+	suite.Equal(operator.PLAN, report.Error.ErrorPhase)
+	suite.EqualValues("failed to determine initially applied solution", report.Error.Message)
+}
+
+func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionCommitErrorAnotherSolutionAlreadyAppliedWithSuccessfulRollback() {
+	ctx := context.Background()
+
+	checkSaptuneVersionCall := suite.mockSaptuneClient.On(
+		"CheckVersionSupport",
 		ctx,
-		"saptune",
-		"solution",
-		"apply",
+	).Return(nil).
+		Once()
+
+	suite.mockSaptuneClient.On(
+		"GetAppliedSolution",
+		ctx,
+	).Return("HANA", nil).
+		NotBefore(checkSaptuneVersionCall).
+		Once()
+
+	saptuneSolutionApplyOperator := operator.NewSaptuneApplySolution(
+		operator.OperatorArguments{
+			"solution": "S4HANA-DBSERVER",
+		},
+		"test-op",
+		operator.OperatorOptions[operator.SaptuneApplySolution]{
+			OperatorOptions: []operator.Option[operator.SaptuneApplySolution]{
+				operator.Option[operator.SaptuneApplySolution](operator.WithSaptuneClient(suite.mockSaptuneClient)),
+			},
+		},
+	)
+
+	report := saptuneSolutionApplyOperator.Run(ctx)
+
+	suite.Nil(report.Success)
+	suite.Equal(operator.COMMIT, report.Error.ErrorPhase)
+	suite.EqualValues("cannot apply solution S4HANA-DBSERVER because another solution HANA is already applied", report.Error.Message)
+}
+
+func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionCommitErrorApplyingSolutionWithSuccessfulRollback() {
+	ctx := context.Background()
+
+	checkVersionSupportCall := suite.mockSaptuneClient.On(
+		"CheckVersionSupport",
+		ctx,
+	).Return(nil).
+		Once()
+
+	getAppliedSolutionCall := suite.mockSaptuneClient.On(
+		"GetAppliedSolution",
+		ctx,
+	).Return("", nil).
+		NotBefore(checkVersionSupportCall).
+		Once()
+
+	applySolutionCall := suite.mockSaptuneClient.On(
+		"ApplySolution",
+		ctx,
 		"HANA",
-	).Return([]byte(saptuneSolutionAppliedNoSolutionOutput), nil).
-		NotBefore(solutionAppliedCall)
+	).Return(errors.New("failed to apply solution")).
+		NotBefore(checkVersionSupportCall).
+		NotBefore(getAppliedSolutionCall).
+		Once()
 
-	mockCmdExecutor.On(
-		"Exec",
+	suite.mockSaptuneClient.On(
+		"RevertSolution",
 		ctx,
-		"saptune",
-		"--format",
-		"json",
-		"solution",
-		"applied",
-	).Return([]byte(saptuneSolutionAppliedHanaSolutionOutput), nil).
+		"HANA",
+	).Return(nil).
+		NotBefore(checkVersionSupportCall).
+		NotBefore(getAppliedSolutionCall).
+		NotBefore(applySolutionCall).
+		Once()
+
+	saptuneSolutionApplyOperator := operator.NewSaptuneApplySolution(
+		operator.OperatorArguments{
+			"solution": "HANA",
+		},
+		"test-op",
+		operator.OperatorOptions[operator.SaptuneApplySolution]{
+			OperatorOptions: []operator.Option[operator.SaptuneApplySolution]{
+				operator.Option[operator.SaptuneApplySolution](operator.WithSaptuneClient(suite.mockSaptuneClient)),
+			},
+		},
+	)
+
+	report := saptuneSolutionApplyOperator.Run(ctx)
+
+	suite.Nil(report.Success)
+	suite.Equal(operator.COMMIT, report.Error.ErrorPhase)
+	suite.EqualValues("failed to apply solution", report.Error.Message)
+}
+
+func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionCommitErrorApplyingSolutionWithFailingRollback() {
+	ctx := context.Background()
+
+	checkVersionSupportCall := suite.mockSaptuneClient.On(
+		"CheckVersionSupport",
+		ctx,
+	).Return(nil).
+		Once()
+
+	getAppliedSolutionCall := suite.mockSaptuneClient.On(
+		"GetAppliedSolution",
+		ctx,
+	).Return("", nil).
+		NotBefore(checkVersionSupportCall).
+		Once()
+
+	applySolutionCall := suite.mockSaptuneClient.On(
+		"ApplySolution",
+		ctx,
+		"HANA",
+	).Return(errors.New("failed to apply solution")).
+		NotBefore(checkVersionSupportCall).
+		NotBefore(getAppliedSolutionCall).
+		Once()
+
+	suite.mockSaptuneClient.On(
+		"RevertSolution",
+		ctx,
+		"HANA",
+	).Return(errors.New("failed to revert solution")).
+		NotBefore(checkVersionSupportCall).
+		NotBefore(getAppliedSolutionCall).
+		NotBefore(applySolutionCall).
+		Once()
+
+	saptuneSolutionApplyOperator := operator.NewSaptuneApplySolution(
+		operator.OperatorArguments{
+			"solution": "HANA",
+		},
+		"test-op",
+		operator.OperatorOptions[operator.SaptuneApplySolution]{
+			OperatorOptions: []operator.Option[operator.SaptuneApplySolution]{
+				operator.Option[operator.SaptuneApplySolution](operator.WithSaptuneClient(suite.mockSaptuneClient)),
+			},
+		},
+	)
+
+	report := saptuneSolutionApplyOperator.Run(ctx)
+
+	suite.Nil(report.Success)
+	suite.Equal(operator.ROLLBACK, report.Error.ErrorPhase)
+	suite.Contains(report.Error.Message, "failed to apply solution")
+	suite.Contains(report.Error.Message, "failed to revert solution")
+}
+
+func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionVerifyErrorDeterminingAppliedSolutionWithSuccessfulRollback() {
+	ctx := context.Background()
+
+	checkVersionSupportCall := suite.mockSaptuneClient.On(
+		"CheckVersionSupport",
+		ctx,
+	).Return(nil).
+		Once()
+
+	getAppliedSolutionCall := suite.mockSaptuneClient.On(
+		"GetAppliedSolution",
+		ctx,
+	).Return("", nil).
+		NotBefore(checkVersionSupportCall).
+		Once()
+
+	applySolutionCall := suite.mockSaptuneClient.On(
+		"ApplySolution",
+		ctx,
+		"HANA",
+	).Return(nil).
+		NotBefore(checkVersionSupportCall).
+		NotBefore(getAppliedSolutionCall).
+		Once()
+
+	suite.mockSaptuneClient.On(
+		"GetAppliedSolution",
+		ctx,
+	).Return("", errors.New("failed to determine applied solution during verify")).
+		Once()
+
+	suite.mockSaptuneClient.On(
+		"RevertSolution",
+		ctx,
+		"HANA",
+	).Return(nil).
+		NotBefore(checkVersionSupportCall).
+		NotBefore(getAppliedSolutionCall).
+		NotBefore(applySolutionCall).
+		Once()
+
+	saptuneSolutionApplyOperator := operator.NewSaptuneApplySolution(
+		operator.OperatorArguments{
+			"solution": "HANA",
+		},
+		"test-op",
+		operator.OperatorOptions[operator.SaptuneApplySolution]{
+			OperatorOptions: []operator.Option[operator.SaptuneApplySolution]{
+				operator.Option[operator.SaptuneApplySolution](operator.WithSaptuneClient(suite.mockSaptuneClient)),
+			},
+		},
+	)
+
+	report := saptuneSolutionApplyOperator.Run(ctx)
+
+	suite.Nil(report.Success)
+	suite.Equal(operator.VERIFY, report.Error.ErrorPhase)
+	suite.EqualValues("failed to determine applied solution during verify", report.Error.Message)
+}
+
+func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionVerifyErrorDeterminingAppliedSolutionWithFailingRollback() {
+	ctx := context.Background()
+
+	checkVersionSupportCall := suite.mockSaptuneClient.On(
+		"CheckVersionSupport",
+		ctx,
+	).Return(nil).
+		Once()
+
+	getAppliedSolutionCall := suite.mockSaptuneClient.On(
+		"GetAppliedSolution",
+		ctx,
+	).Return("", nil).
+		NotBefore(checkVersionSupportCall).
+		Once()
+
+	applySolutionCall := suite.mockSaptuneClient.On(
+		"ApplySolution",
+		ctx,
+		"HANA",
+	).Return(nil).
+		NotBefore(checkVersionSupportCall).
+		NotBefore(getAppliedSolutionCall).
+		Once()
+
+	suite.mockSaptuneClient.On(
+		"GetAppliedSolution",
+		ctx,
+	).Return("", errors.New("failed to determine applied solution during verify")).
+		Once()
+
+	suite.mockSaptuneClient.On(
+		"RevertSolution",
+		ctx,
+		"HANA",
+	).Return(errors.New("failed to revert solution")).
+		NotBefore(checkVersionSupportCall).
+		NotBefore(getAppliedSolutionCall).
+		NotBefore(applySolutionCall).
+		Once()
+
+	saptuneSolutionApplyOperator := operator.NewSaptuneApplySolution(
+		operator.OperatorArguments{
+			"solution": "HANA",
+		},
+		"test-op",
+		operator.OperatorOptions[operator.SaptuneApplySolution]{
+			OperatorOptions: []operator.Option[operator.SaptuneApplySolution]{
+				operator.Option[operator.SaptuneApplySolution](operator.WithSaptuneClient(suite.mockSaptuneClient)),
+			},
+		},
+	)
+
+	report := saptuneSolutionApplyOperator.Run(ctx)
+
+	suite.Nil(report.Success)
+	suite.Equal(operator.ROLLBACK, report.Error.ErrorPhase)
+	suite.Contains(report.Error.Message, "failed to determine applied solution during verify")
+	suite.Contains(report.Error.Message, "failed to revert solution")
+}
+
+func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionVerifyErrorAppliedSolutionDiffersFromRequestedWithSuccessfulRollback() {
+	ctx := context.Background()
+
+	checkVersionSupportCall := suite.mockSaptuneClient.On(
+		"CheckVersionSupport",
+		ctx,
+	).Return(nil).
+		Once()
+
+	firstGetAppliedSolutionCall := suite.mockSaptuneClient.On(
+		"GetAppliedSolution",
+		ctx,
+	).Return("", nil).
+		NotBefore(checkVersionSupportCall).
+		Once()
+
+	applySolutionCall := suite.mockSaptuneClient.On(
+		"ApplySolution",
+		ctx,
+		"HANA",
+	).Return(nil).
+		NotBefore(checkVersionSupportCall).
+		NotBefore(firstGetAppliedSolutionCall).
+		Once()
+
+	getAppliedSolutionCall := suite.mockSaptuneClient.On(
+		"GetAppliedSolution",
+		ctx,
+	).Return("S4HANA-DBSERVER", nil).
+		NotBefore(checkVersionSupportCall).
+		NotBefore(firstGetAppliedSolutionCall).
+		NotBefore(applySolutionCall).
+		Once()
+
+	suite.mockSaptuneClient.On(
+		"RevertSolution",
+		ctx,
+		"HANA",
+	).Return(nil).
+		NotBefore(checkVersionSupportCall).
+		NotBefore(firstGetAppliedSolutionCall).
+		NotBefore(applySolutionCall).
+		NotBefore(getAppliedSolutionCall).
+		Once()
+
+	saptuneSolutionApplyOperator := operator.NewSaptuneApplySolution(
+		operator.OperatorArguments{
+			"solution": "HANA",
+		},
+		"test-op",
+		operator.OperatorOptions[operator.SaptuneApplySolution]{
+			OperatorOptions: []operator.Option[operator.SaptuneApplySolution]{
+				operator.Option[operator.SaptuneApplySolution](operator.WithSaptuneClient(suite.mockSaptuneClient)),
+			},
+		},
+	)
+
+	report := saptuneSolutionApplyOperator.Run(ctx)
+
+	suite.Nil(report.Success)
+	suite.Equal(operator.VERIFY, report.Error.ErrorPhase)
+	suite.EqualValues("verify saptune apply failing, the solution HANA was not applied in commit phase", report.Error.Message)
+}
+
+func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionErrorDetectedAppliedSolutionDiffersFromRequestedWithFailingRollback() {
+	ctx := context.Background()
+
+	checkVersionSupportCall := suite.mockSaptuneClient.On(
+		"CheckVersionSupport",
+		ctx,
+	).Return(nil).
+		Once()
+
+	firstGetAppliedSolutionCall := suite.mockSaptuneClient.On(
+		"GetAppliedSolution",
+		ctx,
+	).Return("", nil).
+		NotBefore(checkVersionSupportCall).
+		Once()
+
+	applySolutionCall := suite.mockSaptuneClient.On(
+		"ApplySolution",
+		ctx,
+		"HANA",
+	).Return(nil).
+		NotBefore(checkVersionSupportCall).
+		NotBefore(firstGetAppliedSolutionCall).
+		Once()
+
+	getAppliedSolutionCall := suite.mockSaptuneClient.On(
+		"GetAppliedSolution",
+		ctx,
+	).Return("S4HANA-DBSERVER", nil).
+		NotBefore(checkVersionSupportCall).
+		NotBefore(firstGetAppliedSolutionCall).
+		NotBefore(applySolutionCall).
+		Once()
+
+	suite.mockSaptuneClient.On(
+		"RevertSolution",
+		ctx,
+		"HANA",
+	).Return(errors.New("failed to revert solution")).
+		NotBefore(checkVersionSupportCall).
+		NotBefore(firstGetAppliedSolutionCall).
+		NotBefore(applySolutionCall).
+		NotBefore(getAppliedSolutionCall).
+		Once()
+
+	saptuneSolutionApplyOperator := operator.NewSaptuneApplySolution(
+		operator.OperatorArguments{
+			"solution": "HANA",
+		},
+		"test-op",
+		operator.OperatorOptions[operator.SaptuneApplySolution]{
+			OperatorOptions: []operator.Option[operator.SaptuneApplySolution]{
+				operator.Option[operator.SaptuneApplySolution](operator.WithSaptuneClient(suite.mockSaptuneClient)),
+			},
+		},
+	)
+
+	report := saptuneSolutionApplyOperator.Run(ctx)
+
+	suite.Nil(report.Success)
+	suite.Equal(operator.ROLLBACK, report.Error.ErrorPhase)
+	suite.Contains(report.Error.Message, "verify saptune apply failing, the solution HANA was not applied in commit phase")
+	suite.Contains(report.Error.Message, "failed to revert solution")
+}
+
+func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionSuccess() {
+	ctx := context.Background()
+
+	checkSaptuneVersionCall := suite.mockSaptuneClient.On(
+		"CheckVersionSupport",
+		ctx,
+	).Return(nil).
+		Once()
+
+	solutionAppliedCall := suite.mockSaptuneClient.On(
+		"GetAppliedSolution",
+		ctx,
+	).Return("", nil).
+		NotBefore(checkSaptuneVersionCall).
+		Once()
+
+	solutionApplyCall := suite.mockSaptuneClient.On(
+		"ApplySolution",
+		ctx,
+		"HANA",
+	).Return(nil).
+		NotBefore(solutionAppliedCall).
+		Once()
+
+	suite.mockSaptuneClient.On(
+		"GetAppliedSolution",
+		ctx,
+	).Return("HANA", nil).
 		NotBefore(solutionApplyCall).
-		Once() // We just need this output once in verify phase
+		Once()
 
 	saptuneSolutionApplyOperator := operator.NewSaptuneApplySolution(
 		operator.OperatorArguments{
@@ -72,7 +536,7 @@ func TestSaptuneApplySolutionSuccess(t *testing.T) {
 		"test-op",
 		operator.OperatorOptions[operator.SaptuneApplySolution]{
 			OperatorOptions: []operator.Option[operator.SaptuneApplySolution]{
-				operator.Option[operator.SaptuneApplySolution](operator.WithCustomSaptuneExecutor(mockCmdExecutor)),
+				operator.Option[operator.SaptuneApplySolution](operator.WithSaptuneClient(suite.mockSaptuneClient)),
 			},
 		},
 	)
@@ -80,40 +544,30 @@ func TestSaptuneApplySolutionSuccess(t *testing.T) {
 	report := saptuneSolutionApplyOperator.Run(ctx)
 
 	expectedDiff := map[string]any{
-		"before": saptuneSolutionAppliedNoSolutionOutput,
-		"after":  saptuneSolutionAppliedHanaSolutionOutput,
+		"before": `{"solution":""}`,
+		"after":  `{"solution":"HANA"}`,
 	}
 
-	assert.Nil(t, report.Error)
-	assert.Equal(t, report.Success.LastPhase, operator.VERIFY)
-	assert.EqualValues(t, report.Success.Diff, expectedDiff)
+	suite.Nil(report.Error)
+	suite.Equal(operator.VERIFY, report.Success.LastPhase)
+	suite.EqualValues(expectedDiff, report.Success.Diff)
 }
 
-func TestSaptuneApplySolutionSuccessSolutionAlreadyApplied(t *testing.T) {
-	mockCmdExecutor := mocks.NewMockCmdExecutor(t)
+func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionSuccessReapplyingAlreadyApplied() {
 	ctx := context.Background()
 
-	checkSaptuneVersionCall := mockCmdExecutor.On(
-		"Exec",
+	checkSaptuneVersionCall := suite.mockSaptuneClient.On(
+		"CheckVersionSupport",
 		ctx,
-		"rpm",
-		"-q",
-		"--qf",
-		"%{VERSION}",
-		"saptune",
-	).Return([]byte("3.1.0"), nil)
+	).Return(nil).
+		Once()
 
-	mockCmdExecutor.On(
-		"Exec",
+	suite.mockSaptuneClient.On(
+		"GetAppliedSolution",
 		ctx,
-		"saptune",
-		"--format",
-		"json",
-		"solution",
-		"applied",
-	).Return([]byte(saptuneSolutionAppliedHanaSolutionOutput), nil).
+	).Return("HANA", nil).
 		NotBefore(checkSaptuneVersionCall).
-		Times(3) // it's called two times
+		Times(2)
 
 	saptuneSolutionApplyOperator := operator.NewSaptuneApplySolution(
 		operator.OperatorArguments{
@@ -122,7 +576,7 @@ func TestSaptuneApplySolutionSuccessSolutionAlreadyApplied(t *testing.T) {
 		"test-op",
 		operator.OperatorOptions[operator.SaptuneApplySolution]{
 			OperatorOptions: []operator.Option[operator.SaptuneApplySolution]{
-				operator.Option[operator.SaptuneApplySolution](operator.WithCustomSaptuneExecutor(mockCmdExecutor)),
+				operator.Option[operator.SaptuneApplySolution](operator.WithSaptuneClient(suite.mockSaptuneClient)),
 			},
 		},
 	)
@@ -130,302 +584,11 @@ func TestSaptuneApplySolutionSuccessSolutionAlreadyApplied(t *testing.T) {
 	report := saptuneSolutionApplyOperator.Run(ctx)
 
 	expectedDiff := map[string]any{
-		"before": saptuneSolutionAppliedHanaSolutionOutput,
-		"after":  saptuneSolutionAppliedHanaSolutionOutput,
+		"before": `{"solution":"HANA"}`,
+		"after":  `{"solution":"HANA"}`,
 	}
 
-	assert.Nil(t, report.Error)
-	assert.Equal(t, report.Success.LastPhase, operator.VERIFY)
-	assert.EqualValues(t, report.Success.Diff, expectedDiff)
-}
-
-func TestSaptuneApplySolutionPlanError(t *testing.T) {
-	mockCmdExecutor := mocks.NewMockCmdExecutor(t)
-	ctx := context.Background()
-
-	mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"rpm",
-		"-q",
-		"--qf",
-		"%{VERSION}",
-		"saptune",
-	).Return([]byte("2.1.0"), nil)
-
-	saptuneSolutionApplyOperator := operator.NewSaptuneApplySolution(
-		operator.OperatorArguments{
-			"solution": "HANA",
-		},
-		"test-op",
-		operator.OperatorOptions[operator.SaptuneApplySolution]{
-			OperatorOptions: []operator.Option[operator.SaptuneApplySolution]{
-				operator.Option[operator.SaptuneApplySolution](operator.WithCustomSaptuneExecutor(mockCmdExecutor)),
-			},
-		},
-	)
-
-	report := saptuneSolutionApplyOperator.Run(ctx)
-
-	assert.Nil(t, report.Success)
-	assert.Equal(t, report.Error.ErrorPhase, operator.PLAN)
-	assert.EqualValues(t, report.Error.Message, "saptune version not supported, installed: 2.1.0, minimum supported: v3.1.0")
-}
-
-func TestSaptuneApplySolutionCommitErrorSuccessfulRollback(t *testing.T) {
-	mockCmdExecutor := mocks.NewMockCmdExecutor(t)
-	ctx := context.Background()
-
-	checkSaptuneVersionCall := mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"rpm",
-		"-q",
-		"--qf",
-		"%{VERSION}",
-		"saptune",
-	).Return([]byte("3.1.0"), nil)
-
-	solutionAppliedCall := mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"saptune",
-		"--format",
-		"json",
-		"solution",
-		"applied",
-	).Return([]byte(saptuneSolutionAppliedNoSolutionOutput), nil).
-		NotBefore(checkSaptuneVersionCall).
-		Twice() // it's called two times
-
-	solutionApplyCall := mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"saptune",
-		"solution",
-		"apply",
-		"HANA",
-	).Return([]byte("error"), errors.New("error during solutionApply")).
-		NotBefore(solutionAppliedCall)
-
-	mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"saptune",
-		"solution",
-		"revert",
-		"HANA",
-	).Return([]byte(""), nil).
-		NotBefore(solutionApplyCall)
-
-	saptuneSolutionApplyOperator := operator.NewSaptuneApplySolution(
-		operator.OperatorArguments{
-			"solution": "HANA",
-		},
-		"test-op",
-		operator.OperatorOptions[operator.SaptuneApplySolution]{
-			OperatorOptions: []operator.Option[operator.SaptuneApplySolution]{
-				operator.Option[operator.SaptuneApplySolution](operator.WithCustomSaptuneExecutor(mockCmdExecutor)),
-			},
-		},
-	)
-
-	report := saptuneSolutionApplyOperator.Run(ctx)
-
-	assert.Nil(t, report.Success)
-	assert.Equal(t, report.Error.ErrorPhase, operator.COMMIT)
-	assert.EqualValues(t, report.Error.Message, "could not perform the saptune apply solution HANA, error: error during solutionApply")
-}
-
-func TestSaptuneApplySolutionCommitErrorFailedRollback(t *testing.T) {
-	mockCmdExecutor := mocks.NewMockCmdExecutor(t)
-	ctx := context.Background()
-
-	checkSaptuneVersionCall := mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"rpm",
-		"-q",
-		"--qf",
-		"%{VERSION}",
-		"saptune",
-	).Return([]byte("3.1.0"), nil)
-
-	solutionAppliedCall := mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"saptune",
-		"--format",
-		"json",
-		"solution",
-		"applied",
-	).Return([]byte(saptuneSolutionAppliedNoSolutionOutput), nil).
-		NotBefore(checkSaptuneVersionCall).
-		Twice() // it's called two times
-
-	solutionApplyCall := mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"saptune",
-		"solution",
-		"apply",
-		"HANA",
-	).Return([]byte("error"), errors.New("error during solutionApply")).
-		NotBefore(solutionAppliedCall)
-
-	mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"saptune",
-		"solution",
-		"revert",
-		"HANA",
-	).Return([]byte("rollback error"), errors.New("error")).
-		NotBefore(solutionApplyCall)
-
-	saptuneSolutionApplyOperator := operator.NewSaptuneApplySolution(
-		operator.OperatorArguments{
-			"solution": "HANA",
-		},
-		"test-op",
-		operator.OperatorOptions[operator.SaptuneApplySolution]{
-			OperatorOptions: []operator.Option[operator.SaptuneApplySolution]{
-				operator.Option[operator.SaptuneApplySolution](operator.WithCustomSaptuneExecutor(mockCmdExecutor)),
-			},
-		},
-	)
-
-	report := saptuneSolutionApplyOperator.Run(ctx)
-
-	assert.Nil(t, report.Success)
-	assert.Equal(t, report.Error.ErrorPhase, operator.ROLLBACK)
-	assert.EqualValues(t, "could not revert saptune solution HANA during rollback, error: rollback error\ncould not perform the saptune apply solution HANA, error: error during solutionApply", report.Error.Message)
-}
-
-func TestSaptuneApplySolutionVerifyErrorSuccessfulRollback(t *testing.T) {
-	mockCmdExecutor := mocks.NewMockCmdExecutor(t)
-	ctx := context.Background()
-
-	checkSaptuneVersionCall := mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"rpm",
-		"-q",
-		"--qf",
-		"%{VERSION}",
-		"saptune",
-	).Return([]byte("3.1.0"), nil)
-
-	mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"saptune",
-		"--format",
-		"json",
-		"solution",
-		"applied",
-	).Return([]byte(saptuneSolutionAppliedNoSolutionOutput), nil).
-		NotBefore(checkSaptuneVersionCall).
-		Times(3)
-
-	solutionApplyCall := mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"saptune",
-		"solution",
-		"apply",
-		"HANA",
-	).Return([]byte(saptuneSolutionAppliedNoSolutionOutput), nil)
-
-	mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"saptune",
-		"solution",
-		"revert",
-		"HANA",
-	).Return([]byte(""), nil).
-		NotBefore(solutionApplyCall)
-
-	saptuneSolutionApplyOperator := operator.NewSaptuneApplySolution(
-		operator.OperatorArguments{
-			"solution": "HANA",
-		},
-		"test-op",
-		operator.OperatorOptions[operator.SaptuneApplySolution]{
-			OperatorOptions: []operator.Option[operator.SaptuneApplySolution]{
-				operator.Option[operator.SaptuneApplySolution](operator.WithCustomSaptuneExecutor(mockCmdExecutor)),
-			},
-		},
-	)
-
-	report := saptuneSolutionApplyOperator.Run(ctx)
-
-	assert.Nil(t, report.Success)
-	assert.Equal(t, report.Error.ErrorPhase, operator.VERIFY)
-	assert.EqualValues(t, "verify saptune apply failing, the solution HANA was not applied in commit phase", report.Error.Message)
-}
-
-func TestSaptuneApplySolutionVerifyErrorFailedRollback(t *testing.T) {
-	mockCmdExecutor := mocks.NewMockCmdExecutor(t)
-	ctx := context.Background()
-
-	checkSaptuneVersionCall := mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"rpm",
-		"-q",
-		"--qf",
-		"%{VERSION}",
-		"saptune",
-	).Return([]byte("3.1.0"), nil)
-
-	mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"saptune",
-		"--format",
-		"json",
-		"solution",
-		"applied",
-	).Return([]byte(saptuneSolutionAppliedNoSolutionOutput), nil).
-		NotBefore(checkSaptuneVersionCall).
-		Times(3)
-
-	solutionApplyCall := mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"saptune",
-		"solution",
-		"apply",
-		"HANA",
-	).Return([]byte(saptuneSolutionAppliedNoSolutionOutput), nil)
-
-	mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"saptune",
-		"solution",
-		"revert",
-		"HANA",
-	).Return([]byte(""), errors.New("error during revert")).
-		NotBefore(solutionApplyCall)
-
-	saptuneSolutionApplyOperator := operator.NewSaptuneApplySolution(
-		operator.OperatorArguments{
-			"solution": "HANA",
-		},
-		"test-op",
-		operator.OperatorOptions[operator.SaptuneApplySolution]{
-			OperatorOptions: []operator.Option[operator.SaptuneApplySolution]{
-				operator.Option[operator.SaptuneApplySolution](operator.WithCustomSaptuneExecutor(mockCmdExecutor)),
-			},
-		},
-	)
-
-	report := saptuneSolutionApplyOperator.Run(ctx)
-
-	assert.Nil(t, report.Success)
-	assert.Equal(t, report.Error.ErrorPhase, operator.ROLLBACK)
-	assert.EqualValues(t, "could not revert saptune solution HANA during rollback, error: \nverify saptune apply failing, the solution HANA was not applied in commit phase", report.Error.Message)
+	suite.Nil(report.Error)
+	suite.Equal(operator.VERIFY, report.Success.LastPhase)
+	suite.EqualValues(expectedDiff, report.Success.Diff)
 }
