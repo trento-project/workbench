@@ -39,11 +39,7 @@ func parseSaptuneSolutionArguments(rawArguments OperatorArguments) (*saptuneSolu
 
 const SaptuneApplySolutionOperatorName = "saptuneapplysolution"
 
-type SaptuneOperator interface {
-	SaptuneApplySolution | SaptuneChangeSolution
-}
-
-type SaptuneOperatorOption[T SaptuneOperator] Option[T]
+type SaptuneApplySolutionOption Option[SaptuneApplySolution]
 
 // SaptuneApplySolution is an operator responsible for applying a saptune solution.
 //
@@ -84,16 +80,9 @@ type saptuneOperationDiffOutput struct {
 	Solution string `json:"solution"`
 }
 
-func WithSaptuneClient[T SaptuneOperator](saptuneClient saptune.Saptune) Option[T] {
-	return func(o *T) {
-		switch op := any(o).(type) {
-		case *SaptuneApplySolution:
-			op.saptune = saptuneClient
-		case *SaptuneChangeSolution:
-			op.saptune = saptuneClient
-		default:
-			panic(fmt.Sprintf("unsupported operator type: %T", op))
-		}
+func WithSaptuneClientApply(saptuneClient saptune.Saptune) SaptuneApplySolutionOption {
+	return func(o *SaptuneApplySolution) {
+		o.saptune = saptuneClient
 	}
 }
 

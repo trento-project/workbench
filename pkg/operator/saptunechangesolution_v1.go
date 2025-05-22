@@ -11,6 +11,8 @@ import (
 
 const SaptuneChangeSolutionOperatorName = "saptunechangesolution"
 
+type SaptuneChangeSolutionOption Option[SaptuneChangeSolution]
+
 // SaptuneChangeSolution is an operator responsible for changing a saptune solution.
 //
 // It requires the same kind of argument needed for SaptuneApplySolution: a map containing a key named "solution".
@@ -37,6 +39,12 @@ type SaptuneChangeSolution struct {
 	baseOperator
 	saptune         saptune.Saptune
 	parsedArguments *saptuneSolutionArguments
+}
+
+func WithSaptuneClientChange(saptuneClient saptune.Saptune) SaptuneChangeSolutionOption {
+	return func(o *SaptuneChangeSolution) {
+		o.saptune = saptuneClient
+	}
 }
 
 func NewSaptuneChangeSolution(
