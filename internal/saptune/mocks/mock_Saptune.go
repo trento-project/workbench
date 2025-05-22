@@ -64,6 +64,49 @@ func (_c *MockSaptune_ApplySolution_Call) RunAndReturn(run func(context.Context,
 	return _c
 }
 
+// ChangeSolution provides a mock function with given fields: ctx, solution
+func (_m *MockSaptune) ChangeSolution(ctx context.Context, solution string) error {
+	ret := _m.Called(ctx, solution)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) error); ok {
+		r0 = rf(ctx, solution)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// MockSaptune_ChangeSolution_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ChangeSolution'
+type MockSaptune_ChangeSolution_Call struct {
+	*mock.Call
+}
+
+// ChangeSolution is a helper method to define mock.On call
+//   - ctx context.Context
+//   - solution string
+func (_e *MockSaptune_Expecter) ChangeSolution(ctx interface{}, solution interface{}) *MockSaptune_ChangeSolution_Call {
+	return &MockSaptune_ChangeSolution_Call{Call: _e.mock.On("ChangeSolution", ctx, solution)}
+}
+
+func (_c *MockSaptune_ChangeSolution_Call) Run(run func(ctx context.Context, solution string)) *MockSaptune_ChangeSolution_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *MockSaptune_ChangeSolution_Call) Return(_a0 error) *MockSaptune_ChangeSolution_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *MockSaptune_ChangeSolution_Call) RunAndReturn(run func(context.Context, string) error) *MockSaptune_ChangeSolution_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // CheckVersionSupport provides a mock function with given fields: ctx
 func (_m *MockSaptune) CheckVersionSupport(ctx context.Context) error {
 	ret := _m.Called(ctx)

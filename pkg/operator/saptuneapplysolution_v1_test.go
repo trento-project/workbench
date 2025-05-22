@@ -41,6 +41,24 @@ func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionPlan
 	suite.EqualValues("argument solution not provided, could not use the operator", report.Error.Message)
 }
 
+func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionPlanErrorEmptySolutionRequested() {
+	ctx := context.Background()
+
+	saptuneSolutionApplyOperator := operator.NewSaptuneApplySolution(
+		operator.OperatorArguments{
+			"solution": "",
+		},
+		"test-op",
+		operator.OperatorOptions[operator.SaptuneApplySolution]{},
+	)
+
+	report := saptuneSolutionApplyOperator.Run(ctx)
+
+	suite.Nil(report.Success)
+	suite.Equal(operator.PLAN, report.Error.ErrorPhase)
+	suite.EqualValues("solution argument is empty", report.Error.Message)
+}
+
 func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionPlanErrorVersionCheck() {
 	ctx := context.Background()
 
@@ -57,7 +75,7 @@ func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionPlan
 		"test-op",
 		operator.OperatorOptions[operator.SaptuneApplySolution]{
 			OperatorOptions: []operator.Option[operator.SaptuneApplySolution]{
-				operator.Option[operator.SaptuneApplySolution](operator.WithSaptuneClient(suite.mockSaptuneClient)),
+				operator.Option[operator.SaptuneApplySolution](operator.WithSaptuneClientApply(suite.mockSaptuneClient)),
 			},
 		},
 	)
@@ -92,7 +110,7 @@ func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionPlan
 		"test-op",
 		operator.OperatorOptions[operator.SaptuneApplySolution]{
 			OperatorOptions: []operator.Option[operator.SaptuneApplySolution]{
-				operator.Option[operator.SaptuneApplySolution](operator.WithSaptuneClient(suite.mockSaptuneClient)),
+				operator.Option[operator.SaptuneApplySolution](operator.WithSaptuneClientApply(suite.mockSaptuneClient)),
 			},
 		},
 	)
@@ -127,7 +145,7 @@ func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionComm
 		"test-op",
 		operator.OperatorOptions[operator.SaptuneApplySolution]{
 			OperatorOptions: []operator.Option[operator.SaptuneApplySolution]{
-				operator.Option[operator.SaptuneApplySolution](operator.WithSaptuneClient(suite.mockSaptuneClient)),
+				operator.Option[operator.SaptuneApplySolution](operator.WithSaptuneClientApply(suite.mockSaptuneClient)),
 			},
 		},
 	)
@@ -181,7 +199,7 @@ func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionComm
 		"test-op",
 		operator.OperatorOptions[operator.SaptuneApplySolution]{
 			OperatorOptions: []operator.Option[operator.SaptuneApplySolution]{
-				operator.Option[operator.SaptuneApplySolution](operator.WithSaptuneClient(suite.mockSaptuneClient)),
+				operator.Option[operator.SaptuneApplySolution](operator.WithSaptuneClientApply(suite.mockSaptuneClient)),
 			},
 		},
 	)
@@ -235,7 +253,7 @@ func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionComm
 		"test-op",
 		operator.OperatorOptions[operator.SaptuneApplySolution]{
 			OperatorOptions: []operator.Option[operator.SaptuneApplySolution]{
-				operator.Option[operator.SaptuneApplySolution](operator.WithSaptuneClient(suite.mockSaptuneClient)),
+				operator.Option[operator.SaptuneApplySolution](operator.WithSaptuneClientApply(suite.mockSaptuneClient)),
 			},
 		},
 	)
@@ -296,7 +314,7 @@ func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionVeri
 		"test-op",
 		operator.OperatorOptions[operator.SaptuneApplySolution]{
 			OperatorOptions: []operator.Option[operator.SaptuneApplySolution]{
-				operator.Option[operator.SaptuneApplySolution](operator.WithSaptuneClient(suite.mockSaptuneClient)),
+				operator.Option[operator.SaptuneApplySolution](operator.WithSaptuneClientApply(suite.mockSaptuneClient)),
 			},
 		},
 	)
@@ -356,7 +374,7 @@ func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionVeri
 		"test-op",
 		operator.OperatorOptions[operator.SaptuneApplySolution]{
 			OperatorOptions: []operator.Option[operator.SaptuneApplySolution]{
-				operator.Option[operator.SaptuneApplySolution](operator.WithSaptuneClient(suite.mockSaptuneClient)),
+				operator.Option[operator.SaptuneApplySolution](operator.WithSaptuneClientApply(suite.mockSaptuneClient)),
 			},
 		},
 	)
@@ -421,7 +439,7 @@ func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionVeri
 		"test-op",
 		operator.OperatorOptions[operator.SaptuneApplySolution]{
 			OperatorOptions: []operator.Option[operator.SaptuneApplySolution]{
-				operator.Option[operator.SaptuneApplySolution](operator.WithSaptuneClient(suite.mockSaptuneClient)),
+				operator.Option[operator.SaptuneApplySolution](operator.WithSaptuneClientApply(suite.mockSaptuneClient)),
 			},
 		},
 	)
@@ -485,7 +503,7 @@ func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionErro
 		"test-op",
 		operator.OperatorOptions[operator.SaptuneApplySolution]{
 			OperatorOptions: []operator.Option[operator.SaptuneApplySolution]{
-				operator.Option[operator.SaptuneApplySolution](operator.WithSaptuneClient(suite.mockSaptuneClient)),
+				operator.Option[operator.SaptuneApplySolution](operator.WithSaptuneClientApply(suite.mockSaptuneClient)),
 			},
 		},
 	)
@@ -536,7 +554,7 @@ func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionSucc
 		"test-op",
 		operator.OperatorOptions[operator.SaptuneApplySolution]{
 			OperatorOptions: []operator.Option[operator.SaptuneApplySolution]{
-				operator.Option[operator.SaptuneApplySolution](operator.WithSaptuneClient(suite.mockSaptuneClient)),
+				operator.Option[operator.SaptuneApplySolution](operator.WithSaptuneClientApply(suite.mockSaptuneClient)),
 			},
 		},
 	)
@@ -576,7 +594,7 @@ func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionSucc
 		"test-op",
 		operator.OperatorOptions[operator.SaptuneApplySolution]{
 			OperatorOptions: []operator.Option[operator.SaptuneApplySolution]{
-				operator.Option[operator.SaptuneApplySolution](operator.WithSaptuneClient(suite.mockSaptuneClient)),
+				operator.Option[operator.SaptuneApplySolution](operator.WithSaptuneClientApply(suite.mockSaptuneClient)),
 			},
 		},
 	)

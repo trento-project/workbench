@@ -299,3 +299,63 @@ func (suite *SaptuneClientTestSuite) TestRevertSolutionSuccess() {
 		suite.NoError(err)
 	}
 }
+
+func (suite *SaptuneClientTestSuite) TestChangeSolutionFailureBecauseCommandFails() {
+	ctx := context.Background()
+
+	suite.mockExecutor.On(
+		"Exec",
+		ctx,
+		"saptune",
+		"solution",
+		"change",
+		"--force",
+		"HANA",
+	).Return(nil, errors.New("error calling saptune"))
+
+	saptuneClient := saptune.NewSaptuneClient(
+		suite.mockExecutor,
+		suite.logger,
+	)
+	err := saptuneClient.ChangeSolution(ctx, "HANA")
+
+	suite.Error(err)
+	suite.ErrorContains(err, `could not perform saptune change solution HANA`)
+}
+
+func (suite *SaptuneClientTestSuite) TestChangeSolutionSucceess() {
+	ctx := context.Background()
+
+	scenarios := []struct {
+		name          string
+		commandOutput []byte
+	}{
+		{
+			name:          "change solution",
+			commandOutput: helpers.ReadFixture("saptune/change_solution_success.output"),
+		},
+		{
+			name:          "change to already applied solution",
+			commandOutput: helpers.ReadFixture("saptune/change_solution_to_same_success.output"),
+		},
+	}
+	for _, scenario := range scenarios {
+		suite.mockExecutor.On(
+			"Exec",
+			ctx,
+			"saptune",
+			"solution",
+			"change",
+			"--force",
+			"HANA",
+		).Return(scenario.commandOutput, nil)
+
+		saptuneClient := saptune.NewSaptuneClient(
+			suite.mockExecutor,
+			suite.logger,
+		)
+		err := saptuneClient.ChangeSolution(ctx, "HANA")
+
+		suite.NoError(err)
+	}
+}

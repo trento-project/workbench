@@ -16,8 +16,9 @@ const minimalSaptuneVersion = "v3.1.0"
 
 type Saptune interface {
 	CheckVersionSupport(ctx context.Context) error
-	ApplySolution(ctx context.Context, solution string) error
 	GetAppliedSolution(ctx context.Context) (string, error)
+	ApplySolution(ctx context.Context, solution string) error
+	ChangeSolution(ctx context.Context, solution string) error
 	RevertSolution(ctx context.Context, solution string) error
 }
 
@@ -78,6 +79,24 @@ func (saptune *saptuneClient) ApplySolution(ctx context.Context, solution string
 		)
 
 		return fmt.Errorf("could not perform saptune solution apply %s, error: %s",
+			solution,
+			err,
+		)
+	}
+
+	return nil
+}
+
+func (saptune *saptuneClient) ChangeSolution(ctx context.Context, solution string) error {
+	changeSolutionOutput, err := saptune.executor.Exec(ctx, "saptune", "solution", "change", "--force", solution)
+	if err != nil {
+		saptune.logger.Errorf(
+			"could not perform saptune solution change %s, error output: %s",
+			solution,
+			changeSolutionOutput,
+		)
+
+		return fmt.Errorf("could not perform saptune change solution %s, error: %s",
 			solution,
 			err,
 		)

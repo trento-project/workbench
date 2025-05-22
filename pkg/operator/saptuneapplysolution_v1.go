@@ -28,6 +28,10 @@ func parseSaptuneSolutionArguments(rawArguments OperatorArguments) (*saptuneSolu
 		)
 	}
 
+	if solution == "" {
+		return nil, errors.New("solution argument is empty")
+	}
+
 	return &saptuneSolutionArguments{
 		solution: solution,
 	}, nil
@@ -76,7 +80,7 @@ type saptuneOperationDiffOutput struct {
 	Solution string `json:"solution"`
 }
 
-func WithSaptuneClient(saptuneClient saptune.Saptune) SaptuneApplySolutionOption {
+func WithSaptuneClientApply(saptuneClient saptune.Saptune) SaptuneApplySolutionOption {
 	return func(o *SaptuneApplySolution) {
 		o.saptune = saptuneClient
 	}
