@@ -27,6 +27,26 @@ type sapStateChangeArguments struct {
 
 type SAPInstanceStartOption Option[SAPInstanceStart]
 
+// SAPInstanceStart operator starts a SAP instance.
+//
+// Arguments:
+//	instance_number (required): String with the instance number of the instance to start
+//  timeout: Timeout in seconds to wait until the instance is started
+//
+// # Execution Phases
+//
+// - PLAN:
+//   The operator gets the instance current processes and stores the state.
+//
+// - COMMIT:
+//   If the SAP instances is not already started, it is started using the sapcontrol Start command.
+//
+// - VERIFY:
+//   Verify if the SAP instance is started.
+//
+// - ROLLBACK:
+//   If an error occurs during the COMMIT or VERIFY phase, the instance is stopped back again.
+
 type SAPInstanceStart struct {
 	baseOperator
 	parsedArguments     *sapStateChangeArguments
