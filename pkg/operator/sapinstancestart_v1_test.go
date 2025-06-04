@@ -82,11 +82,9 @@ func (suite *SAPInstanceStartOperatorTestSuite) TestSAPInstanceStartTimeoutInval
 func (suite *SAPInstanceStartOperatorTestSuite) TestSAPInstanceStartPlanError() {
 	ctx := context.Background()
 
-	suite.mockSapcontrol.On(
-		"GetProcessListContext",
-		ctx,
-		mock.Anything,
-	).Return(nil, errors.New("error getting processes")).
+	suite.mockSapcontrol.
+		On("GetProcessListContext", ctx, mock.Anything).
+		Return(nil, errors.New("error getting processes")).
 		Once()
 
 	sapInstanceStartOperator := operator.NewSAPInstanceStart(
@@ -114,20 +112,19 @@ func (suite *SAPInstanceStartOperatorTestSuite) TestSAPInstanceStartCommitAlread
 
 	green := sapcontrol.STATECOLORSAPControlGREEN
 
-	suite.mockSapcontrol.On(
-		"GetProcessListContext",
-		mock.Anything,
-		mock.Anything,
-	).Return(&sapcontrol.GetProcessListResponse{
-		Processes: []*sapcontrol.OSProcess{
-			{
-				Dispstatus: &green,
+	suite.mockSapcontrol.
+		On("GetProcessListContext", mock.Anything, mock.Anything).
+		Return(&sapcontrol.GetProcessListResponse{
+			Processes: []*sapcontrol.OSProcess{
+				{
+					Dispstatus: &green,
+				},
+				{
+					Dispstatus: &green,
+				},
 			},
-			{
-				Dispstatus: &green,
-			},
-		},
-	}, nil)
+		}, nil).
+		Twice()
 
 	sapInstanceStartOperator := operator.NewSAPInstanceStart(
 		operator.OperatorArguments{
@@ -159,41 +156,38 @@ func (suite *SAPInstanceStartOperatorTestSuite) TestSAPInstanceStartCommitStarti
 
 	gray := sapcontrol.STATECOLORSAPControlGRAY
 
-	suite.mockSapcontrol.On(
-		"GetProcessListContext",
-		ctx,
-		mock.Anything,
-	).Return(
-		&sapcontrol.GetProcessListResponse{
-			Processes: []*sapcontrol.OSProcess{
-				{
-					Dispstatus: &gray,
+	planGetProcesses := suite.mockSapcontrol.
+		On("GetProcessListContext", ctx, mock.Anything).
+		Return(
+			&sapcontrol.GetProcessListResponse{
+				Processes: []*sapcontrol.OSProcess{
+					{
+						Dispstatus: &gray,
+					},
 				},
-			},
-		}, nil,
-	).Once().On(
-		"StartContext",
-		ctx,
-		mock.Anything,
-	).Return(
-		nil, errors.New("error starting"),
-	).On(
-		"StopContext",
-		ctx,
-		mock.Anything,
-	).Return(nil, nil).On(
-		"GetProcessListContext",
-		mock.Anything,
-		mock.Anything,
-	).Return(
-		&sapcontrol.GetProcessListResponse{
-			Processes: []*sapcontrol.OSProcess{
-				{
-					Dispstatus: &gray,
+			}, nil,
+		).
+		Once()
+
+	suite.mockSapcontrol.
+		On("StartContext", ctx, mock.Anything).
+		Return(nil, errors.New("error starting")).
+		NotBefore(planGetProcesses).
+		On("StopContext", ctx, mock.Anything).
+		Return(nil, nil).
+		NotBefore(planGetProcesses).
+		On("GetProcessListContext", mock.Anything, mock.Anything).
+		Return(
+			&sapcontrol.GetProcessListResponse{
+				Processes: []*sapcontrol.OSProcess{
+					{
+						Dispstatus: &gray,
+					},
 				},
-			},
-		}, nil,
-	).Once()
+			}, nil,
+		).
+		Once().
+		NotBefore(planGetProcesses)
 
 	sapInstanceStartOperator := operator.NewSAPInstanceStart(
 		operator.OperatorArguments{
@@ -219,47 +213,43 @@ func (suite *SAPInstanceStartOperatorTestSuite) TestSAPInstanceStartVerifyError(
 
 	gray := sapcontrol.STATECOLORSAPControlGRAY
 
-	suite.mockSapcontrol.On(
-		"GetProcessListContext",
-		ctx,
-		mock.Anything,
-	).Return(
-		&sapcontrol.GetProcessListResponse{
-			Processes: []*sapcontrol.OSProcess{
-				{
-					Dispstatus: &gray,
+	planGetProcesses := suite.mockSapcontrol.
+		On("GetProcessListContext", ctx, mock.Anything).
+		Return(
+			&sapcontrol.GetProcessListResponse{
+				Processes: []*sapcontrol.OSProcess{
+					{
+						Dispstatus: &gray,
+					},
 				},
-			},
-		}, nil,
-	).Once().On(
-		"StartContext",
-		ctx,
-		mock.Anything,
-	).Return(
-		nil, nil,
-	).On(
-		"GetProcessListContext",
-		mock.Anything,
-		mock.Anything,
-	).Return(
-		nil, errors.New("error getting processes in verify"),
-	).Once().On(
-		"StopContext",
-		ctx,
-		mock.Anything,
-	).Return(nil, nil).On(
-		"GetProcessListContext",
-		mock.Anything,
-		mock.Anything,
-	).Return(
-		&sapcontrol.GetProcessListResponse{
-			Processes: []*sapcontrol.OSProcess{
-				{
-					Dispstatus: &gray,
+			}, nil,
+		).
+		Once()
+
+	verifyGetProcesses := suite.mockSapcontrol.
+		On("GetProcessListContext", mock.Anything, mock.Anything).
+		Return(nil, errors.New("error getting processes in verify")).
+		Once().
+		NotBefore(planGetProcesses)
+
+	suite.mockSapcontrol.
+		On("StartContext", ctx, mock.Anything).
+		Return(nil, nil).
+		NotBefore(planGetProcesses).
+		On("StopContext", ctx, mock.Anything).
+		Return(nil, nil).
+		NotBefore(verifyGetProcesses).
+		On("GetProcessListContext", mock.Anything, mock.Anything).
+		Return(
+			&sapcontrol.GetProcessListResponse{
+				Processes: []*sapcontrol.OSProcess{
+					{
+						Dispstatus: &gray,
+					},
 				},
-			},
-		}, nil,
-	)
+			}, nil,
+		).
+		NotBefore(verifyGetProcesses)
 
 	sapInstanceStartOperator := operator.NewSAPInstanceStart(
 		operator.OperatorArguments{
@@ -286,29 +276,22 @@ func (suite *SAPInstanceStartOperatorTestSuite) TestSAPInstanceStartVerifyTimeou
 
 	gray := sapcontrol.STATECOLORSAPControlGRAY
 
-	suite.mockSapcontrol.On(
-		"GetProcessListContext",
-		mock.Anything,
-		mock.Anything,
-	).Return(
-		&sapcontrol.GetProcessListResponse{
-			Processes: []*sapcontrol.OSProcess{
-				{
-					Dispstatus: &gray,
+	suite.mockSapcontrol.
+		On("GetProcessListContext", mock.Anything, mock.Anything).
+		Return(
+			&sapcontrol.GetProcessListResponse{
+				Processes: []*sapcontrol.OSProcess{
+					{
+						Dispstatus: &gray,
+					},
 				},
-			},
-		}, nil,
-	).On(
-		"StartContext",
-		ctx,
-		mock.Anything,
-	).Return(
-		nil, nil,
-	).On(
-		"StopContext",
-		ctx,
-		mock.Anything,
-	).Return(nil, nil)
+			}, nil,
+		).
+		Times(3).
+		On("StartContext", ctx, mock.Anything).
+		Return(nil, nil).
+		On("StopContext", ctx, mock.Anything).
+		Return(nil, nil)
 
 	sapInstanceStartOperator := operator.NewSAPInstanceStart(
 		operator.OperatorArguments{
@@ -340,29 +323,22 @@ func (suite *SAPInstanceStartOperatorTestSuite) TestSAPInstanceStartRollbackStop
 
 	gray := sapcontrol.STATECOLORSAPControlGRAY
 
-	suite.mockSapcontrol.On(
-		"GetProcessListContext",
-		ctx,
-		mock.Anything,
-	).Return(
-		&sapcontrol.GetProcessListResponse{
-			Processes: []*sapcontrol.OSProcess{
-				{
-					Dispstatus: &gray,
+	suite.mockSapcontrol.
+		On("GetProcessListContext", ctx, mock.Anything).
+		Return(
+			&sapcontrol.GetProcessListResponse{
+				Processes: []*sapcontrol.OSProcess{
+					{
+						Dispstatus: &gray,
+					},
 				},
-			},
-		}, nil,
-	).On(
-		"StartContext",
-		ctx,
-		mock.Anything,
-	).Return(
-		nil, errors.New("error starting"),
-	).On(
-		"StopContext",
-		ctx,
-		mock.Anything,
-	).Return(nil, errors.New("error stopping"))
+			}, nil,
+		).
+		Once().
+		On("StartContext", ctx, mock.Anything).
+		Return(nil, errors.New("error starting")).
+		On("StopContext", ctx, mock.Anything).
+		Return(nil, errors.New("error stopping"))
 
 	sapInstanceStartOperator := operator.NewSAPInstanceStart(
 		operator.OperatorArguments{
@@ -389,33 +365,31 @@ func (suite *SAPInstanceStartOperatorTestSuite) TestSAPInstanceStartSuccess() {
 	green := sapcontrol.STATECOLORSAPControlGREEN
 	gray := sapcontrol.STATECOLORSAPControlGRAY
 
-	suite.mockSapcontrol.On(
-		"GetProcessListContext",
-		ctx,
-		mock.Anything,
-	).Return(&sapcontrol.GetProcessListResponse{
-		Processes: []*sapcontrol.OSProcess{
-			{
-				Dispstatus: &gray,
+	planGetProcesses := suite.mockSapcontrol.
+		On("GetProcessListContext", ctx, mock.Anything).
+		Return(&sapcontrol.GetProcessListResponse{
+			Processes: []*sapcontrol.OSProcess{
+				{
+					Dispstatus: &gray,
+				},
 			},
-		},
-	}, nil).Once().On(
-		"GetProcessListContext",
-		mock.Anything,
-		mock.Anything,
-	).Return(&sapcontrol.GetProcessListResponse{
-		Processes: []*sapcontrol.OSProcess{
-			{
-				Dispstatus: &green,
+		}, nil).
+		Once()
+
+	suite.mockSapcontrol.
+		On("StartContext", ctx, mock.Anything).
+		Return(nil, nil).
+		NotBefore(planGetProcesses).
+		On("GetProcessListContext", mock.Anything, mock.Anything).
+		Return(&sapcontrol.GetProcessListResponse{
+			Processes: []*sapcontrol.OSProcess{
+				{
+					Dispstatus: &green,
+				},
 			},
-		},
-	}, nil).On(
-		"StartContext",
-		ctx,
-		mock.Anything,
-	).Return(
-		nil, nil,
-	)
+		}, nil).
+		Once().
+		NotBefore(planGetProcesses)
 
 	sapInstanceStartOperator := operator.NewSAPInstanceStart(
 		operator.OperatorArguments{
