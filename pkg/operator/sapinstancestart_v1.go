@@ -128,35 +128,30 @@ func (s *SAPInstanceStart) commit(ctx context.Context) error {
 		return fmt.Errorf("error starting instance: %w", err)
 	}
 
+	return nil
+}
+
+func (s *SAPInstanceStart) verify(ctx context.Context) error {
 	// need to wait until the processes start properly
-	err = sleepContext(ctx, s.startDelay)
+	err := sleepContext(ctx, s.startDelay)
 	if err != nil {
 		return err
 	}
 
-	return waitUntilSapInstanceState(
+	err = waitUntilSapInstanceState(
 		ctx,
 		s.sapControlConnector,
 		sapcontrol.STATECOLORSAPControlGREEN,
 		s.parsedArguments.timeout,
 		s.interval,
 	)
-}
 
-func (s *SAPInstanceStart) verify(ctx context.Context) error {
-	started, err := allProcessesInState(ctx, s.sapControlConnector, sapcontrol.STATECOLORSAPControlGREEN)
 	if err != nil {
-		return fmt.Errorf("error checking processes state: %w", err)
+		return fmt.Errorf("verify instance started failed: %w", err)
 	}
 
-	if started {
-		s.resources[afterDiffField] = started
-		return nil
-	}
-
-	return fmt.Errorf(
-		"verify instance started failed, instance was not started in commit phase",
-	)
+	s.resources[afterDiffField] = true
+	return nil
 }
 
 func (s *SAPInstanceStart) rollback(ctx context.Context) error {
@@ -166,13 +161,19 @@ func (s *SAPInstanceStart) rollback(ctx context.Context) error {
 		return fmt.Errorf("error stopping instance: %w", err)
 	}
 
-	return waitUntilSapInstanceState(
+	err = waitUntilSapInstanceState(
 		ctx,
 		s.sapControlConnector,
 		sapcontrol.STATECOLORSAPControlGRAY,
 		s.parsedArguments.timeout,
 		s.interval,
 	)
+
+	if err != nil {
+		return fmt.Errorf("rollback to stopped failed: %w", err)
+	}
+
+	return nil
 }
 
 func (s *SAPInstanceStart) operationDiff(ctx context.Context) map[string]any {
@@ -280,7 +281,7 @@ func parseSAPStateChangeArguments(rawArguments OperatorArguments) (*sapStateChan
 			)
 		}
 
-		timeout = time.Duration(int(timeoutFloat)) * time.Second
+		timeout = time.Duration(timeoutFloat) * time.Second
 	}
 
 	return &sapStateChangeArguments{

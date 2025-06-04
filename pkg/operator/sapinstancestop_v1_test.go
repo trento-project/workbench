@@ -116,7 +116,7 @@ func (suite *SAPInstanceStopOperatorTestSuite) TestSAPInstanceStopCommitAlreadyS
 
 	suite.mockSapcontrol.On(
 		"GetProcessListContext",
-		ctx,
+		mock.Anything,
 		mock.Anything,
 	).Return(&sapcontrol.GetProcessListResponse{
 		Processes: []*sapcontrol.OSProcess{
@@ -213,7 +213,73 @@ func (suite *SAPInstanceStopOperatorTestSuite) TestSAPInstanceStopCommitStopping
 	suite.EqualValues("error stopping instance: error stopping", report.Error.Message)
 }
 
-func (suite *SAPInstanceStopOperatorTestSuite) TestSAPInstanceStopCommitStoppingTimeout() {
+func (suite *SAPInstanceStopOperatorTestSuite) TestSAPInstanceStopVerifyError() {
+	ctx := context.Background()
+
+	green := sapcontrol.STATECOLORSAPControlGREEN
+
+	suite.mockSapcontrol.On(
+		"GetProcessListContext",
+		ctx,
+		mock.Anything,
+	).Return(
+		&sapcontrol.GetProcessListResponse{
+			Processes: []*sapcontrol.OSProcess{
+				{
+					Dispstatus: &green,
+				},
+			},
+		}, nil,
+	).Once().On(
+		"StopContext",
+		ctx,
+		mock.Anything,
+	).Return(
+		nil, nil,
+	).On(
+		"GetProcessListContext",
+		mock.Anything,
+		mock.Anything,
+	).Return(
+		nil, errors.New("error getting processes in verify"),
+	).Once().On(
+		"StartContext",
+		ctx,
+		mock.Anything,
+	).Return(nil, nil).On(
+		"GetProcessListContext",
+		mock.Anything,
+		mock.Anything,
+	).Return(
+		&sapcontrol.GetProcessListResponse{
+			Processes: []*sapcontrol.OSProcess{
+				{
+					Dispstatus: &green,
+				},
+			},
+		}, nil,
+	)
+
+	sapInstanceStopOperator := operator.NewSAPInstanceStop(
+		operator.OperatorArguments{
+			"instance_number": "00",
+		},
+		"test-op",
+		operator.OperatorOptions[operator.SAPInstanceStop]{
+			OperatorOptions: []operator.Option[operator.SAPInstanceStop]{
+				operator.Option[operator.SAPInstanceStop](operator.WithCustomStopSapcontrol(suite.mockSapcontrol)),
+			},
+		},
+	)
+
+	report := sapInstanceStopOperator.Run(ctx)
+
+	suite.Nil(report.Success)
+	suite.Equal(operator.VERIFY, report.Error.ErrorPhase)
+	suite.EqualValues("verify instance stopped failed: error getting instance process list: error getting processes in verify", report.Error.Message)
+}
+
+func (suite *SAPInstanceStopOperatorTestSuite) TestSAPInstanceStopVerifyTimeout() {
 	ctx := context.Background()
 
 	green := sapcontrol.STATECOLORSAPControlGREEN
@@ -260,87 +326,10 @@ func (suite *SAPInstanceStopOperatorTestSuite) TestSAPInstanceStopCommitStopping
 
 	suite.Nil(report.Success)
 	suite.Equal(operator.ROLLBACK, report.Error.ErrorPhase)
-	suite.EqualValues("error waiting until instance is in desired state\n"+
-		"error waiting until instance is in desired state", report.Error.Message)
-}
-
-func (suite *SAPInstanceStopOperatorTestSuite) TestSAPInstanceStopVerifyError() {
-	ctx := context.Background()
-
-	gray := sapcontrol.STATECOLORSAPControlGRAY
-	green := sapcontrol.STATECOLORSAPControlGREEN
-
-	suite.mockSapcontrol.On(
-		"GetProcessListContext",
-		ctx,
-		mock.Anything,
-	).Return(
-		&sapcontrol.GetProcessListResponse{
-			Processes: []*sapcontrol.OSProcess{
-				{
-					Dispstatus: &green,
-				},
-			},
-		}, nil,
-	).Once().On(
-		"StopContext",
-		ctx,
-		mock.Anything,
-	).Return(
-		nil, nil,
-	).On(
-		"GetProcessListContext",
-		mock.Anything,
-		mock.Anything,
-	).Return(
-		&sapcontrol.GetProcessListResponse{
-			Processes: []*sapcontrol.OSProcess{
-				{
-					Dispstatus: &gray,
-				},
-			},
-		}, nil,
-	).Once().On(
-		"GetProcessListContext",
-		ctx,
-		mock.Anything,
-	).Return(
-		nil, errors.New("error getting processes in verify"),
-	).Once().On(
-		"StartContext",
-		ctx,
-		mock.Anything,
-	).Return(nil, nil).On(
-		"GetProcessListContext",
-		mock.Anything,
-		mock.Anything,
-	).Return(
-		&sapcontrol.GetProcessListResponse{
-			Processes: []*sapcontrol.OSProcess{
-				{
-					Dispstatus: &green,
-				},
-			},
-		}, nil,
-	)
-
-	sapInstanceStopOperator := operator.NewSAPInstanceStop(
-		operator.OperatorArguments{
-			"instance_number": "00",
-		},
-		"test-op",
-		operator.OperatorOptions[operator.SAPInstanceStop]{
-			OperatorOptions: []operator.Option[operator.SAPInstanceStop]{
-				operator.Option[operator.SAPInstanceStop](operator.WithCustomStopSapcontrol(suite.mockSapcontrol)),
-			},
-		},
-	)
-
-	report := sapInstanceStopOperator.Run(ctx)
-
-	suite.Nil(report.Success)
-	suite.Equal(operator.VERIFY, report.Error.ErrorPhase)
-	suite.EqualValues("error checking processes state: error getting instance process list: error getting processes in verify", report.Error.Message)
+	suite.EqualValues(
+		"rollback to started failed: error waiting until instance is in desired state\n"+
+			"verify instance stopped failed: "+
+			"error waiting until instance is in desired state", report.Error.Message)
 }
 
 func (suite *SAPInstanceStopOperatorTestSuite) TestSAPInstanceStopRollbackStartingError() {

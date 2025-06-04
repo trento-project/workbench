@@ -116,7 +116,7 @@ func (suite *SAPInstanceStartOperatorTestSuite) TestSAPInstanceStartCommitAlread
 
 	suite.mockSapcontrol.On(
 		"GetProcessListContext",
-		ctx,
+		mock.Anything,
 		mock.Anything,
 	).Return(&sapcontrol.GetProcessListResponse{
 		Processes: []*sapcontrol.OSProcess{
@@ -137,6 +137,7 @@ func (suite *SAPInstanceStartOperatorTestSuite) TestSAPInstanceStartCommitAlread
 		operator.OperatorOptions[operator.SAPInstanceStart]{
 			OperatorOptions: []operator.Option[operator.SAPInstanceStart]{
 				operator.Option[operator.SAPInstanceStart](operator.WithCustomStartSapcontrol(suite.mockSapcontrol)),
+				operator.Option[operator.SAPInstanceStart](operator.WithCustomStartInitialDelay(0 * time.Second)),
 			},
 		},
 	)
@@ -171,6 +172,16 @@ func (suite *SAPInstanceStartOperatorTestSuite) TestSAPInstanceStartCommitStarti
 			},
 		}, nil,
 	).Once().On(
+		"StartContext",
+		ctx,
+		mock.Anything,
+	).Return(
+		nil, errors.New("error starting"),
+	).On(
+		"StopContext",
+		ctx,
+		mock.Anything,
+	).Return(nil, nil).On(
 		"GetProcessListContext",
 		mock.Anything,
 		mock.Anything,
@@ -182,17 +193,7 @@ func (suite *SAPInstanceStartOperatorTestSuite) TestSAPInstanceStartCommitStarti
 				},
 			},
 		}, nil,
-	).On(
-		"StartContext",
-		ctx,
-		mock.Anything,
-	).Return(
-		nil, errors.New("error starting"),
-	).On(
-		"StopContext",
-		ctx,
-		mock.Anything,
-	).Return(nil, nil)
+	).Once()
 
 	sapInstanceStartOperator := operator.NewSAPInstanceStart(
 		operator.OperatorArguments{
@@ -213,7 +214,74 @@ func (suite *SAPInstanceStartOperatorTestSuite) TestSAPInstanceStartCommitStarti
 	suite.EqualValues("error starting instance: error starting", report.Error.Message)
 }
 
-func (suite *SAPInstanceStartOperatorTestSuite) TestSAPInstanceStartCommitStartingTimeout() {
+func (suite *SAPInstanceStartOperatorTestSuite) TestSAPInstanceStartVerifyError() {
+	ctx := context.Background()
+
+	gray := sapcontrol.STATECOLORSAPControlGRAY
+
+	suite.mockSapcontrol.On(
+		"GetProcessListContext",
+		ctx,
+		mock.Anything,
+	).Return(
+		&sapcontrol.GetProcessListResponse{
+			Processes: []*sapcontrol.OSProcess{
+				{
+					Dispstatus: &gray,
+				},
+			},
+		}, nil,
+	).Once().On(
+		"StartContext",
+		ctx,
+		mock.Anything,
+	).Return(
+		nil, nil,
+	).On(
+		"GetProcessListContext",
+		mock.Anything,
+		mock.Anything,
+	).Return(
+		nil, errors.New("error getting processes in verify"),
+	).Once().On(
+		"StopContext",
+		ctx,
+		mock.Anything,
+	).Return(nil, nil).On(
+		"GetProcessListContext",
+		mock.Anything,
+		mock.Anything,
+	).Return(
+		&sapcontrol.GetProcessListResponse{
+			Processes: []*sapcontrol.OSProcess{
+				{
+					Dispstatus: &gray,
+				},
+			},
+		}, nil,
+	)
+
+	sapInstanceStartOperator := operator.NewSAPInstanceStart(
+		operator.OperatorArguments{
+			"instance_number": "00",
+		},
+		"test-op",
+		operator.OperatorOptions[operator.SAPInstanceStart]{
+			OperatorOptions: []operator.Option[operator.SAPInstanceStart]{
+				operator.Option[operator.SAPInstanceStart](operator.WithCustomStartSapcontrol(suite.mockSapcontrol)),
+				operator.Option[operator.SAPInstanceStart](operator.WithCustomStartInitialDelay(0 * time.Second)),
+			},
+		},
+	)
+
+	report := sapInstanceStartOperator.Run(ctx)
+
+	suite.Nil(report.Success)
+	suite.Equal(operator.VERIFY, report.Error.ErrorPhase)
+	suite.EqualValues("verify instance started failed: error getting instance process list: error getting processes in verify", report.Error.Message)
+}
+
+func (suite *SAPInstanceStartOperatorTestSuite) TestSAPInstanceStartVerifyTimeout() {
 	ctx := context.Background()
 
 	gray := sapcontrol.STATECOLORSAPControlGRAY
@@ -261,88 +329,10 @@ func (suite *SAPInstanceStartOperatorTestSuite) TestSAPInstanceStartCommitStarti
 
 	suite.Nil(report.Success)
 	suite.Equal(operator.ROLLBACK, report.Error.ErrorPhase)
-	suite.EqualValues("error waiting until instance is in desired state\n"+
-		"error waiting until instance is in desired state", report.Error.Message)
-}
-
-func (suite *SAPInstanceStartOperatorTestSuite) TestSAPInstanceStartVerifyError() {
-	ctx := context.Background()
-
-	gray := sapcontrol.STATECOLORSAPControlGRAY
-	green := sapcontrol.STATECOLORSAPControlGREEN
-
-	suite.mockSapcontrol.On(
-		"GetProcessListContext",
-		ctx,
-		mock.Anything,
-	).Return(
-		&sapcontrol.GetProcessListResponse{
-			Processes: []*sapcontrol.OSProcess{
-				{
-					Dispstatus: &gray,
-				},
-			},
-		}, nil,
-	).Once().On(
-		"StartContext",
-		ctx,
-		mock.Anything,
-	).Return(
-		nil, nil,
-	).On(
-		"GetProcessListContext",
-		mock.Anything,
-		mock.Anything,
-	).Return(
-		&sapcontrol.GetProcessListResponse{
-			Processes: []*sapcontrol.OSProcess{
-				{
-					Dispstatus: &green,
-				},
-			},
-		}, nil,
-	).Once().On(
-		"GetProcessListContext",
-		ctx,
-		mock.Anything,
-	).Return(
-		nil, errors.New("error getting processes in verify"),
-	).Once().On(
-		"StopContext",
-		ctx,
-		mock.Anything,
-	).Return(nil, nil).On(
-		"GetProcessListContext",
-		mock.Anything,
-		mock.Anything,
-	).Return(
-		&sapcontrol.GetProcessListResponse{
-			Processes: []*sapcontrol.OSProcess{
-				{
-					Dispstatus: &gray,
-				},
-			},
-		}, nil,
-	)
-
-	sapInstanceStartOperator := operator.NewSAPInstanceStart(
-		operator.OperatorArguments{
-			"instance_number": "00",
-		},
-		"test-op",
-		operator.OperatorOptions[operator.SAPInstanceStart]{
-			OperatorOptions: []operator.Option[operator.SAPInstanceStart]{
-				operator.Option[operator.SAPInstanceStart](operator.WithCustomStartSapcontrol(suite.mockSapcontrol)),
-				operator.Option[operator.SAPInstanceStart](operator.WithCustomStartInitialDelay(0 * time.Second)),
-			},
-		},
-	)
-
-	report := sapInstanceStartOperator.Run(ctx)
-
-	suite.Nil(report.Success)
-	suite.Equal(operator.VERIFY, report.Error.ErrorPhase)
-	suite.EqualValues("error checking processes state: error getting instance process list: error getting processes in verify", report.Error.Message)
+	suite.EqualValues(
+		"rollback to stopped failed: error waiting until instance is in desired state\n"+
+			"verify instance started failed: "+
+			"error waiting until instance is in desired state", report.Error.Message)
 }
 
 func (suite *SAPInstanceStartOperatorTestSuite) TestSAPInstanceStartRollbackStoppingError() {

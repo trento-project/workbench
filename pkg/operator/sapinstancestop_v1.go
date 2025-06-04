@@ -112,29 +112,24 @@ func (s *SAPInstanceStop) commit(ctx context.Context) error {
 		return fmt.Errorf("error stopping instance: %w", err)
 	}
 
-	return waitUntilSapInstanceState(
+	return nil
+}
+
+func (s *SAPInstanceStop) verify(ctx context.Context) error {
+	err := waitUntilSapInstanceState(
 		ctx,
 		s.sapControlConnector,
 		sapcontrol.STATECOLORSAPControlGRAY,
 		s.parsedArguments.timeout,
 		s.interval,
 	)
-}
 
-func (s *SAPInstanceStop) verify(ctx context.Context) error {
-	stopped, err := allProcessesInState(ctx, s.sapControlConnector, sapcontrol.STATECOLORSAPControlGRAY)
 	if err != nil {
-		return fmt.Errorf("error checking processes state: %w", err)
+		return fmt.Errorf("verify instance stopped failed: %w", err)
 	}
 
-	if stopped {
-		s.resources[afterDiffField] = stopped
-		return nil
-	}
-
-	return fmt.Errorf(
-		"verify instance stopped failed, instance was not stopped in commit phase",
-	)
+	s.resources[afterDiffField] = true
+	return nil
 }
 
 func (s *SAPInstanceStop) rollback(ctx context.Context) error {
@@ -144,13 +139,19 @@ func (s *SAPInstanceStop) rollback(ctx context.Context) error {
 		return fmt.Errorf("error starting instance: %w", err)
 	}
 
-	return waitUntilSapInstanceState(
+	err = waitUntilSapInstanceState(
 		ctx,
 		s.sapControlConnector,
 		sapcontrol.STATECOLORSAPControlGREEN,
 		s.parsedArguments.timeout,
 		s.interval,
 	)
+
+	if err != nil {
+		return fmt.Errorf("rollback to started failed: %w", err)
+	}
+
+	return nil
 }
 
 func (s *SAPInstanceStop) operationDiff(ctx context.Context) map[string]any {
