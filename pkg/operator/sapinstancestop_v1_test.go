@@ -124,7 +124,7 @@ func (suite *SAPInstanceStopOperatorTestSuite) TestSAPInstanceStopCommitAlreadyS
 				},
 			},
 		}, nil).
-		Twice()
+		Once()
 
 	sapInstanceStopOperator := operator.NewSAPInstanceStop(
 		operator.OperatorArguments{
@@ -146,7 +146,7 @@ func (suite *SAPInstanceStopOperatorTestSuite) TestSAPInstanceStopCommitAlreadyS
 	}
 
 	suite.Nil(report.Error)
-	suite.Equal(operator.VERIFY, report.Success.LastPhase)
+	suite.Equal(operator.PLAN, report.Success.LastPhase)
 	suite.EqualValues(expectedDiff, report.Success.Diff)
 }
 

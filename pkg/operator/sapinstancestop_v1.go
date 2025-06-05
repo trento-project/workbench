@@ -48,9 +48,10 @@ func WithCustomStopInterval(interval time.Duration) SAPInstanceStopOption {
 //
 // - PLAN:
 //   The operator gets the instance current processes and stores the state.
+//   The operation is skipped if the SAP instances is already stopped.
 //
 // - COMMIT:
-//   If the SAP instances is not already stopped, it is started using the sapcontrol Stop command.
+//   It stops the SAP instance using the sapcontrol Stop command.
 //
 // - VERIFY:
 //   Verify if the SAP instance is stopped.
@@ -78,10 +79,10 @@ func NewSAPInstanceStop(
 	}
 }
 
-func (s *SAPInstanceStop) plan(ctx context.Context) error {
+func (s *SAPInstanceStop) plan(ctx context.Context) (bool, error) {
 	opArguments, err := parseSAPStateChangeArguments(s.arguments)
 	if err != nil {
-		return err
+		return false, err
 	}
 	s.parsedArguments = opArguments
 
@@ -92,20 +93,21 @@ func (s *SAPInstanceStop) plan(ctx context.Context) error {
 
 	stopped, err := allProcessesInState(ctx, s.sapControlConnector, sapcontrol.STATECOLORSAPControlGRAY)
 	if err != nil {
-		return fmt.Errorf("error checking processes state: %w", err)
+		return false, fmt.Errorf("error checking processes state: %w", err)
 	}
 
 	s.resources[beforeDiffField] = stopped
 
-	return nil
+	if stopped {
+		s.logger.Info("instance already stopped, skipping operation")
+		s.resources[afterDiffField] = stopped
+		return true, nil
+	}
+
+	return false, nil
 }
 
 func (s *SAPInstanceStop) commit(ctx context.Context) error {
-	if s.resources[beforeDiffField] == true {
-		s.logger.Info("instance already stopped, skipping operation")
-		return nil
-	}
-
 	request := new(sapcontrol.Stop)
 	_, err := s.sapControlConnector.StopContext(ctx, request)
 	if err != nil {

@@ -124,7 +124,7 @@ func (suite *SAPInstanceStartOperatorTestSuite) TestSAPInstanceStartCommitAlread
 				},
 			},
 		}, nil).
-		Twice()
+		Once()
 
 	sapInstanceStartOperator := operator.NewSAPInstanceStart(
 		operator.OperatorArguments{
@@ -147,7 +147,7 @@ func (suite *SAPInstanceStartOperatorTestSuite) TestSAPInstanceStartCommitAlread
 	}
 
 	suite.Nil(report.Error)
-	suite.Equal(operator.VERIFY, report.Success.LastPhase)
+	suite.Equal(operator.PLAN, report.Success.LastPhase)
 	suite.EqualValues(expectedDiff, report.Success.Diff)
 }
 

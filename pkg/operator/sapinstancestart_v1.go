@@ -37,9 +37,10 @@ type SAPInstanceStartOption Option[SAPInstanceStart]
 //
 // - PLAN:
 //   The operator gets the instance current processes and stores the state.
+//   The operation is skipped if the SAP instances is already started.
 //
 // - COMMIT:
-//   If the SAP instances is not already started, it is started using the sapcontrol Start command.
+//   It starts the SAP instance using the sapcontrol Start command.
 //
 // - VERIFY:
 //   Verify if the SAP instance is started.
@@ -94,10 +95,10 @@ func NewSAPInstanceStart(
 	}
 }
 
-func (s *SAPInstanceStart) plan(ctx context.Context) error {
+func (s *SAPInstanceStart) plan(ctx context.Context) (bool, error) {
 	opArguments, err := parseSAPStateChangeArguments(s.arguments)
 	if err != nil {
-		return err
+		return false, err
 	}
 	s.parsedArguments = opArguments
 
@@ -108,20 +109,21 @@ func (s *SAPInstanceStart) plan(ctx context.Context) error {
 
 	started, err := allProcessesInState(ctx, s.sapControlConnector, sapcontrol.STATECOLORSAPControlGREEN)
 	if err != nil {
-		return fmt.Errorf("error checking processes state: %w", err)
+		return false, fmt.Errorf("error checking processes state: %w", err)
 	}
 
 	s.resources[beforeDiffField] = started
 
-	return nil
+	if started {
+		s.logger.Info("instance already started, skipping operation")
+		s.resources[afterDiffField] = started
+		return true, nil
+	}
+
+	return false, nil
 }
 
 func (s *SAPInstanceStart) commit(ctx context.Context) error {
-	if s.resources[beforeDiffField] == true {
-		s.logger.Info("instance already started, skipping operation")
-		return nil
-	}
-
 	request := new(sapcontrol.Start)
 	_, err := s.sapControlConnector.StartContext(ctx, request)
 	if err != nil {
