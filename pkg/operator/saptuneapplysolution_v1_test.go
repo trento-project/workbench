@@ -585,7 +585,7 @@ func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionSucc
 		ctx,
 	).Return("HANA", nil).
 		NotBefore(checkSaptuneVersionCall).
-		Times(2)
+		Once()
 
 	saptuneSolutionApplyOperator := operator.NewSaptuneApplySolution(
 		operator.OperatorArguments{
@@ -607,6 +607,6 @@ func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionSucc
 	}
 
 	suite.Nil(report.Error)
-	suite.Equal(operator.VERIFY, report.Success.LastPhase)
+	suite.Equal(operator.PLAN, report.Success.LastPhase)
 	suite.EqualValues(expectedDiff, report.Success.Diff)
 }

@@ -120,10 +120,10 @@ func NewClusterMaintenanceChange(
 	}
 }
 
-func (c *ClusterMaintenanceChange) plan(ctx context.Context) error {
+func (c *ClusterMaintenanceChange) plan(ctx context.Context) (bool, error) {
 	opArguments, err := parseClusterMaintenanceArguments(c.arguments)
 	if err != nil {
-		return err
+		return false, err
 	}
 	c.parsedArguments = opArguments
 
@@ -138,25 +138,26 @@ func (c *ClusterMaintenanceChange) plan(ctx context.Context) error {
 	// check if a cluster is available and running
 	_, err = c.executor.Exec(ctx, "crm", "status")
 	if err != nil {
-		return fmt.Errorf("error getting cluster status: %w", err)
+		return false, fmt.Errorf("error getting cluster status: %w", err)
 	}
 
 	currentState, err := getMaintenanceState(ctx, c.executor, c.scope, c.parsedArguments)
 	if err != nil {
-		return err
+		return false, err
 	}
 
 	c.resources[beforeDiffField] = currentState
 
-	return nil
+	if c.resources[beforeDiffField] == c.parsedArguments.maintenance {
+		c.logger.Infof("maintenance state %v already set, skipping operation", c.parsedArguments.maintenance)
+		c.resources[afterDiffField] = currentState
+		return true, nil
+	}
+
+	return false, nil
 }
 
 func (c *ClusterMaintenanceChange) commit(ctx context.Context) error {
-	if c.resources[beforeDiffField] == c.parsedArguments.maintenance {
-		c.logger.Infof("maintenance state %v already set, skipping operation", c.parsedArguments.maintenance)
-		return nil
-	}
-
 	err := isIdle(ctx, c.executor)
 	if err != nil {
 		return err
