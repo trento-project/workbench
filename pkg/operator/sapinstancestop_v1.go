@@ -41,7 +41,7 @@ func WithCustomStopInterval(interval time.Duration) SAPInstanceStopOption {
 // NewSAPInstanceStop operator stops a SAP instance.
 //
 // Arguments:
-//	instance_number (required): String with the instance number of the instance to stop
+//  instance_number (required): String with the instance number of the instance to stop
 //  timeout: Timeout in seconds to wait until the instance is stopped
 //
 // # Execution Phases

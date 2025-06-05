@@ -30,7 +30,7 @@ type SAPInstanceStartOption Option[SAPInstanceStart]
 // SAPInstanceStart operator starts a SAP instance.
 //
 // Arguments:
-//	instance_number (required): String with the instance number of the instance to start
+//  instance_number (required): String with the instance number of the instance to start
 //  timeout: Timeout in seconds to wait until the instance is started
 //
 // # Execution Phases
