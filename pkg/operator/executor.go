@@ -6,7 +6,7 @@ import (
 )
 
 type phaser interface {
-	plan(ctx context.Context) error
+	plan(ctx context.Context) (alreadyApplied bool, err error)
 	commit(ctx context.Context) error
 	rollback(ctx context.Context) error
 	verify(ctx context.Context) error
@@ -21,9 +21,14 @@ type Executor struct {
 
 func (e *Executor) Run(ctx context.Context) *ExecutionReport {
 	e.currentPhase = PLAN
-	err := e.phaser.plan(ctx)
+	alreadyApplied, err := e.phaser.plan(ctx)
 	if err != nil {
 		return executionReportWithError(err, e.currentPhase, e.operationID)
+	}
+
+	if alreadyApplied {
+		diff := e.phaser.operationDiff(ctx)
+		return executionReportWithSuccess(diff, e.currentPhase, e.operationID)
 	}
 
 	e.currentPhase = COMMIT

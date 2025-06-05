@@ -55,10 +55,10 @@ type SaptuneApplySolutionOption Option[SaptuneApplySolution]
 //   The minimum required version is 3.1.0. If saptune is not installed or the version does not meet the minimum requirement,
 //   the operation will fail.
 //   The initially applied solution, if any, is collected as the "before" diff.
-//
-// - COMMIT:
 //   The operator checks if the requested solution is already applied. If it is, no action is taken,
 //   ensuring idempotency without returning an error.
+//
+// - COMMIT:
 //   If there is any other solution already applied, an error is raised, because only one solution can be applied at a time.
 // 	 If otherwise there is no solution applied the saptune command to apply the solution will be executed.
 //
@@ -110,34 +110,35 @@ func NewSaptuneApplySolution(
 	}
 }
 
-func (sa *SaptuneApplySolution) plan(ctx context.Context) error {
+func (sa *SaptuneApplySolution) plan(ctx context.Context) (bool, error) {
 	opArguments, err := parseSaptuneSolutionArguments(sa.arguments)
 	if err != nil {
-		return err
+		return false, err
 	}
 	sa.parsedArguments = opArguments
 
 	if err = sa.saptune.CheckVersionSupport(ctx); err != nil {
-		return err
+		return false, err
 	}
 
 	initiallyAppliedSolution, err := sa.saptune.GetAppliedSolution(ctx)
 	if err != nil {
-		return err
+		return false, err
 	}
 
 	sa.resources[beforeDiffField] = initiallyAppliedSolution
 
-	return nil
+	if sa.parsedArguments.solution == initiallyAppliedSolution {
+		sa.logger.Infof("solution %s is already applied, skipping operation", sa.parsedArguments.solution)
+		sa.resources[afterDiffField] = initiallyAppliedSolution
+		return true, nil
+	}
+
+	return false, nil
 }
 
 func (sa *SaptuneApplySolution) commit(ctx context.Context) error {
 	initiallyAppliedSolution, _ := sa.resources[beforeDiffField].(string)
-
-	if sa.parsedArguments.solution == initiallyAppliedSolution {
-		sa.logger.Infof("solution %s is already applied, skipping commit phase", sa.parsedArguments.solution)
-		return nil
-	}
 
 	if initiallyAppliedSolution != "" {
 		return fmt.Errorf(

@@ -959,7 +959,7 @@ func TestClusterMaintenanceChangeCommitAlreadyApplied(t *testing.T) {
 	}
 
 	assert.Nil(t, report.Error)
-	assert.Equal(t, report.Success.LastPhase, operator.VERIFY)
+	assert.Equal(t, report.Success.LastPhase, operator.PLAN)
 	assert.EqualValues(t, report.Success.Diff, expectedDiff)
 }
 

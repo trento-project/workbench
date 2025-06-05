@@ -23,7 +23,6 @@ type SaptuneChangeSolutionOption Option[SaptuneChangeSolution]
 //   Same as SaptuneApplySolutionOption.
 //
 // - COMMIT:
-//   The operator checks if the requested solution is already applied. If it is, no action is taken, ensuring idempotency.
 //   If there is no other solution already applied, an error is raised,
 //   effectively allowing a transition from a solution to another but not from no solution to some solution.
 // 	 If otherwise there is a solution applied that is not the currently applied one the saptune command to change the solution will be executed.
@@ -71,25 +70,31 @@ func NewSaptuneChangeSolution(
 	}
 }
 
-func (sc *SaptuneChangeSolution) plan(ctx context.Context) error {
+func (sc *SaptuneChangeSolution) plan(ctx context.Context) (bool, error) {
 	opArguments, err := parseSaptuneSolutionArguments(sc.arguments)
 	if err != nil {
-		return err
+		return false, err
 	}
 	sc.parsedArguments = opArguments
 
 	if err = sc.saptune.CheckVersionSupport(ctx); err != nil {
-		return err
+		return false, err
 	}
 
 	initiallyAppliedSolution, err := sc.saptune.GetAppliedSolution(ctx)
 	if err != nil {
-		return err
+		return false, err
 	}
 
 	sc.resources[beforeDiffField] = initiallyAppliedSolution
 
-	return nil
+	if sc.parsedArguments.solution == initiallyAppliedSolution {
+		sc.logger.Infof("solution %s is already applied. Nothing to change, skipping operation", sc.parsedArguments.solution)
+		sc.resources[afterDiffField] = initiallyAppliedSolution
+		return true, nil
+	}
+
+	return false, nil
 }
 
 func (sc *SaptuneChangeSolution) commit(ctx context.Context) error {
@@ -100,11 +105,6 @@ func (sc *SaptuneChangeSolution) commit(ctx context.Context) error {
 			"cannot change solution to %s because no solution is currently applied",
 			sc.parsedArguments.solution,
 		)
-	}
-
-	if sc.parsedArguments.solution == initiallyAppliedSolution {
-		sc.logger.Infof("solution %s is already applied. Nothing to change, skipping commit phase", sc.parsedArguments.solution)
-		return nil
 	}
 
 	return sc.saptune.ChangeSolution(ctx, sc.parsedArguments.solution)
