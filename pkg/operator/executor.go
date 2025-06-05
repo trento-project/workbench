@@ -6,7 +6,7 @@ import (
 )
 
 type phaser interface {
-	plan(ctx context.Context) (bool, error)
+	plan(ctx context.Context) (alreadyApplied bool, err error)
 	commit(ctx context.Context) error
 	rollback(ctx context.Context) error
 	verify(ctx context.Context) error
