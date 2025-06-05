@@ -412,3 +412,78 @@ func (suite *SAPInstanceStopOperatorTestSuite) TestSAPInstanceStopSuccess() {
 	suite.Equal(operator.VERIFY, report.Success.LastPhase)
 	suite.EqualValues(expectedDiff, report.Success.Diff)
 }
+
+func (suite *SAPInstanceStartOperatorTestSuite) TestSAPInstanceStopSuccessMultipleQueries() {
+	ctx := context.Background()
+
+	gray := sapcontrol.STATECOLORSAPControlGRAY
+	green := sapcontrol.STATECOLORSAPControlGREEN
+
+	planGetProcesses := suite.mockSapcontrol.
+		On("GetProcessListContext", ctx, mock.Anything).
+		Return(
+			&sapcontrol.GetProcessListResponse{
+				Processes: []*sapcontrol.OSProcess{
+					{
+						Dispstatus: &green,
+					},
+				},
+			}, nil,
+		).
+		Once()
+
+	suite.mockSapcontrol.
+		On("StopContext", ctx, mock.Anything).
+		Return(nil, nil).
+		NotBefore(planGetProcesses)
+
+	suite.mockSapcontrol.
+		On("GetProcessListContext", mock.Anything, mock.Anything).
+		Return(
+			&sapcontrol.GetProcessListResponse{
+				Processes: []*sapcontrol.OSProcess{
+					{
+						Dispstatus: &green,
+					},
+				},
+			}, nil,
+		).
+		Times(3).
+		NotBefore(planGetProcesses).
+		On("GetProcessListContext", mock.Anything, mock.Anything).
+		Return(
+			&sapcontrol.GetProcessListResponse{
+				Processes: []*sapcontrol.OSProcess{
+					{
+						Dispstatus: &gray,
+					},
+				},
+			}, nil,
+		).
+		Once()
+
+	sapInstanceStartOperator := operator.NewSAPInstanceStop(
+		operator.OperatorArguments{
+			"instance_number": "00",
+			"timeout":         5.0,
+		},
+		"test-op",
+		operator.OperatorOptions[operator.SAPInstanceStop]{
+			OperatorOptions: []operator.Option[operator.SAPInstanceStop]{
+				operator.Option[operator.SAPInstanceStop](operator.WithCustomStopSapcontrol(suite.mockSapcontrol)),
+				operator.Option[operator.SAPInstanceStop](operator.WithCustomStopInterval(0 * time.Second)),
+			},
+		},
+	)
+
+	report := sapInstanceStartOperator.Run(ctx)
+
+	expectedDiff := map[string]any{
+		"before": `{"stopped":false}`,
+		"after":  `{"stopped":true}`,
+	}
+
+	suite.Nil(report.Error)
+	suite.Equal(operator.VERIFY, report.Success.LastPhase)
+	suite.EqualValues(expectedDiff, report.Success.Diff)
+}

@@ -415,3 +415,79 @@ func (suite *SAPInstanceStartOperatorTestSuite) TestSAPInstanceStartSuccess() {
 	suite.Equal(operator.VERIFY, report.Success.LastPhase)
 	suite.EqualValues(expectedDiff, report.Success.Diff)
 }
+
+func (suite *SAPInstanceStartOperatorTestSuite) TestSAPInstanceStartSuccessMultipleQueries() {
+	ctx := context.Background()
+
+	gray := sapcontrol.STATECOLORSAPControlGRAY
+	green := sapcontrol.STATECOLORSAPControlGREEN
+
+	planGetProcesses := suite.mockSapcontrol.
+		On("GetProcessListContext", ctx, mock.Anything).
+		Return(
+			&sapcontrol.GetProcessListResponse{
+				Processes: []*sapcontrol.OSProcess{
+					{
+						Dispstatus: &gray,
+					},
+				},
+			}, nil,
+		).
+		Once()
+
+	suite.mockSapcontrol.
+		On("StartContext", ctx, mock.Anything).
+		Return(nil, nil).
+		NotBefore(planGetProcesses)
+
+	suite.mockSapcontrol.
+		On("GetProcessListContext", mock.Anything, mock.Anything).
+		Return(
+			&sapcontrol.GetProcessListResponse{
+				Processes: []*sapcontrol.OSProcess{
+					{
+						Dispstatus: &gray,
+					},
+				},
+			}, nil,
+		).
+		Times(3).
+		NotBefore(planGetProcesses).
+		On("GetProcessListContext", mock.Anything, mock.Anything).
+		Return(
+			&sapcontrol.GetProcessListResponse{
+				Processes: []*sapcontrol.OSProcess{
+					{
+						Dispstatus: &green,
+					},
+				},
+			}, nil,
+		).
+		Once()
+
+	sapInstanceStartOperator := operator.NewSAPInstanceStart(
+		operator.OperatorArguments{
+			"instance_number": "00",
+			"timeout":         5.0,
+		},
+		"test-op",
+		operator.OperatorOptions[operator.SAPInstanceStart]{
+			OperatorOptions: []operator.Option[operator.SAPInstanceStart]{
+				operator.Option[operator.SAPInstanceStart](operator.WithCustomStartSapcontrol(suite.mockSapcontrol)),
+				operator.Option[operator.SAPInstanceStart](operator.WithCustomStartInitialDelay(0 * time.Second)),
+				operator.Option[operator.SAPInstanceStart](operator.WithCustomStartInterval(0 * time.Second)),
+			},
+		},
+	)
+
+	report := sapInstanceStartOperator.Run(ctx)
+
+	expectedDiff := map[string]any{
+		"before": `{"started":false}`,
+		"after":  `{"started":true}`,
+	}
+
+	suite.Nil(report.Error)
+	suite.Equal(operator.VERIFY, report.Success.LastPhase)
+	suite.EqualValues(expectedDiff, report.Success.Diff)
+}
