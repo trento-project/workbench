@@ -14,7 +14,7 @@ func TestExecutorHappyFlow(t *testing.T) {
 	emptyDiff := make(map[string]any)
 
 	phaserCall := phaser.On("plan", executionContext).
-		Return(nil)
+		Return(false, nil)
 
 	commitCall := phaser.On("commit", executionContext).
 		Return(nil).
@@ -47,7 +47,7 @@ func TestExecutorPlanError(t *testing.T) {
 	planError := errors.New("error during plan phase")
 
 	phaser.On("plan", executionContext).
-		Return(planError)
+		Return(false, planError)
 
 	executor := Executor{
 		phaser:      phaser,
@@ -61,13 +61,38 @@ func TestExecutorPlanError(t *testing.T) {
 	assert.Nil(t, report.Success)
 }
 
+func TestExecutorPlanAlreadyApplied(t *testing.T) {
+	executionContext := context.Background()
+	phaser := NewMockphaser(t)
+	emptyDiff := make(map[string]any)
+
+	planCall := phaser.On("plan", executionContext).
+		Return(true, nil)
+
+	phaser.On("operationDiff", executionContext).
+		Return(emptyDiff).
+		NotBefore(planCall)
+
+	executor := Executor{
+		phaser:      phaser,
+		operationID: "operation-id",
+	}
+
+	report := executor.Run(executionContext)
+
+	assert.Equal(t, "operation-id", report.OperationID)
+	assert.Equal(t, PLAN, report.Success.LastPhase)
+	assert.Equal(t, emptyDiff, report.Success.Diff)
+	assert.Nil(t, report.Error)
+}
+
 func TestExecutorCommitErrorWithSuccessfulRollback(t *testing.T) {
 	executionContext := context.Background()
 	phaser := NewMockphaser(t)
 	commitError := errors.New("error during error phase")
 
 	phaserCall := phaser.On("plan", executionContext).
-		Return(nil)
+		Return(false, nil)
 
 	commitCall := phaser.On("commit", executionContext).
 		Return(commitError).
@@ -96,7 +121,7 @@ func TestExecutorCommitErrorWithFailedRollback(t *testing.T) {
 	rollbackError := errors.New("error during rollback phase")
 
 	phaserCall := phaser.On("plan", executionContext).
-		Return(nil)
+		Return(false, nil)
 
 	commitCall := phaser.On("commit", executionContext).
 		Return(commitError).
@@ -124,7 +149,7 @@ func TestExecutorVerifyErrorWithSuccessfulRollback(t *testing.T) {
 	verifyError := errors.New("error during verify phase")
 
 	phaserCall := phaser.On("plan", executionContext).
-		Return(nil)
+		Return(false, nil)
 
 	commitCall := phaser.On("commit", executionContext).
 		Return(nil).
@@ -157,7 +182,7 @@ func TestExecutorVerifyErrorWithFailedRollback(t *testing.T) {
 	rollbackError := errors.New("error during rollback phase")
 
 	phaserCall := phaser.On("plan", executionContext).
-		Return(nil)
+		Return(false, nil)
 
 	commitCall := phaser.On("commit", executionContext).
 		Return(nil).

@@ -108,17 +108,27 @@ func (_c *Mockphaser_operationDiff_Call) RunAndReturn(run func(context.Context) 
 }
 
 // plan provides a mock function with given fields: ctx
-func (_m *Mockphaser) plan(ctx context.Context) error {
+func (_m *Mockphaser) plan(ctx context.Context) (bool, error) {
 	ret := _m.Called(ctx)
 
-	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context) error); ok {
+	var r0 bool
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context) (bool, error)); ok {
+		return rf(ctx)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context) bool); ok {
 		r0 = rf(ctx)
 	} else {
-		r0 = ret.Error(0)
+		r0 = ret.Get(0).(bool)
 	}
 
-	return r0
+	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
+		r1 = rf(ctx)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }
 
 // Mockphaser_plan_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'plan'
@@ -139,12 +149,12 @@ func (_c *Mockphaser_plan_Call) Run(run func(ctx context.Context)) *Mockphaser_p
 	return _c
 }
 
-func (_c *Mockphaser_plan_Call) Return(_a0 error) *Mockphaser_plan_Call {
-	_c.Call.Return(_a0)
+func (_c *Mockphaser_plan_Call) Return(_a0 bool, _a1 error) *Mockphaser_plan_Call {
+	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *Mockphaser_plan_Call) RunAndReturn(run func(context.Context) error) *Mockphaser_plan_Call {
+func (_c *Mockphaser_plan_Call) RunAndReturn(run func(context.Context) (bool, error)) *Mockphaser_plan_Call {
 	_c.Call.Return(run)
 	return _c
 }
