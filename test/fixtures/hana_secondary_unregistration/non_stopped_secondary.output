@@ -1,0 +1,25 @@
+SAPCONTROL-OK: <begin>
+online=true
+mode=sync
+operation mode=logreplay
+site id=2
+site name=Site2
+isSource=false
+isConsumer=true
+hasConsumers=false
+isTakeoverActive=false
+isPrimarySuspended=false
+isTimetravelEnabled=false
+replayMode=auto
+active primary site=1
+primary masters=node-vmhana01
+mapping/node-vmhana02=Site2/node-vmhana02
+mapping/node-vmhana02=Site1/node-vmhana01
+siteTier/Site1=1
+siteTier/Site2=2
+siteReplicationMode/Site1=primary
+siteReplicationMode/Site2=sync
+siteOperationMode/Site1=primary
+siteOperationMode/Site2=logreplay
+siteMapping/Site1=Site2
+SAPCONTROL-OK: <end>

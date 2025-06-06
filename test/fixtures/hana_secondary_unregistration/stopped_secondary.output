@@ -1,0 +1,21 @@
+SAPCONTROL-OK: <begin>
+online=false
+nameserver node-vmhana02:30001 not responding.
+nameserver node-vmhana02:30001 not responding.
+mode=sync
+operation mode=unknown
+site id=2
+site name=Site2
+nameserver node-vmhana02:30001 not responding.
+nameserver node-vmhana02:30001 not responding.
+isSource=unknown
+isConsumer=true
+hasConsumers=unknown
+isTakeoverActive=false
+isPrimarySuspended=false
+isTimetravelEnabled=false
+replayMode=auto
+active primary site=1
+primary masters=node-vmhana01
+SAPCONTROL-OK: <end>
+done.
