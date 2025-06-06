@@ -134,6 +134,13 @@ func StandardRegistry(options ...BaseOperatorOption) *Registry {
 					})
 				},
 			},
+			UnregisterHANASecondaryOperatorName: map[string]OperatorBuilder{
+				"v1": func(operationID string, arguments OperatorArguments) Operator {
+					return NewUnregisterHANASecondary(arguments, operationID, OperatorOptions[UnregisterHANASecondary]{
+						BaseOperatorOptions: options,
+					})
+				},
+			},
 		},
 	}
 }
