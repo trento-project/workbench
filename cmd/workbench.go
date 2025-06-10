@@ -38,25 +38,25 @@ func main() {
 
 	logger := support.NewDefaultLogger(logLevel)
 
-	slog.Info("starting workbench CLI", "version", Version)
+	logger.Info("starting workbench CLI", "version", Version)
 
 	operatorName := args[0]
 	registry := operator.StandardRegistry(operator.WithCustomLogger(logger))
 
 	builder, err := registry.GetOperatorBuilder(operatorName)
 	if err != nil {
-		slog.Error("operator not available, exiting", "operator", operatorName)
+		logger.Error("operator not available, exiting", "operator", operatorName)
 		os.Exit(1)
 	}
 
 	opArgs := make(operator.OperatorArguments)
 	err = json.Unmarshal([]byte(options.Arguments), &opArgs)
 	if err != nil {
-		slog.Error("could not unmarshal options arguments", "arguments", options.Arguments)
+		logger.Error("could not unmarshal options arguments", "arguments", options.Arguments)
 		os.Exit(1)
 	}
 
-	slog.Info(
+	logger.Info(
 		"starting execution with operator",
 		"operator", operatorName,
 		"arguments", options.Arguments,
@@ -66,7 +66,7 @@ func main() {
 
 	report := op.Run(ctx)
 	if report.Error != nil {
-		slog.Error(
+		logger.Error(
 			"operation execution error",
 			"phase", report.Error.ErrorPhase,
 			"reason", report.Error.Message,
@@ -74,7 +74,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	slog.Info(
+	logger.Info(
 		"execution succeeded",
 		"phase", report.Success.LastPhase,
 		"diff_before", report.Success.Diff["before"],
