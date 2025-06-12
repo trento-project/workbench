@@ -13,20 +13,25 @@ func TestExecutorHappyFlow(t *testing.T) {
 	phaser := NewMockphaser(t)
 	emptyDiff := make(map[string]any)
 
-	phaserCall := phaser.On("plan", executionContext).
+	planCall := phaser.On("plan", executionContext).
 		Return(false, nil)
 
 	commitCall := phaser.On("commit", executionContext).
 		Return(nil).
-		NotBefore(phaserCall)
+		NotBefore(planCall)
 
 	verifyCall := phaser.On("verify", executionContext).
 		Return(nil).
 		NotBefore(commitCall)
 
-	phaser.On("operationDiff", executionContext).
+	operationDiffCall := phaser.On("operationDiff", executionContext).
 		Return(emptyDiff).
 		NotBefore(verifyCall)
+
+	phaser.On("after", executionContext).
+		Return().
+		Once().
+		NotBefore(operationDiffCall)
 
 	executor := Executor{
 		phaser:      phaser,
@@ -49,6 +54,8 @@ func TestExecutorPlanError(t *testing.T) {
 	phaser.On("plan", executionContext).
 		Return(false, planError)
 
+	phaser.AssertNotCalled(t, "after", executionContext)
+
 	executor := Executor{
 		phaser:      phaser,
 		operationID: "operation-id",
@@ -69,9 +76,14 @@ func TestExecutorPlanAlreadyApplied(t *testing.T) {
 	planCall := phaser.On("plan", executionContext).
 		Return(true, nil)
 
-	phaser.On("operationDiff", executionContext).
+	operationDiffCall := phaser.On("operationDiff", executionContext).
 		Return(emptyDiff).
 		NotBefore(planCall)
+
+	phaser.On("after", executionContext).
+		Return().
+		Once().
+		NotBefore(operationDiffCall)
 
 	executor := Executor{
 		phaser:      phaser,
@@ -91,16 +103,21 @@ func TestExecutorCommitErrorWithSuccessfulRollback(t *testing.T) {
 	phaser := NewMockphaser(t)
 	commitError := errors.New("error during error phase")
 
-	phaserCall := phaser.On("plan", executionContext).
+	planCall := phaser.On("plan", executionContext).
 		Return(false, nil)
 
 	commitCall := phaser.On("commit", executionContext).
 		Return(commitError).
-		NotBefore(phaserCall)
+		NotBefore(planCall)
 
-	phaser.On("rollback", executionContext).
+	rollbackCall := phaser.On("rollback", executionContext).
 		Return(nil).
 		NotBefore(commitCall)
+
+	phaser.On("after", executionContext).
+		Return().
+		Once().
+		NotBefore(rollbackCall)
 
 	executor := Executor{
 		phaser:      phaser,
@@ -120,16 +137,21 @@ func TestExecutorCommitErrorWithFailedRollback(t *testing.T) {
 	commitError := errors.New("error during error phase")
 	rollbackError := errors.New("error during rollback phase")
 
-	phaserCall := phaser.On("plan", executionContext).
+	planCall := phaser.On("plan", executionContext).
 		Return(false, nil)
 
 	commitCall := phaser.On("commit", executionContext).
 		Return(commitError).
-		NotBefore(phaserCall)
+		NotBefore(planCall)
 
-	phaser.On("rollback", executionContext).
+	rollbackCall := phaser.On("rollback", executionContext).
 		Return(rollbackError).
 		NotBefore(commitCall)
+
+	phaser.On("after", executionContext).
+		Return().
+		Once().
+		NotBefore(rollbackCall)
 
 	executor := Executor{
 		phaser:      phaser,
@@ -148,20 +170,25 @@ func TestExecutorVerifyErrorWithSuccessfulRollback(t *testing.T) {
 	phaser := NewMockphaser(t)
 	verifyError := errors.New("error during verify phase")
 
-	phaserCall := phaser.On("plan", executionContext).
+	planCall := phaser.On("plan", executionContext).
 		Return(false, nil)
 
 	commitCall := phaser.On("commit", executionContext).
 		Return(nil).
-		NotBefore(phaserCall)
+		NotBefore(planCall)
 
 	verifyCall := phaser.On("verify", executionContext).
 		Return(verifyError).
 		NotBefore(commitCall)
 
-	phaser.On("rollback", executionContext).
+	rollbackCall := phaser.On("rollback", executionContext).
 		Return(nil).
 		NotBefore(verifyCall)
+
+	phaser.On("after", executionContext).
+		Return().
+		Once().
+		NotBefore(rollbackCall)
 
 	executor := Executor{
 		phaser:      phaser,
@@ -181,20 +208,25 @@ func TestExecutorVerifyErrorWithFailedRollback(t *testing.T) {
 	verifyError := errors.New("error during verify phase")
 	rollbackError := errors.New("error during rollback phase")
 
-	phaserCall := phaser.On("plan", executionContext).
+	planCall := phaser.On("plan", executionContext).
 		Return(false, nil)
 
 	commitCall := phaser.On("commit", executionContext).
 		Return(nil).
-		NotBefore(phaserCall)
+		NotBefore(planCall)
 
 	verifyCall := phaser.On("verify", executionContext).
 		Return(verifyError).
 		NotBefore(commitCall)
 
-	phaser.On("rollback", executionContext).
+	rollbackCall := phaser.On("rollback", executionContext).
 		Return(rollbackError).
 		NotBefore(verifyCall)
+
+	phaser.On("after", executionContext).
+		Return().
+		Once().
+		NotBefore(rollbackCall)
 
 	executor := Executor{
 		phaser:      phaser,

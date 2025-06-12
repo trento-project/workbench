@@ -21,6 +21,39 @@ func (_m *Mockphaser) EXPECT() *Mockphaser_Expecter {
 	return &Mockphaser_Expecter{mock: &_m.Mock}
 }
 
+// after provides a mock function with given fields: ctx
+func (_m *Mockphaser) after(ctx context.Context) {
+	_m.Called(ctx)
+}
+
+// Mockphaser_after_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'after'
+type Mockphaser_after_Call struct {
+	*mock.Call
+}
+
+// after is a helper method to define mock.On call
+//   - ctx context.Context
+func (_e *Mockphaser_Expecter) after(ctx interface{}) *Mockphaser_after_Call {
+	return &Mockphaser_after_Call{Call: _e.mock.On("after", ctx)}
+}
+
+func (_c *Mockphaser_after_Call) Run(run func(ctx context.Context)) *Mockphaser_after_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context))
+	})
+	return _c
+}
+
+func (_c *Mockphaser_after_Call) Return() *Mockphaser_after_Call {
+	_c.Call.Return()
+	return _c
+}
+
+func (_c *Mockphaser_after_Call) RunAndReturn(run func(context.Context)) *Mockphaser_after_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // commit provides a mock function with given fields: ctx
 func (_m *Mockphaser) commit(ctx context.Context) error {
 	ret := _m.Called(ctx)
@@ -149,8 +182,8 @@ func (_c *Mockphaser_plan_Call) Run(run func(ctx context.Context)) *Mockphaser_p
 	return _c
 }
 
-func (_c *Mockphaser_plan_Call) Return(_a0 bool, _a1 error) *Mockphaser_plan_Call {
-	_c.Call.Return(_a0, _a1)
+func (_c *Mockphaser_plan_Call) Return(alreadyApplied bool, err error) *Mockphaser_plan_Call {
+	_c.Call.Return(alreadyApplied, err)
 	return _c
 }
 

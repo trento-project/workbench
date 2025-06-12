@@ -11,6 +11,7 @@ type phaser interface {
 	rollback(ctx context.Context) error
 	verify(ctx context.Context) error
 	operationDiff(ctx context.Context) map[string]any
+	after(ctx context.Context)
 }
 
 type Executor struct {
@@ -25,6 +26,8 @@ func (e *Executor) Run(ctx context.Context) *ExecutionReport {
 	if err != nil {
 		return executionReportWithError(err, e.currentPhase, e.operationID)
 	}
+
+	defer e.phaser.after(ctx)
 
 	if alreadyApplied {
 		diff := e.phaser.operationDiff(ctx)

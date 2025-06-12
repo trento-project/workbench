@@ -1,6 +1,8 @@
 package operator
 
 import (
+	"context"
+
 	"github.com/sirupsen/logrus"
 )
 
@@ -43,3 +45,5 @@ func newBaseOperator(
 
 	return *base
 }
+
+func (b *baseOperator) after(_ context.Context) {}
