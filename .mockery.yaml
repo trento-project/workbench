@@ -29,3 +29,11 @@ packages:
           dir: "internal/saptune/mocks"
         interfaces:
           Saptune:
+    github.com/trento-project/workbench/internal/systemd:
+        config:
+          outpkg: "mocks"
+          dir: "internal/systemd/mocks"
+        interfaces:
+          DbusConnector:
+          Systemd:
+          SystemdLoader:
