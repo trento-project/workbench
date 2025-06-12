@@ -134,6 +134,13 @@ func StandardRegistry(options ...BaseOperatorOption) *Registry {
 					})
 				},
 			},
+			EnablePacemakerOperatorName: map[string]OperatorBuilder{
+				"v1": func(operationID string, arguments OperatorArguments) Operator {
+					return NewEnablePacemaker(arguments, operationID, OperatorOptions[EnablePacemaker]{
+						BaseOperatorOptions: options,
+					})
+				},
+			},
 		},
 	}
 }
