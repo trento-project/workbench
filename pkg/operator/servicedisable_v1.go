@@ -1,0 +1,130 @@
+package operator
+
+import (
+	"context"
+	"fmt"
+
+	"github.com/trento-project/workbench/internal/systemd"
+)
+
+const PacemakerDisableOperatorName = "pacemakerdisable"
+
+type ServiceDisableOption Option[ServiceDisable]
+
+// ServiceDisable operator disables a systemd unit.
+//
+// # Execution Phases
+//
+// - PLAN:
+//   The operator connects to systemd and determines if the service is enabled.
+//   The operation is skipped if the service is already disabled.
+//
+// - COMMIT:
+//   It disables the systemd unit.
+//
+// - VERIFY:
+//   The operator checks if the service is disabled after the commit phase.
+//
+// - ROLLBACK:
+//   If an error occurs during the COMMIT or VERIFY phase, the service is enabled back again.
+
+type ServiceDisable struct {
+	baseOperator
+	systemdLoader    systemd.SystemdLoader
+	systemdConnector systemd.Systemd
+	service          string
+}
+
+func WithCustomServiceDisableSystemdLoader(systemdLoader systemd.SystemdLoader) ServiceDisableOption {
+	return func(sd *ServiceDisable) {
+		sd.systemdLoader = systemdLoader
+	}
+}
+
+func WithServiceToDisable(service string) ServiceDisableOption {
+	return func(sd *ServiceDisable) {
+		sd.service = service
+	}
+}
+
+func NewServiceDisable(
+	arguments OperatorArguments,
+	operationID string,
+	options OperatorOptions[ServiceDisable],
+) *Executor {
+	serviceDisable := &ServiceDisable{
+		baseOperator:  newBaseOperator(operationID, arguments, options.BaseOperatorOptions...),
+		systemdLoader: systemd.NewDefaultSystemdLoader(),
+	}
+
+	for _, opt := range options.OperatorOptions {
+		opt(serviceDisable)
+	}
+
+	return &Executor{
+		phaser:      serviceDisable,
+		operationID: operationID,
+	}
+}
+
+func (sd *ServiceDisable) plan(ctx context.Context) (bool, error) {
+	systemdConnector, err := sd.systemdLoader.NewSystemd(ctx, sd.logger)
+	if err != nil {
+		sd.logger.Errorf("unable to initialize systemd connector: %s", err)
+		return false, fmt.Errorf("unable to initialize systemd connector: %w", err)
+	}
+	sd.systemdConnector = systemdConnector
+
+	serviceEnabled, err := sd.systemdConnector.IsEnabled(ctx, sd.service)
+	if err != nil {
+		sd.logger.Errorf("failed to check if service %s is enabled: %v", sd.service, err)
+		return false, fmt.Errorf("failed to check if %s service is enabled: %w", sd.service, err)
+	}
+
+	sd.resources[beforeDiffField] = serviceEnabled
+
+	if !serviceEnabled {
+		sd.logger.Infof("service %s is already disabled, skipping operation", sd.service)
+		sd.resources[afterDiffField] = serviceEnabled
+		return true, nil
+	}
+	return false, nil
+}
+
+func (sd *ServiceDisable) commit(ctx context.Context) error {
+	if err := sd.systemdConnector.Disable(ctx, sd.service); err != nil {
+		sd.logger.Errorf("failed to disable service %s: %v", sd.service, err)
+		return fmt.Errorf("failed to disable service %s: %w", sd.service, err)
+	}
+
+	return nil
+}
+
+func (sd *ServiceDisable) verify(ctx context.Context) error {
+	serviceEnabled, err := sd.systemdConnector.IsEnabled(ctx, sd.service)
+	if err != nil {
+		sd.logger.Errorf("failed to check if service %s is enabled: %v", sd.service, err)
+		return fmt.Errorf("failed to check if service %s is enabled: %w", sd.service, err)
+	}
+
+	if serviceEnabled {
+		sd.logger.Infof("service %s is not disabled, rolling back", sd.service)
+		return fmt.Errorf("service %s is not disabled", sd.service)
+	}
+
+	sd.resources[afterDiffField] = serviceEnabled
+
+	return nil
+}
+
+func (sd *ServiceDisable) rollback(ctx context.Context) error {
+	return sd.systemdConnector.Enable(ctx, sd.service)
+}
+
+func (sd *ServiceDisable) operationDiff(ctx context.Context) map[string]any {
+	return computeOperationDiff(sd.resources)
+}
+
+func (sd *ServiceDisable) after(ctx context.Context) {
+	sd.systemdConnector.Close()
+}
