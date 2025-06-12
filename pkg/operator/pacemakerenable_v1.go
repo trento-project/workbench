@@ -100,7 +100,6 @@ func (p *PacemakerEnable) commit(ctx context.Context) error {
 		p.logger.Error("failed to start pacemaker service", "error", err)
 		return fmt.Errorf("failed to start pacemaker service: %w", err)
 	}
-	p.logger.Info("Pacemaker service enabled successfully")
 	return nil
 }
 
