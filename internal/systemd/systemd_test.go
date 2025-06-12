@@ -13,22 +13,22 @@ import (
 	"github.com/trento-project/workbench/internal/systemd/mocks"
 )
 
-type SaptuneClientTestSuite struct {
+type SystemdTestSuite struct {
 	suite.Suite
 	dbusMock *mocks.MockDbusConnector
 	logger   *logrus.Entry
 }
 
 func TestSaptuneClient(t *testing.T) {
-	suite.Run(t, new(SaptuneClientTestSuite))
+	suite.Run(t, new(SystemdTestSuite))
 }
 
-func (suite *SaptuneClientTestSuite) SetupTest() {
+func (suite *SystemdTestSuite) SetupTest() {
 	suite.dbusMock = mocks.NewMockDbusConnector(suite.T())
 	suite.logger = logrus.NewEntry(logrus.StandardLogger())
 }
 
-func (suite *SaptuneClientTestSuite) TestServiceIsEnabledFailure() {
+func (suite *SystemdTestSuite) TestServiceIsEnabledFailure() {
 	ctx := context.Background()
 
 	suite.dbusMock.On(
@@ -54,7 +54,7 @@ func (suite *SaptuneClientTestSuite) TestServiceIsEnabledFailure() {
 	suite.ErrorContains(err, "failed to get unit file state for service foo.service: exit status 1")
 }
 
-func (suite *SaptuneClientTestSuite) TestServiceIsEnabled() {
+func (suite *SystemdTestSuite) TestServiceIsEnabled() {
 	ctx := context.Background()
 
 	property := &dbus.Property{
@@ -82,7 +82,7 @@ func (suite *SaptuneClientTestSuite) TestServiceIsEnabled() {
 	suite.True(enabled)
 }
 
-func (suite *SaptuneClientTestSuite) TestServiceIsDisabled() {
+func (suite *SystemdTestSuite) TestServiceIsDisabled() {
 	ctx := context.Background()
 
 	property := &dbus.Property{
@@ -110,7 +110,7 @@ func (suite *SaptuneClientTestSuite) TestServiceIsDisabled() {
 	suite.False(enabled)
 }
 
-func (suite *SaptuneClientTestSuite) TestEnableServiceFailure() {
+func (suite *SystemdTestSuite) TestEnableServiceFailure() {
 	ctx := context.Background()
 
 	suite.dbusMock.On(
@@ -137,7 +137,7 @@ func (suite *SaptuneClientTestSuite) TestEnableServiceFailure() {
 	suite.ErrorContains(err, "failed to enable service foo.service: exit status 1")
 }
 
-func (suite *SaptuneClientTestSuite) TestEnableServiceFailureOnReload() {
+func (suite *SystemdTestSuite) TestEnableServiceFailureOnReload() {
 	ctx := context.Background()
 
 	enableCall := suite.dbusMock.On(
@@ -171,7 +171,7 @@ func (suite *SaptuneClientTestSuite) TestEnableServiceFailureOnReload() {
 	suite.ErrorContains(err, "failed to reload service foo.service: exit status 1")
 }
 
-func (suite *SaptuneClientTestSuite) TestSuccessfulEnableService() {
+func (suite *SystemdTestSuite) TestSuccessfulEnableService() {
 	ctx := context.Background()
 
 	enableCall := suite.dbusMock.On(
@@ -204,7 +204,7 @@ func (suite *SaptuneClientTestSuite) TestSuccessfulEnableService() {
 	suite.NoError(err)
 }
 
-func (suite *SaptuneClientTestSuite) TestDisableServiceFailure() {
+func (suite *SystemdTestSuite) TestDisableServiceFailure() {
 	ctx := context.Background()
 
 	suite.dbusMock.On(
@@ -229,7 +229,7 @@ func (suite *SaptuneClientTestSuite) TestDisableServiceFailure() {
 	suite.ErrorContains(err, "failed to disable service foo.service: exit status 1")
 }
 
-func (suite *SaptuneClientTestSuite) TestDisableServiceFailureOnReload() {
+func (suite *SystemdTestSuite) TestDisableServiceFailureOnReload() {
 	ctx := context.Background()
 
 	disableCall := suite.dbusMock.On(
@@ -261,7 +261,7 @@ func (suite *SaptuneClientTestSuite) TestDisableServiceFailureOnReload() {
 	suite.ErrorContains(err, "failed to reload service foo.service: exit status 1")
 }
 
-func (suite *SaptuneClientTestSuite) TestSuccessfulDisableService() {
+func (suite *SystemdTestSuite) TestSuccessfulDisableService() {
 	ctx := context.Background()
 
 	disableCall := suite.dbusMock.On(
