@@ -11,7 +11,7 @@ import (
 	"github.com/trento-project/workbench/pkg/operator"
 )
 
-type EnablePacemakerOperatorTestSuite struct {
+type PacemakerEnableOperatorTestSuite struct {
 	suite.Suite
 	logger            *logrus.Logger
 	loggerEntry       *logrus.Entry
@@ -19,46 +19,46 @@ type EnablePacemakerOperatorTestSuite struct {
 	mockSystemdLoader *mocks.MockSystemdLoader
 }
 
-func buildEnablePacemakerOperator(suite *EnablePacemakerOperatorTestSuite) operator.Operator {
-	return operator.NewEnablePacemaker(
+func buildPacemakerEnableOperator(suite *PacemakerEnableOperatorTestSuite) operator.Operator {
+	return operator.NewPacemakerEnable(
 		operator.OperatorArguments{},
 		"test-op",
-		operator.OperatorOptions[operator.EnablePacemaker]{
+		operator.OperatorOptions[operator.PacemakerEnable]{
 			BaseOperatorOptions: []operator.BaseOperatorOption{
 				operator.WithCustomLogger(suite.logger),
 			},
-			OperatorOptions: []operator.Option[operator.EnablePacemaker]{
-				operator.Option[operator.EnablePacemaker](operator.WithCustomEnablePacemakerSystemdLoader(suite.mockSystemdLoader)),
+			OperatorOptions: []operator.Option[operator.PacemakerEnable]{
+				operator.Option[operator.PacemakerEnable](operator.WithCustomPacemakerEnableSystemdLoader(suite.mockSystemdLoader)),
 			},
 		},
 	)
 }
 
-func TestEnablePacemakerOperator(t *testing.T) {
-	suite.Run(t, new(EnablePacemakerOperatorTestSuite))
+func TestPacemakerEnableOperator(t *testing.T) {
+	suite.Run(t, new(PacemakerEnableOperatorTestSuite))
 }
 
-func (suite *EnablePacemakerOperatorTestSuite) SetupTest() {
+func (suite *PacemakerEnableOperatorTestSuite) SetupTest() {
 	suite.logger = logrus.StandardLogger()
 	suite.loggerEntry = suite.logger.WithField("operation_id", "test-op")
 	suite.mockSystemd = mocks.NewMockSystemd(suite.T())
 	suite.mockSystemdLoader = mocks.NewMockSystemdLoader(suite.T())
 }
 
-func (suite *EnablePacemakerOperatorTestSuite) TestEnablePacemakerOperatorPlanErrorDbusConnection() {
+func (suite *PacemakerEnableOperatorTestSuite) TestPacemakerEnableOperatorPlanErrorDbusConnection() {
 	ctx := context.Background()
 
 	suite.mockSystemdLoader.On("NewSystemd", ctx, suite.loggerEntry).
 		Return(nil, errors.New("dbus connection error")).
 		Once()
 
-	report := buildEnablePacemakerOperator(suite).Run(ctx)
+	report := buildPacemakerEnableOperator(suite).Run(ctx)
 
 	suite.Nil(report.Success)
 	suite.EqualValues("unable to initialize systemd connector: dbus connection error", report.Error.Message)
 }
 
-func (suite *EnablePacemakerOperatorTestSuite) TestEnablePacemakerOperatorPlanErrorIsEnabled() {
+func (suite *PacemakerEnableOperatorTestSuite) TestPacemakerEnableOperatorPlanErrorIsEnabled() {
 	ctx := context.Background()
 
 	systemdLoaderCall := suite.mockSystemdLoader.On("NewSystemd", ctx, suite.loggerEntry).
@@ -70,13 +70,13 @@ func (suite *EnablePacemakerOperatorTestSuite) TestEnablePacemakerOperatorPlanEr
 		Once().
 		NotBefore(systemdLoaderCall)
 
-	report := buildEnablePacemakerOperator(suite).Run(ctx)
+	report := buildPacemakerEnableOperator(suite).Run(ctx)
 
 	suite.Nil(report.Success)
 	suite.EqualValues("failed to check if pacemaker service is enabled: systemd error", report.Error.Message)
 }
 
-func (suite *EnablePacemakerOperatorTestSuite) TestEnablePacemakerOperatorPlanAlreadyEnabled() {
+func (suite *PacemakerEnableOperatorTestSuite) TestPacemakerEnableOperatorPlanAlreadyEnabled() {
 	ctx := context.Background()
 
 	systemdLoaderCall := suite.mockSystemdLoader.On("NewSystemd", ctx, suite.loggerEntry).
@@ -93,7 +93,7 @@ func (suite *EnablePacemakerOperatorTestSuite) TestEnablePacemakerOperatorPlanAl
 		Once().
 		NotBefore(isEnabledCall)
 
-	report := buildEnablePacemakerOperator(suite).Run(ctx)
+	report := buildPacemakerEnableOperator(suite).Run(ctx)
 
 	expectedDiff := map[string]any{
 		"before": `{"enabled":true}`,
@@ -105,7 +105,7 @@ func (suite *EnablePacemakerOperatorTestSuite) TestEnablePacemakerOperatorPlanAl
 	suite.EqualValues(expectedDiff, report.Success.Diff)
 }
 
-func (suite *EnablePacemakerOperatorTestSuite) TestEnablePacemakerOperatorCommitErrorEnableFailedRollback() {
+func (suite *PacemakerEnableOperatorTestSuite) TestPacemakerEnableOperatorCommitErrorEnableFailedRollback() {
 	ctx := context.Background()
 
 	systemdLoaderCall := suite.mockSystemdLoader.On("NewSystemd", ctx, suite.loggerEntry).
@@ -132,14 +132,14 @@ func (suite *EnablePacemakerOperatorTestSuite) TestEnablePacemakerOperatorCommit
 		Once().
 		NotBefore(disableCall)
 
-	report := buildEnablePacemakerOperator(suite).Run(ctx)
+	report := buildPacemakerEnableOperator(suite).Run(ctx)
 
 	suite.Nil(report.Success)
 	suite.Equal(operator.ROLLBACK, report.Error.ErrorPhase)
 	suite.EqualValues("systemd disable error\nfailed to start pacemaker service: systemd enable error", report.Error.Message)
 }
 
-func (suite *EnablePacemakerOperatorTestSuite) TestEnablePacemakerOperatorCommitErrorEnableSuccessfulRollback() {
+func (suite *PacemakerEnableOperatorTestSuite) TestPacemakerEnableOperatorCommitErrorEnableSuccessfulRollback() {
 	ctx := context.Background()
 
 	systemdLoaderCall := suite.mockSystemdLoader.On("NewSystemd", ctx, suite.loggerEntry).
@@ -166,14 +166,14 @@ func (suite *EnablePacemakerOperatorTestSuite) TestEnablePacemakerOperatorCommit
 		Once().
 		NotBefore(disableCall)
 
-	report := buildEnablePacemakerOperator(suite).Run(ctx)
+	report := buildPacemakerEnableOperator(suite).Run(ctx)
 
 	suite.Nil(report.Success)
 	suite.Equal(operator.COMMIT, report.Error.ErrorPhase)
 	suite.EqualValues("failed to start pacemaker service: systemd enable error", report.Error.Message)
 }
 
-func (suite *EnablePacemakerOperatorTestSuite) TestEnablePacemakerOperatorVerifyErrorIsEnabledFailedRollback() {
+func (suite *PacemakerEnableOperatorTestSuite) TestPacemakerEnableOperatorVerifyErrorIsEnabledFailedRollback() {
 	ctx := context.Background()
 
 	systemdLoaderCall := suite.mockSystemdLoader.On("NewSystemd", ctx, suite.loggerEntry).
@@ -205,14 +205,14 @@ func (suite *EnablePacemakerOperatorTestSuite) TestEnablePacemakerOperatorVerify
 		Once().
 		NotBefore(disableCall)
 
-	report := buildEnablePacemakerOperator(suite).Run(ctx)
+	report := buildPacemakerEnableOperator(suite).Run(ctx)
 
 	suite.Nil(report.Success)
 	suite.Equal(operator.ROLLBACK, report.Error.ErrorPhase)
 	suite.EqualValues("systemd disable error\nfailed to check if pacemaker service is enabled: error verifying is enabled", report.Error.Message)
 }
 
-func (suite *EnablePacemakerOperatorTestSuite) TestEnablePacemakerOperatorVerifyErrorIsEnabledSuccessfulRollback() {
+func (suite *PacemakerEnableOperatorTestSuite) TestPacemakerEnableOperatorVerifyErrorIsEnabledSuccessfulRollback() {
 	ctx := context.Background()
 
 	systemdLoaderCall := suite.mockSystemdLoader.On("NewSystemd", ctx, suite.loggerEntry).
@@ -244,14 +244,14 @@ func (suite *EnablePacemakerOperatorTestSuite) TestEnablePacemakerOperatorVerify
 		Once().
 		NotBefore(disableCall)
 
-	report := buildEnablePacemakerOperator(suite).Run(ctx)
+	report := buildPacemakerEnableOperator(suite).Run(ctx)
 
 	suite.Nil(report.Success)
 	suite.Equal(operator.VERIFY, report.Error.ErrorPhase)
 	suite.EqualValues("failed to check if pacemaker service is enabled: error verifying is enabled", report.Error.Message)
 }
 
-func (suite *EnablePacemakerOperatorTestSuite) TestEnablePacemakerOperatorVerifyNotEnabledFailedRollback() {
+func (suite *PacemakerEnableOperatorTestSuite) TestPacemakerEnableOperatorVerifyNotEnabledFailedRollback() {
 	ctx := context.Background()
 
 	systemdLoaderCall := suite.mockSystemdLoader.On("NewSystemd", ctx, suite.loggerEntry).
@@ -283,14 +283,14 @@ func (suite *EnablePacemakerOperatorTestSuite) TestEnablePacemakerOperatorVerify
 		Once().
 		NotBefore(disableCall)
 
-	report := buildEnablePacemakerOperator(suite).Run(ctx)
+	report := buildPacemakerEnableOperator(suite).Run(ctx)
 
 	suite.Nil(report.Success)
 	suite.Equal(operator.ROLLBACK, report.Error.ErrorPhase)
 	suite.EqualValues("systemd disable error\npacemaker service is not enabled", report.Error.Message)
 }
 
-func (suite *EnablePacemakerOperatorTestSuite) TestEnablePacemakerOperatorVerifyNotEnabledSuccessfulRollback() {
+func (suite *PacemakerEnableOperatorTestSuite) TestPacemakerEnableOperatorVerifyNotEnabledSuccessfulRollback() {
 	ctx := context.Background()
 
 	systemdLoaderCall := suite.mockSystemdLoader.On("NewSystemd", ctx, suite.loggerEntry).
@@ -322,14 +322,14 @@ func (suite *EnablePacemakerOperatorTestSuite) TestEnablePacemakerOperatorVerify
 		Once().
 		NotBefore(disableCall)
 
-	report := buildEnablePacemakerOperator(suite).Run(ctx)
+	report := buildPacemakerEnableOperator(suite).Run(ctx)
 
 	suite.Nil(report.Success)
 	suite.Equal(operator.VERIFY, report.Error.ErrorPhase)
 	suite.EqualValues("pacemaker service is not enabled", report.Error.Message)
 }
 
-func (suite *EnablePacemakerOperatorTestSuite) TestEnablePacemakerOperatorSuccess() {
+func (suite *PacemakerEnableOperatorTestSuite) TestPacemakerEnableOperatorSuccess() {
 	ctx := context.Background()
 
 	systemdLoaderCall := suite.mockSystemdLoader.On("NewSystemd", ctx, suite.loggerEntry).
@@ -356,7 +356,7 @@ func (suite *EnablePacemakerOperatorTestSuite) TestEnablePacemakerOperatorSucces
 		Once().
 		NotBefore(verifyIsEnabledCall)
 
-	report := buildEnablePacemakerOperator(suite).Run(ctx)
+	report := buildPacemakerEnableOperator(suite).Run(ctx)
 
 	expectedDiff := map[string]any{
 		"before": `{"enabled":false}`,

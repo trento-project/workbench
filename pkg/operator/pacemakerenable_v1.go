@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	EnablePacemakerOperatorName = "enablepacemaker"
+	PacemakerEnableOperatorName = "pacemakerenable"
 	pacemakerServiceName        = "pacemaker.service"
 )
 
@@ -17,9 +17,9 @@ type pacemakerEnablementDiffOutput struct {
 	Enabled bool `json:"enabled"`
 }
 
-type EnablePacemakerOption Option[EnablePacemaker]
+type PacemakerEnableOption Option[PacemakerEnable]
 
-// EnablePacemaker operator enables Pacemaker systemd unit.
+// PacemakerEnable operator enables Pacemaker systemd unit.
 //
 // # Execution Phases
 //
@@ -36,101 +36,101 @@ type EnablePacemakerOption Option[EnablePacemaker]
 // - ROLLBACK:
 //   If an error occurs during the COMMIT or VERIFY phase, the Pacemaker service is disabled back again.
 
-type EnablePacemaker struct {
+type PacemakerEnable struct {
 	baseOperator
 	systemdLoader    systemd.SystemdLoader
 	systemdConnector systemd.Systemd
 }
 
-func WithCustomEnablePacemakerSystemdLoader(systemdLoader systemd.SystemdLoader) EnablePacemakerOption {
-	return func(o *EnablePacemaker) {
+func WithCustomPacemakerEnableSystemdLoader(systemdLoader systemd.SystemdLoader) PacemakerEnableOption {
+	return func(o *PacemakerEnable) {
 		o.systemdLoader = systemdLoader
 	}
 }
 
-func NewEnablePacemaker(
+func NewPacemakerEnable(
 	arguments OperatorArguments,
 	operationID string,
-	options OperatorOptions[EnablePacemaker],
+	options OperatorOptions[PacemakerEnable],
 ) *Executor {
-	enablePacemaker := &EnablePacemaker{
+	pacemakerEnable := &PacemakerEnable{
 		baseOperator:  newBaseOperator(operationID, arguments, options.BaseOperatorOptions...),
 		systemdLoader: systemd.NewDefaultSystemdLoader(),
 	}
 
 	for _, opt := range options.OperatorOptions {
-		opt(enablePacemaker)
+		opt(pacemakerEnable)
 	}
 
 	return &Executor{
-		phaser:      enablePacemaker,
+		phaser:      pacemakerEnable,
 		operationID: operationID,
 	}
 }
 
-func (s *EnablePacemaker) plan(ctx context.Context) (bool, error) {
-	if s.systemdConnector == nil {
-		systemdConnector, err := s.systemdLoader.NewSystemd(ctx, s.logger)
+func (p *PacemakerEnable) plan(ctx context.Context) (bool, error) {
+	if p.systemdConnector == nil {
+		systemdConnector, err := p.systemdLoader.NewSystemd(ctx, p.logger)
 		if err != nil {
-			s.logger.Errorf("unable to initialize systemd connector: %s", err)
+			p.logger.Errorf("unable to initialize systemd connector: %s", err)
 			return false, fmt.Errorf("unable to initialize systemd connector: %w", err)
 		}
-		s.systemdConnector = systemdConnector
+		p.systemdConnector = systemdConnector
 	}
 
-	pacemakerEnabled, err := s.systemdConnector.IsEnabled(ctx, pacemakerServiceName)
+	pacemakerEnabled, err := p.systemdConnector.IsEnabled(ctx, pacemakerServiceName)
 	if err != nil {
-		s.logger.Error("failed to check if pacemaker service is enabled", "error", err)
+		p.logger.Error("failed to check if pacemaker service is enabled", "error", err)
 		return false, fmt.Errorf("failed to check if pacemaker service is enabled: %w", err)
 	}
 
-	s.resources[beforeDiffField] = pacemakerEnabled
+	p.resources[beforeDiffField] = pacemakerEnabled
 
 	if pacemakerEnabled {
-		s.logger.Info("pacemaker service already enabled, skipping operation")
-		s.resources[afterDiffField] = pacemakerEnabled
+		p.logger.Info("pacemaker service already enabled, skipping operation")
+		p.resources[afterDiffField] = pacemakerEnabled
 		return true, nil
 	}
 
 	return false, nil
 }
 
-func (s *EnablePacemaker) commit(ctx context.Context) error {
-	if err := s.systemdConnector.Enable(ctx, pacemakerServiceName); err != nil {
-		s.logger.Error("failed to start pacemaker service", "error", err)
+func (p *PacemakerEnable) commit(ctx context.Context) error {
+	if err := p.systemdConnector.Enable(ctx, pacemakerServiceName); err != nil {
+		p.logger.Error("failed to start pacemaker service", "error", err)
 		return fmt.Errorf("failed to start pacemaker service: %w", err)
 	}
-	s.logger.Info("Pacemaker service enabled successfully")
+	p.logger.Info("Pacemaker service enabled successfully")
 	return nil
 }
 
-func (s *EnablePacemaker) verify(ctx context.Context) error {
-	pacemakerEnabled, err := s.systemdConnector.IsEnabled(ctx, pacemakerServiceName)
+func (p *PacemakerEnable) verify(ctx context.Context) error {
+	pacemakerEnabled, err := p.systemdConnector.IsEnabled(ctx, pacemakerServiceName)
 	if err != nil {
-		s.logger.Error("failed to check if pacemaker service is enabled", "error", err)
+		p.logger.Error("failed to check if pacemaker service is enabled", "error", err)
 		return fmt.Errorf("failed to check if pacemaker service is enabled: %w", err)
 	}
 
 	if !pacemakerEnabled {
-		s.logger.Info("pacemaker service is not enabled, rolling back")
+		p.logger.Info("pacemaker service is not enabled, rolling back")
 		return fmt.Errorf("pacemaker service is not enabled")
 	}
 
-	s.resources[afterDiffField] = pacemakerEnabled
+	p.resources[afterDiffField] = pacemakerEnabled
 
 	return nil
 }
 
-func (s *EnablePacemaker) rollback(ctx context.Context) error {
-	return s.systemdConnector.Disable(ctx, pacemakerServiceName)
+func (p *PacemakerEnable) rollback(ctx context.Context) error {
+	return p.systemdConnector.Disable(ctx, pacemakerServiceName)
 }
 
-func (s *EnablePacemaker) operationDiff(ctx context.Context) map[string]any {
-	return computeOperationDiff(s.resources)
+func (p *PacemakerEnable) operationDiff(ctx context.Context) map[string]any {
+	return computeOperationDiff(p.resources)
 }
 
-func (s *EnablePacemaker) after(_ context.Context) {
-	s.systemdConnector.Close()
+func (p *PacemakerEnable) after(_ context.Context) {
+	p.systemdConnector.Close()
 }
 
 func computeOperationDiff(resources map[string]any) map[string]any {
