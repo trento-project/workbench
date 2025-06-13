@@ -3,11 +3,11 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"log/slog"
 	"os"
 
-	"github.com/sirupsen/logrus"
-
 	"github.com/jessevdk/go-flags"
+	"github.com/trento-project/workbench/internal/support"
 	"github.com/trento-project/workbench/pkg/operator"
 )
 
@@ -29,51 +29,55 @@ func main() {
 		os.Exit(1)
 	}
 
-	logger := logrus.StandardLogger()
+	var logLevel slog.Level
 	if options.Verbose {
-		logger.SetLevel(logrus.DebugLevel)
+		logLevel = slog.LevelDebug
+	} else {
+		logLevel = slog.LevelInfo
 	}
 
-	logger.Infof(
-		"starting workbench CLI, version: %s",
-		Version,
-	)
+	logger := support.NewDefaultLogger(logLevel)
+
+	slog.Info("starting workbench CLI", "version", Version)
 
 	operatorName := args[0]
 	registry := operator.StandardRegistry(operator.WithCustomLogger(logger))
 
 	builder, err := registry.GetOperatorBuilder(operatorName)
 	if err != nil {
-		logger.Fatalf("operator: %s not available, exiting", operatorName)
+		slog.Error("operator not available, exiting", "operator", operatorName)
+		os.Exit(1)
 	}
 
 	opArgs := make(operator.OperatorArguments)
 	err = json.Unmarshal([]byte(options.Arguments), &opArgs)
 	if err != nil {
-		logger.Fatalf("could not unmarhsal %s into arguments", options.Arguments)
+		slog.Error("could not unmarshal options arguments", "arguments", options.Arguments)
+		os.Exit(1)
 	}
 
-	logger.Infof(
-		"starting execution with operator: %s - arguments: %s",
-		operatorName,
-		options.Arguments,
+	slog.Info(
+		"starting execution with operator",
+		"operator", operatorName,
+		"arguments", options.Arguments,
 	)
 
 	op := builder("test-cli", opArgs)
 
 	report := op.Run(ctx)
 	if report.Error != nil {
-		logger.Fatalf(
-			"operation execution error, phase: %s, reason: %s",
-			report.Error.ErrorPhase,
-			report.Error.Message,
+		slog.Error(
+			"operation execution error",
+			"phase", report.Error.ErrorPhase,
+			"reason", report.Error.Message,
 		)
+		os.Exit(1)
 	}
 
-	logger.Infof(
-		"execution succeded in phase: %s, diff: before: %s, after: %s",
-		report.Success.LastPhase,
-		report.Success.Diff["before"],
-		report.Success.Diff["after"],
+	slog.Info(
+		"execution succeeded",
+		"phase", report.Success.LastPhase,
+		"diff_before", report.Success.Diff["before"],
+		"diff_after", report.Success.Diff["after"],
 	)
 }
