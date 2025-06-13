@@ -149,7 +149,7 @@ func (c *ClusterMaintenanceChange) plan(ctx context.Context) (bool, error) {
 	c.resources[beforeDiffField] = currentState
 
 	if c.resources[beforeDiffField] == c.parsedArguments.maintenance {
-		c.logger.Infof("maintenance state %v already set, skipping operation", c.parsedArguments.maintenance)
+		c.logger.Info("maintenance state already set, skipping operation", "state", c.parsedArguments.maintenance)
 		c.resources[afterDiffField] = currentState
 		return true, nil
 	}

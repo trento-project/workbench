@@ -129,7 +129,7 @@ func (sa *SaptuneApplySolution) plan(ctx context.Context) (bool, error) {
 	sa.resources[beforeDiffField] = initiallyAppliedSolution
 
 	if sa.parsedArguments.solution == initiallyAppliedSolution {
-		sa.logger.Infof("solution %s is already applied, skipping operation", sa.parsedArguments.solution)
+		sa.logger.Info("solution is already applied, skipping operation", "solution", sa.parsedArguments.solution)
 		sa.resources[afterDiffField] = initiallyAppliedSolution
 		return true, nil
 	}
