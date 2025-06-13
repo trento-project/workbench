@@ -44,14 +44,14 @@ type ServiceEnable struct {
 }
 
 func WithCustomServiceEnableSystemdLoader(systemdLoader systemd.SystemdLoader) ServiceEnableOption {
-	return func(o *ServiceEnable) {
-		o.systemdLoader = systemdLoader
+	return func(se *ServiceEnable) {
+		se.systemdLoader = systemdLoader
 	}
 }
 
-func WithService(service string) ServiceEnableOption {
-	return func(o *ServiceEnable) {
-		o.service = service
+func WithServiceToEnable(service string) ServiceEnableOption {
+	return func(se *ServiceEnable) {
+		se.service = service
 	}
 }
 
@@ -75,66 +75,66 @@ func NewServiceEnable(
 	}
 }
 
-func (p *ServiceEnable) plan(ctx context.Context) (bool, error) {
-	systemdConnector, err := p.systemdLoader.NewSystemd(ctx, p.logger)
+func (se *ServiceEnable) plan(ctx context.Context) (bool, error) {
+	systemdConnector, err := se.systemdLoader.NewSystemd(ctx, se.logger)
 	if err != nil {
-		p.logger.Errorf("unable to initialize systemd connector: %v", err)
+		se.logger.Errorf("unable to initialize systemd connector: %v", err)
 		return false, fmt.Errorf("unable to initialize systemd connector: %w", err)
 	}
-	p.systemdConnector = systemdConnector
+	se.systemdConnector = systemdConnector
 
-	serviceEnabled, err := p.systemdConnector.IsEnabled(ctx, p.service)
+	serviceEnabled, err := se.systemdConnector.IsEnabled(ctx, se.service)
 	if err != nil {
-		p.logger.Errorf("failed to check if service %s is enabled: %v", p.service, err)
-		return false, fmt.Errorf("failed to check if %s service is enabled: %w", p.service, err)
+		se.logger.Errorf("failed to check if service %s is enabled: %v", se.service, err)
+		return false, fmt.Errorf("failed to check if %s service is enabled: %w", se.service, err)
 	}
 
-	p.resources[beforeDiffField] = serviceEnabled
+	se.resources[beforeDiffField] = serviceEnabled
 
 	if serviceEnabled {
-		p.logger.Infof("service %s already enabled, skipping operation", p.service)
-		p.resources[afterDiffField] = serviceEnabled
+		se.logger.Infof("service %s already enabled, skipping operation", se.service)
+		se.resources[afterDiffField] = serviceEnabled
 		return true, nil
 	}
 
 	return false, nil
 }
 
-func (p *ServiceEnable) commit(ctx context.Context) error {
-	if err := p.systemdConnector.Enable(ctx, p.service); err != nil {
-		p.logger.Errorf("failed to enable service %s: %v", p.service, err)
-		return fmt.Errorf("failed to enable service %s: %w", p.service, err)
+func (se *ServiceEnable) commit(ctx context.Context) error {
+	if err := se.systemdConnector.Enable(ctx, se.service); err != nil {
+		se.logger.Errorf("failed to enable service %s: %v", se.service, err)
+		return fmt.Errorf("failed to enable service %s: %w", se.service, err)
 	}
 	return nil
 }
 
-func (p *ServiceEnable) verify(ctx context.Context) error {
-	serviceEnabled, err := p.systemdConnector.IsEnabled(ctx, p.service)
+func (se *ServiceEnable) verify(ctx context.Context) error {
+	serviceEnabled, err := se.systemdConnector.IsEnabled(ctx, se.service)
 	if err != nil {
-		p.logger.Errorf("failed to check if service %s is enabled: %v", p.service, err)
-		return fmt.Errorf("failed to check if service %s is enabled: %w", p.service, err)
+		se.logger.Errorf("failed to check if service %s is enabled: %v", se.service, err)
+		return fmt.Errorf("failed to check if service %s is enabled: %w", se.service, err)
 	}
 
 	if !serviceEnabled {
-		p.logger.Infof("service %s is not enabled, rolling back", p.service)
-		return fmt.Errorf("service %s is not enabled", p.service)
+		se.logger.Infof("service %s is not enabled, rolling back", se.service)
+		return fmt.Errorf("service %s is not enabled", se.service)
 	}
 
-	p.resources[afterDiffField] = serviceEnabled
+	se.resources[afterDiffField] = serviceEnabled
 
 	return nil
 }
 
-func (p *ServiceEnable) rollback(ctx context.Context) error {
-	return p.systemdConnector.Disable(ctx, p.service)
+func (se *ServiceEnable) rollback(ctx context.Context) error {
+	return se.systemdConnector.Disable(ctx, se.service)
 }
 
-func (p *ServiceEnable) operationDiff(ctx context.Context) map[string]any {
-	return computeOperationDiff(p.resources)
+func (se *ServiceEnable) operationDiff(ctx context.Context) map[string]any {
+	return computeOperationDiff(se.resources)
 }
 
-func (p *ServiceEnable) after(_ context.Context) {
-	p.systemdConnector.Close()
+func (se *ServiceEnable) after(_ context.Context) {
+	se.systemdConnector.Close()
 }
 
 func computeOperationDiff(resources map[string]any) map[string]any {
