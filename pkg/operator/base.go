@@ -16,7 +16,7 @@ type BaseOperatorOption Option[baseOperator]
 
 func WithCustomLogger(logger *slog.Logger) BaseOperatorOption {
 	return func(b *baseOperator) {
-		b.loggerInstance = logger
+		b.logger = logger
 	}
 }
 
@@ -33,16 +33,16 @@ func newBaseOperator(
 	options ...BaseOperatorOption,
 ) baseOperator {
 	base := &baseOperator{
-		arguments:      arguments,
-		resources:      make(map[string]any),
-		loggerInstance: support.NewDefaultLogger(slog.LevelInfo),
+		arguments: arguments,
+		resources: make(map[string]any),
+		logger:    support.NewDefaultLogger(slog.LevelInfo),
 	}
 
 	for _, opt := range options {
 		opt(base)
 	}
 
-	base.logger = base.loggerInstance.With("operation_id", operationID)
+	base.logger = base.logger.With("operation_id", operationID)
 
 	return *base
 }
