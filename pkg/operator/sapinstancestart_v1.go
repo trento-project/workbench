@@ -11,7 +11,6 @@ import (
 
 const (
 	SapInstanceStartOperatorName    = "sapinstancestart"
-	defaultStartDelay               = 1 * time.Second
 	defaultSapInstanceStateTimeout  = 5 * time.Minute
 	defaultSapInstanceStateInterval = 10 * time.Second
 )
@@ -53,7 +52,6 @@ type SAPInstanceStart struct {
 	parsedArguments     *sapStateChangeArguments
 	sapControlConnector sapcontrol.SAPControlConnector
 	interval            time.Duration
-	startDelay          time.Duration
 }
 
 func WithCustomStartSapcontrol(sapControlConnector sapcontrol.SAPControlConnector) SAPInstanceStartOption {
@@ -68,12 +66,6 @@ func WithCustomStartInterval(interval time.Duration) SAPInstanceStartOption {
 	}
 }
 
-func WithCustomStartInitialDelay(startDelay time.Duration) SAPInstanceStartOption {
-	return func(o *SAPInstanceStart) {
-		o.startDelay = startDelay
-	}
-}
-
 func NewSAPInstanceStart(
 	arguments OperatorArguments,
 	operationID string,
@@ -82,7 +74,6 @@ func NewSAPInstanceStart(
 	sapInstanceStart := &SAPInstanceStart{
 		baseOperator: newBaseOperator(operationID, arguments, options.BaseOperatorOptions...),
 		interval:     defaultSapInstanceStateInterval,
-		startDelay:   defaultStartDelay,
 	}
 
 	for _, opt := range options.OperatorOptions {
@@ -134,13 +125,7 @@ func (s *SAPInstanceStart) commit(ctx context.Context) error {
 }
 
 func (s *SAPInstanceStart) verify(ctx context.Context) error {
-	// need to wait until the processes start properly
-	err := sleepContext(ctx, s.startDelay)
-	if err != nil {
-		return err
-	}
-
-	err = waitUntilSapInstanceState(
+	err := waitUntilSapInstanceState(
 		ctx,
 		s.sapControlConnector,
 		sapcontrol.STATECOLORSAPControlGREEN,
@@ -205,6 +190,12 @@ func allProcessesInState(
 	response, err := connector.GetProcessListContext(ctx, request)
 	if err != nil {
 		return false, fmt.Errorf("error getting instance process list: %w", err)
+	}
+
+	// GetProcessList can return an empty list for some seconds when the instance
+	// is started. Discard this scenario.
+	if len(response.Processes) == 0 {
+		return false, nil
 	}
 
 	for _, process := range response.Processes {
