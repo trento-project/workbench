@@ -134,7 +134,6 @@ func (suite *SAPInstanceStartOperatorTestSuite) TestSAPInstanceStartCommitAlread
 		operator.OperatorOptions[operator.SAPInstanceStart]{
 			OperatorOptions: []operator.Option[operator.SAPInstanceStart]{
 				operator.Option[operator.SAPInstanceStart](operator.WithCustomStartSapcontrol(suite.mockSapcontrol)),
-				operator.Option[operator.SAPInstanceStart](operator.WithCustomStartInitialDelay(0 * time.Second)),
 			},
 		},
 	)
@@ -259,7 +258,6 @@ func (suite *SAPInstanceStartOperatorTestSuite) TestSAPInstanceStartVerifyError(
 		operator.OperatorOptions[operator.SAPInstanceStart]{
 			OperatorOptions: []operator.Option[operator.SAPInstanceStart]{
 				operator.Option[operator.SAPInstanceStart](operator.WithCustomStartSapcontrol(suite.mockSapcontrol)),
-				operator.Option[operator.SAPInstanceStart](operator.WithCustomStartInitialDelay(0 * time.Second)),
 			},
 		},
 	)
@@ -302,7 +300,6 @@ func (suite *SAPInstanceStartOperatorTestSuite) TestSAPInstanceStartVerifyTimeou
 		operator.OperatorOptions[operator.SAPInstanceStart]{
 			OperatorOptions: []operator.Option[operator.SAPInstanceStart]{
 				operator.Option[operator.SAPInstanceStart](operator.WithCustomStartSapcontrol(suite.mockSapcontrol)),
-				operator.Option[operator.SAPInstanceStart](operator.WithCustomStartInitialDelay(0 * time.Second)),
 				operator.Option[operator.SAPInstanceStart](operator.WithCustomStartInterval(0 * time.Second)),
 			},
 		},
@@ -399,7 +396,6 @@ func (suite *SAPInstanceStartOperatorTestSuite) TestSAPInstanceStartSuccess() {
 		operator.OperatorOptions[operator.SAPInstanceStart]{
 			OperatorOptions: []operator.Option[operator.SAPInstanceStart]{
 				operator.Option[operator.SAPInstanceStart](operator.WithCustomStartSapcontrol(suite.mockSapcontrol)),
-				operator.Option[operator.SAPInstanceStart](operator.WithCustomStartInitialDelay(0 * time.Second)),
 			},
 		},
 	)
@@ -442,6 +438,12 @@ func (suite *SAPInstanceStartOperatorTestSuite) TestSAPInstanceStartSuccessMulti
 
 	suite.mockSapcontrol.
 		On("GetProcessListContext", mock.Anything, mock.Anything).
+		Return(&sapcontrol.GetProcessListResponse{
+			Processes: []*sapcontrol.OSProcess{},
+		}, nil).
+		Twice().
+		NotBefore(planGetProcesses).
+		On("GetProcessListContext", mock.Anything, mock.Anything).
 		Return(
 			&sapcontrol.GetProcessListResponse{
 				Processes: []*sapcontrol.OSProcess{
@@ -474,7 +476,6 @@ func (suite *SAPInstanceStartOperatorTestSuite) TestSAPInstanceStartSuccessMulti
 		operator.OperatorOptions[operator.SAPInstanceStart]{
 			OperatorOptions: []operator.Option[operator.SAPInstanceStart]{
 				operator.Option[operator.SAPInstanceStart](operator.WithCustomStartSapcontrol(suite.mockSapcontrol)),
-				operator.Option[operator.SAPInstanceStart](operator.WithCustomStartInitialDelay(0 * time.Second)),
 				operator.Option[operator.SAPInstanceStart](operator.WithCustomStartInterval(0 * time.Second)),
 			},
 		},
