@@ -40,7 +40,7 @@ func TestServiceEnableOperator(t *testing.T) {
 }
 
 func (suite *ServiceEnableOperatorTestSuite) SetupTest() {
-	suite.logger = support.NewDefaultLogger(slog.LevelInfo).With("operation_id", "test-op")
+	suite.logger = support.NewDefaultLogger(slog.LevelInfo)
 	suite.mockSystemd = mocks.NewMockSystemd(suite.T())
 	suite.mockSystemdLoader = mocks.NewMockSystemdLoader(suite.T())
 }
@@ -48,7 +48,7 @@ func (suite *ServiceEnableOperatorTestSuite) SetupTest() {
 func (suite *ServiceEnableOperatorTestSuite) TestServiceEnableOperatorPlanErrorDbusConnection() {
 	ctx := context.Background()
 
-	suite.mockSystemdLoader.On("NewSystemd", ctx, suite.logger).
+	suite.mockSystemdLoader.On("NewSystemd", ctx, suite.logger.With("operation_id", "test-op")).
 		Return(nil, errors.New("dbus connection error")).
 		Once()
 
@@ -61,7 +61,7 @@ func (suite *ServiceEnableOperatorTestSuite) TestServiceEnableOperatorPlanErrorD
 func (suite *ServiceEnableOperatorTestSuite) TestServiceEnableOperatorPlanErrorIsEnabled() {
 	ctx := context.Background()
 
-	systemdLoaderCall := suite.mockSystemdLoader.On("NewSystemd", ctx, suite.logger).
+	systemdLoaderCall := suite.mockSystemdLoader.On("NewSystemd", ctx, suite.logger.With("operation_id", "test-op")).
 		Return(suite.mockSystemd, nil).
 		Once()
 
@@ -79,7 +79,7 @@ func (suite *ServiceEnableOperatorTestSuite) TestServiceEnableOperatorPlanErrorI
 func (suite *ServiceEnableOperatorTestSuite) TestServiceEnableOperatorPlanAlreadyEnabled() {
 	ctx := context.Background()
 
-	systemdLoaderCall := suite.mockSystemdLoader.On("NewSystemd", ctx, suite.logger).
+	systemdLoaderCall := suite.mockSystemdLoader.On("NewSystemd", ctx, suite.logger.With("operation_id", "test-op")).
 		Return(suite.mockSystemd, nil).
 		Once()
 
@@ -108,7 +108,7 @@ func (suite *ServiceEnableOperatorTestSuite) TestServiceEnableOperatorPlanAlread
 func (suite *ServiceEnableOperatorTestSuite) TestServiceEnableOperatorCommitErrorEnableFailedRollback() {
 	ctx := context.Background()
 
-	systemdLoaderCall := suite.mockSystemdLoader.On("NewSystemd", ctx, suite.logger).
+	systemdLoaderCall := suite.mockSystemdLoader.On("NewSystemd", ctx, suite.logger.With("operation_id", "test-op")).
 		Return(suite.mockSystemd, nil).
 		Once()
 
@@ -142,7 +142,7 @@ func (suite *ServiceEnableOperatorTestSuite) TestServiceEnableOperatorCommitErro
 func (suite *ServiceEnableOperatorTestSuite) TestServiceEnableOperatorCommitErrorEnableSuccessfulRollback() {
 	ctx := context.Background()
 
-	systemdLoaderCall := suite.mockSystemdLoader.On("NewSystemd", ctx, suite.logger).
+	systemdLoaderCall := suite.mockSystemdLoader.On("NewSystemd", ctx, suite.logger.With("operation_id", "test-op")).
 		Return(suite.mockSystemd, nil).
 		Once()
 
@@ -176,7 +176,7 @@ func (suite *ServiceEnableOperatorTestSuite) TestServiceEnableOperatorCommitErro
 func (suite *ServiceEnableOperatorTestSuite) TestServiceEnableOperatorVerifyErrorIsEnabledFailedRollback() {
 	ctx := context.Background()
 
-	systemdLoaderCall := suite.mockSystemdLoader.On("NewSystemd", ctx, suite.logger).
+	systemdLoaderCall := suite.mockSystemdLoader.On("NewSystemd", ctx, suite.logger.With("operation_id", "test-op")).
 		Return(suite.mockSystemd, nil).
 		Once()
 
@@ -215,7 +215,7 @@ func (suite *ServiceEnableOperatorTestSuite) TestServiceEnableOperatorVerifyErro
 func (suite *ServiceEnableOperatorTestSuite) TestServiceEnableOperatorVerifyErrorIsEnabledSuccessfulRollback() {
 	ctx := context.Background()
 
-	systemdLoaderCall := suite.mockSystemdLoader.On("NewSystemd", ctx, suite.logger).
+	systemdLoaderCall := suite.mockSystemdLoader.On("NewSystemd", ctx, suite.logger.With("operation_id", "test-op")).
 		Return(suite.mockSystemd, nil).
 		Once()
 
@@ -254,7 +254,7 @@ func (suite *ServiceEnableOperatorTestSuite) TestServiceEnableOperatorVerifyErro
 func (suite *ServiceEnableOperatorTestSuite) TestServiceEnableOperatorVerifyNotEnabledFailedRollback() {
 	ctx := context.Background()
 
-	systemdLoaderCall := suite.mockSystemdLoader.On("NewSystemd", ctx, suite.logger).
+	systemdLoaderCall := suite.mockSystemdLoader.On("NewSystemd", ctx, suite.logger.With("operation_id", "test-op")).
 		Return(suite.mockSystemd, nil).
 		Once()
 
@@ -293,7 +293,7 @@ func (suite *ServiceEnableOperatorTestSuite) TestServiceEnableOperatorVerifyNotE
 func (suite *ServiceEnableOperatorTestSuite) TestServiceEnableOperatorVerifyNotEnabledSuccessfulRollback() {
 	ctx := context.Background()
 
-	systemdLoaderCall := suite.mockSystemdLoader.On("NewSystemd", ctx, suite.logger).
+	systemdLoaderCall := suite.mockSystemdLoader.On("NewSystemd", ctx, suite.logger.With("operation_id", "test-op")).
 		Return(suite.mockSystemd, nil).
 		Once()
 
@@ -332,7 +332,7 @@ func (suite *ServiceEnableOperatorTestSuite) TestServiceEnableOperatorVerifyNotE
 func (suite *ServiceEnableOperatorTestSuite) TestServiceEnableOperatorSuccess() {
 	ctx := context.Background()
 
-	systemdLoaderCall := suite.mockSystemdLoader.On("NewSystemd", ctx, suite.logger).
+	systemdLoaderCall := suite.mockSystemdLoader.On("NewSystemd", ctx, suite.logger.With("operation_id", "test-op")).
 		Return(suite.mockSystemd, nil).
 		Once()
 
