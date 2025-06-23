@@ -3,12 +3,13 @@ package systemd_test
 import (
 	"context"
 	"errors"
+	"log/slog"
 	"testing"
 
 	"github.com/coreos/go-systemd/v22/dbus"
 	innerDbus "github.com/godbus/dbus/v5"
-	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/suite"
+	"github.com/trento-project/workbench/internal/support"
 	"github.com/trento-project/workbench/internal/systemd"
 	"github.com/trento-project/workbench/internal/systemd/mocks"
 )
@@ -16,7 +17,7 @@ import (
 type SystemdTestSuite struct {
 	suite.Suite
 	dbusMock *mocks.MockDbusConnector
-	logger   *logrus.Entry
+	logger   *slog.Logger
 }
 
 func TestSaptuneClient(t *testing.T) {
@@ -25,7 +26,7 @@ func TestSaptuneClient(t *testing.T) {
 
 func (suite *SystemdTestSuite) SetupTest() {
 	suite.dbusMock = mocks.NewMockDbusConnector(suite.T())
-	suite.logger = logrus.NewEntry(logrus.StandardLogger())
+	suite.logger = support.NewDefaultLogger(slog.LevelInfo).With("test", "systemd_test_suite")
 }
 
 func (suite *SystemdTestSuite) TestServiceIsEnabledFailure() {

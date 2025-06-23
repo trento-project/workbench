@@ -78,21 +78,21 @@ func NewServiceEnable(
 func (se *ServiceEnable) plan(ctx context.Context) (bool, error) {
 	systemdConnector, err := se.systemdLoader.NewSystemd(ctx, se.logger)
 	if err != nil {
-		se.logger.Errorf("unable to initialize systemd connector: %v", err)
+		se.logger.Error("unable to initialize systemd connector", "error", err)
 		return false, fmt.Errorf("unable to initialize systemd connector: %w", err)
 	}
 	se.systemdConnector = systemdConnector
 
 	serviceEnabled, err := se.systemdConnector.IsEnabled(ctx, se.service)
 	if err != nil {
-		se.logger.Errorf("failed to check if service %s is enabled: %v", se.service, err)
+		se.logger.Error("failed to check if service is enabled", "service", se.service, "error", err)
 		return false, fmt.Errorf("failed to check if %s service is enabled: %w", se.service, err)
 	}
 
 	se.resources[beforeDiffField] = serviceEnabled
 
 	if serviceEnabled {
-		se.logger.Infof("service %s already enabled, skipping operation", se.service)
+		se.logger.Info("service already enabled, skipping operation", "service", se.service)
 		se.resources[afterDiffField] = serviceEnabled
 		return true, nil
 	}
@@ -102,7 +102,7 @@ func (se *ServiceEnable) plan(ctx context.Context) (bool, error) {
 
 func (se *ServiceEnable) commit(ctx context.Context) error {
 	if err := se.systemdConnector.Enable(ctx, se.service); err != nil {
-		se.logger.Errorf("failed to enable service %s: %v", se.service, err)
+		se.logger.Error("failed to enable service", "service", se.service, "error", err)
 		return fmt.Errorf("failed to enable service %s: %w", se.service, err)
 	}
 	return nil
@@ -111,12 +111,12 @@ func (se *ServiceEnable) commit(ctx context.Context) error {
 func (se *ServiceEnable) verify(ctx context.Context) error {
 	serviceEnabled, err := se.systemdConnector.IsEnabled(ctx, se.service)
 	if err != nil {
-		se.logger.Errorf("failed to check if service %s is enabled: %v", se.service, err)
+		se.logger.Error("failed to check if service is enabled", "service", se.service, "error", err)
 		return fmt.Errorf("failed to check if service %s is enabled: %w", se.service, err)
 	}
 
 	if !serviceEnabled {
-		se.logger.Infof("service %s is not enabled, rolling back", se.service)
+		se.logger.Info("service %s is not enabled, rolling back", "service", se.service)
 		return fmt.Errorf("service %s is not enabled", se.service)
 	}
 
