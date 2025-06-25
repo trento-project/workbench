@@ -7,7 +7,6 @@ require (
 	github.com/godbus/dbus/v5 v5.1.0
 	github.com/hooklift/gowsdl v0.5.0
 	github.com/jessevdk/go-flags v1.6.1
-	github.com/sirupsen/logrus v1.9.3
 	github.com/stretchr/testify v1.10.0
 	github.com/tidwall/gjson v1.18.0
 	golang.org/x/mod v0.25.0

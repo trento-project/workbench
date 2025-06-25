@@ -3,9 +3,9 @@ package saptune
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"strings"
 
-	"github.com/sirupsen/logrus"
 	"github.com/tidwall/gjson"
 	"golang.org/x/mod/semver"
 
@@ -24,12 +24,12 @@ type Saptune interface {
 
 type saptuneClient struct {
 	executor support.CmdExecutor
-	logger   *logrus.Entry
+	logger   *slog.Logger
 }
 
 func NewSaptuneClient(
 	executor support.CmdExecutor,
-	logger *logrus.Entry,
+	logger *slog.Logger,
 ) Saptune {
 	return &saptuneClient{
 		executor: executor,
@@ -56,7 +56,7 @@ func (saptune *saptuneClient) CheckVersionSupport(ctx context.Context) error {
 		)
 	}
 
-	saptune.logger.Debugf("installed saptune version: %s", detectedVersion)
+	saptune.logger.Debug("installed saptune version", "version", detectedVersion)
 
 	return nil
 }
@@ -72,11 +72,9 @@ func (saptune *saptuneClient) GetAppliedSolution(ctx context.Context) (string, e
 func (saptune *saptuneClient) ApplySolution(ctx context.Context, solution string) error {
 	applyOutput, err := saptune.executor.Exec(ctx, "saptune", "solution", "apply", solution)
 	if err != nil {
-		saptune.logger.Errorf(
-			"could not perform saptune solution apply %s, error output: %s",
-			solution,
-			applyOutput,
-		)
+		saptune.logger.Error("could not perform saptune solution apply",
+			"solution", solution,
+			"error_output", applyOutput)
 
 		return fmt.Errorf("could not perform saptune solution apply %s, error: %s",
 			solution,
@@ -90,11 +88,9 @@ func (saptune *saptuneClient) ApplySolution(ctx context.Context, solution string
 func (saptune *saptuneClient) ChangeSolution(ctx context.Context, solution string) error {
 	changeSolutionOutput, err := saptune.executor.Exec(ctx, "saptune", "solution", "change", "--force", solution)
 	if err != nil {
-		saptune.logger.Errorf(
-			"could not perform saptune solution change %s, error output: %s",
-			solution,
-			changeSolutionOutput,
-		)
+		saptune.logger.Error("could not perform saptune solution change",
+			"solution", solution,
+			"error_output", changeSolutionOutput)
 
 		return fmt.Errorf("could not perform saptune change solution %s, error: %s",
 			solution,
@@ -108,11 +104,7 @@ func (saptune *saptuneClient) ChangeSolution(ctx context.Context, solution strin
 func (saptune *saptuneClient) RevertSolution(ctx context.Context, solution string) error {
 	revertOutput, err := saptune.executor.Exec(ctx, "saptune", "solution", "revert", solution)
 	if err != nil {
-		saptune.logger.Errorf(
-			"could not perform saptune solution revert %s, error output: %s",
-			solution,
-			revertOutput,
-		)
+		saptune.logger.Error("could not perform saptune solution revert", "solution", solution, "error_output", revertOutput)
 
 		return fmt.Errorf("could not perform saptune solution revert %s, error: %s",
 			solution,

@@ -3,8 +3,7 @@ package systemd
 import (
 	"context"
 	"fmt"
-
-	"github.com/sirupsen/logrus"
+	"log/slog"
 )
 
 type Systemd interface {
@@ -16,18 +15,18 @@ type Systemd interface {
 
 type SystemdConnector struct {
 	dbusConnection DbusConnector
-	logger         *logrus.Entry
+	logger         *slog.Logger
 }
 
 type SystemdConnectorOption func(*SystemdConnector)
 
 type SystemdLoader interface {
-	NewSystemd(ctx context.Context, logger *logrus.Entry, options ...SystemdConnectorOption) (Systemd, error)
+	NewSystemd(ctx context.Context, logger *slog.Logger, options ...SystemdConnectorOption) (Systemd, error)
 }
 
 type defaultSystemdLoader struct{}
 
-func (d *defaultSystemdLoader) NewSystemd(ctx context.Context, logger *logrus.Entry, options ...SystemdConnectorOption) (Systemd, error) {
+func (d *defaultSystemdLoader) NewSystemd(ctx context.Context, logger *slog.Logger, options ...SystemdConnectorOption) (Systemd, error) {
 	return NewSystemd(ctx, logger, options...)
 }
 
@@ -41,7 +40,7 @@ func WithCustomDbusConnector(dbusConnection DbusConnector) SystemdConnectorOptio
 	}
 }
 
-func NewSystemd(ctx context.Context, logger *logrus.Entry, options ...SystemdConnectorOption) (Systemd, error) {
+func NewSystemd(ctx context.Context, logger *slog.Logger, options ...SystemdConnectorOption) (Systemd, error) {
 	systemdInstance := &SystemdConnector{
 		logger: logger,
 	}
@@ -56,7 +55,7 @@ func NewSystemd(ctx context.Context, logger *logrus.Entry, options ...SystemdCon
 
 	dbusConnection, err := NewDbusConnector(ctx)
 	if err != nil {
-		logger.Errorf("failed to create dbus connection: %v", err)
+		logger.Error("failed to create dbus connection", "error", err)
 		return nil, err
 	}
 	systemdInstance.dbusConnection = dbusConnection
@@ -67,7 +66,7 @@ func NewSystemd(ctx context.Context, logger *logrus.Entry, options ...SystemdCon
 func (s *SystemdConnector) Enable(ctx context.Context, service string) error {
 	_, _, err := s.dbusConnection.EnableUnitFilesContext(ctx, []string{service}, false, true)
 	if err != nil {
-		s.logger.Errorf("failed to enable service %s: %v", service, err)
+		s.logger.Error("failed to enable service", "service", service, "error", err)
 		return fmt.Errorf("failed to enable service %s: %w", service, err)
 	}
 
@@ -77,7 +76,7 @@ func (s *SystemdConnector) Enable(ctx context.Context, service string) error {
 func (s *SystemdConnector) Disable(ctx context.Context, service string) error {
 	_, err := s.dbusConnection.DisableUnitFilesContext(ctx, []string{service}, false)
 	if err != nil {
-		s.logger.Errorf("failed to disable service %s: %v", service, err)
+		s.logger.Error("failed to disable service", "service", service, "error", err)
 		return fmt.Errorf("failed to disable service %s: %w", service, err)
 	}
 
@@ -87,7 +86,7 @@ func (s *SystemdConnector) Disable(ctx context.Context, service string) error {
 func (s *SystemdConnector) IsEnabled(ctx context.Context, service string) (bool, error) {
 	unitFileState, err := s.dbusConnection.GetUnitPropertyContext(ctx, service, "UnitFileState")
 	if err != nil {
-		s.logger.Errorf("failed to get unit file state for service %s: %v", service, err)
+		s.logger.Error("failed to get unit file state for service", "service", service, "error", err)
 		return false, fmt.Errorf("failed to get unit file state for service %s: %w", service, err)
 	}
 
@@ -101,7 +100,7 @@ func (s *SystemdConnector) Close() {
 func (s *SystemdConnector) reload(ctx context.Context, service string) error {
 	err := s.dbusConnection.ReloadContext(ctx)
 	if err != nil {
-		s.logger.Errorf("failed to reload service %s: %v", service, err)
+		s.logger.Error("failed to reload service", "service", service, "error", err)
 		return fmt.Errorf("failed to reload service %s: %w", service, err)
 	}
 	return nil

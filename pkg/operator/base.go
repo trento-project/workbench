@@ -2,8 +2,9 @@ package operator
 
 import (
 	"context"
+	"log/slog"
 
-	"github.com/sirupsen/logrus"
+	"github.com/trento-project/workbench/internal/support"
 )
 
 const (
@@ -13,17 +14,16 @@ const (
 
 type BaseOperatorOption Option[baseOperator]
 
-func WithCustomLogger(logger *logrus.Logger) BaseOperatorOption {
+func WithCustomLogger(logger *slog.Logger) BaseOperatorOption {
 	return func(b *baseOperator) {
-		b.loggerInstance = logger
+		b.logger = logger
 	}
 }
 
 type baseOperator struct {
-	arguments      OperatorArguments
-	resources      map[string]any
-	loggerInstance *logrus.Logger
-	logger         *logrus.Entry
+	arguments OperatorArguments
+	resources map[string]any
+	logger    *slog.Logger
 }
 
 func newBaseOperator(
@@ -32,16 +32,16 @@ func newBaseOperator(
 	options ...BaseOperatorOption,
 ) baseOperator {
 	base := &baseOperator{
-		arguments:      arguments,
-		resources:      make(map[string]any),
-		loggerInstance: logrus.StandardLogger(),
+		arguments: arguments,
+		resources: make(map[string]any),
+		logger:    support.NewDefaultLogger(slog.LevelInfo),
 	}
 
 	for _, opt := range options {
 		opt(base)
 	}
 
-	base.logger = base.loggerInstance.WithField("operation_id", operationID)
+	base.logger = base.logger.With("operation_id", operationID)
 
 	return *base
 }

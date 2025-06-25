@@ -4,8 +4,8 @@ package mocks
 
 import (
 	context "context"
+	slog "log/slog"
 
-	logrus "github.com/sirupsen/logrus"
 	mock "github.com/stretchr/testify/mock"
 
 	systemd "github.com/trento-project/workbench/internal/systemd"
@@ -25,7 +25,7 @@ func (_m *MockSystemdLoader) EXPECT() *MockSystemdLoader_Expecter {
 }
 
 // NewSystemd provides a mock function with given fields: ctx, logger, options
-func (_m *MockSystemdLoader) NewSystemd(ctx context.Context, logger *logrus.Entry, options ...systemd.SystemdConnectorOption) (systemd.Systemd, error) {
+func (_m *MockSystemdLoader) NewSystemd(ctx context.Context, logger *slog.Logger, options ...systemd.SystemdConnectorOption) (systemd.Systemd, error) {
 	_va := make([]interface{}, len(options))
 	for _i := range options {
 		_va[_i] = options[_i]
@@ -37,10 +37,10 @@ func (_m *MockSystemdLoader) NewSystemd(ctx context.Context, logger *logrus.Entr
 
 	var r0 systemd.Systemd
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, *logrus.Entry, ...systemd.SystemdConnectorOption) (systemd.Systemd, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, *slog.Logger, ...systemd.SystemdConnectorOption) (systemd.Systemd, error)); ok {
 		return rf(ctx, logger, options...)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, *logrus.Entry, ...systemd.SystemdConnectorOption) systemd.Systemd); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, *slog.Logger, ...systemd.SystemdConnectorOption) systemd.Systemd); ok {
 		r0 = rf(ctx, logger, options...)
 	} else {
 		if ret.Get(0) != nil {
@@ -48,7 +48,7 @@ func (_m *MockSystemdLoader) NewSystemd(ctx context.Context, logger *logrus.Entr
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, *logrus.Entry, ...systemd.SystemdConnectorOption) error); ok {
+	if rf, ok := ret.Get(1).(func(context.Context, *slog.Logger, ...systemd.SystemdConnectorOption) error); ok {
 		r1 = rf(ctx, logger, options...)
 	} else {
 		r1 = ret.Error(1)
@@ -64,14 +64,14 @@ type MockSystemdLoader_NewSystemd_Call struct {
 
 // NewSystemd is a helper method to define mock.On call
 //   - ctx context.Context
-//   - logger *logrus.Entry
+//   - logger *slog.Logger
 //   - options ...systemd.SystemdConnectorOption
 func (_e *MockSystemdLoader_Expecter) NewSystemd(ctx interface{}, logger interface{}, options ...interface{}) *MockSystemdLoader_NewSystemd_Call {
 	return &MockSystemdLoader_NewSystemd_Call{Call: _e.mock.On("NewSystemd",
 		append([]interface{}{ctx, logger}, options...)...)}
 }
 
-func (_c *MockSystemdLoader_NewSystemd_Call) Run(run func(ctx context.Context, logger *logrus.Entry, options ...systemd.SystemdConnectorOption)) *MockSystemdLoader_NewSystemd_Call {
+func (_c *MockSystemdLoader_NewSystemd_Call) Run(run func(ctx context.Context, logger *slog.Logger, options ...systemd.SystemdConnectorOption)) *MockSystemdLoader_NewSystemd_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		variadicArgs := make([]systemd.SystemdConnectorOption, len(args)-2)
 		for i, a := range args[2:] {
@@ -79,7 +79,7 @@ func (_c *MockSystemdLoader_NewSystemd_Call) Run(run func(ctx context.Context, l
 				variadicArgs[i] = a.(systemd.SystemdConnectorOption)
 			}
 		}
-		run(args[0].(context.Context), args[1].(*logrus.Entry), variadicArgs...)
+		run(args[0].(context.Context), args[1].(*slog.Logger), variadicArgs...)
 	})
 	return _c
 }
@@ -89,7 +89,7 @@ func (_c *MockSystemdLoader_NewSystemd_Call) Return(_a0 systemd.Systemd, _a1 err
 	return _c
 }
 
-func (_c *MockSystemdLoader_NewSystemd_Call) RunAndReturn(run func(context.Context, *logrus.Entry, ...systemd.SystemdConnectorOption) (systemd.Systemd, error)) *MockSystemdLoader_NewSystemd_Call {
+func (_c *MockSystemdLoader_NewSystemd_Call) RunAndReturn(run func(context.Context, *slog.Logger, ...systemd.SystemdConnectorOption) (systemd.Systemd, error)) *MockSystemdLoader_NewSystemd_Call {
 	_c.Call.Return(run)
 	return _c
 }

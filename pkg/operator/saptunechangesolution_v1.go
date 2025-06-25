@@ -89,7 +89,8 @@ func (sc *SaptuneChangeSolution) plan(ctx context.Context) (bool, error) {
 	sc.resources[beforeDiffField] = initiallyAppliedSolution
 
 	if sc.parsedArguments.solution == initiallyAppliedSolution {
-		sc.logger.Infof("solution %s is already applied. Nothing to change, skipping operation", sc.parsedArguments.solution)
+		sc.logger.Info("solution is already applied. Nothing to change, skipping operation",
+			"solution", sc.parsedArguments.solution)
 		sc.resources[afterDiffField] = initiallyAppliedSolution
 		return true, nil
 	}
@@ -140,7 +141,7 @@ func (sc *SaptuneChangeSolution) rollback(ctx context.Context) error {
 		return nil
 	}
 
-	sc.logger.Infof("Changing solution to the initially applied one: %s", initiallyAppliedSolution)
+	sc.logger.Info("Changing solution to the initially applied one", "appliedSolution", initiallyAppliedSolution)
 	return sc.saptune.ChangeSolution(ctx, initiallyAppliedSolution)
 }
 

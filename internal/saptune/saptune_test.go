@@ -5,9 +5,11 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/sirupsen/logrus"
+	"log/slog"
+
 	"github.com/stretchr/testify/suite"
 	"github.com/trento-project/workbench/internal/saptune"
+	"github.com/trento-project/workbench/internal/support"
 	"github.com/trento-project/workbench/internal/support/mocks"
 	"github.com/trento-project/workbench/test/helpers"
 )
@@ -15,7 +17,7 @@ import (
 type SaptuneClientTestSuite struct {
 	suite.Suite
 	mockExecutor *mocks.MockCmdExecutor
-	logger       *logrus.Entry
+	logger       *slog.Logger
 }
 
 func TestSaptuneClient(t *testing.T) {
@@ -24,7 +26,7 @@ func TestSaptuneClient(t *testing.T) {
 
 func (suite *SaptuneClientTestSuite) SetupTest() {
 	suite.mockExecutor = mocks.NewMockCmdExecutor(suite.T())
-	suite.logger = logrus.NewEntry(logrus.StandardLogger())
+	suite.logger = support.NewDefaultLogger(slog.LevelInfo)
 }
 
 func (suite *SaptuneClientTestSuite) TestVersionCheckFailureBecauseUnableToDetectVersion() {
