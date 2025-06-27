@@ -20,7 +20,7 @@ type SystemdTestSuite struct {
 	logger   *slog.Logger
 }
 
-func TestSaptuneClient(t *testing.T) {
+func TestSystemdClient(t *testing.T) {
 	suite.Run(t, new(SystemdTestSuite))
 }
 
