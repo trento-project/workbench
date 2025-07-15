@@ -88,8 +88,8 @@ type GetSystemInstanceList struct {
 }
 
 type GetSystemInstanceListResponse struct {
-	XMLName  xml.Name       `xml:"urn:SAPControl GetSystemInstanceListResponse"`
-	Instance []*SAPInstance `xml:"instance>item,omitempty" json:"instance>item,omitempty"`
+	XMLName   xml.Name       `xml:"urn:SAPControl GetSystemInstanceListResponse"`
+	Instances []*SAPInstance `xml:"instance>item,omitempty" json:"instance>item,omitempty"`
 }
 
 type SAPInstance struct {
