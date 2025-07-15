@@ -77,6 +77,61 @@ func (_c *MockSAPControlConnector_GetProcessListContext_Call) RunAndReturn(run f
 	return _c
 }
 
+// GetSystemInstanceListContext provides a mock function with given fields: ctx, request
+func (_m *MockSAPControlConnector) GetSystemInstanceListContext(ctx context.Context, request *sapcontrol.GetSystemInstanceList) (*sapcontrol.GetSystemInstanceListResponse, error) {
+	ret := _m.Called(ctx, request)
+
+	var r0 *sapcontrol.GetSystemInstanceListResponse
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *sapcontrol.GetSystemInstanceList) (*sapcontrol.GetSystemInstanceListResponse, error)); ok {
+		return rf(ctx, request)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *sapcontrol.GetSystemInstanceList) *sapcontrol.GetSystemInstanceListResponse); ok {
+		r0 = rf(ctx, request)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*sapcontrol.GetSystemInstanceListResponse)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *sapcontrol.GetSystemInstanceList) error); ok {
+		r1 = rf(ctx, request)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockSAPControlConnector_GetSystemInstanceListContext_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetSystemInstanceListContext'
+type MockSAPControlConnector_GetSystemInstanceListContext_Call struct {
+	*mock.Call
+}
+
+// GetSystemInstanceListContext is a helper method to define mock.On call
+//   - ctx context.Context
+//   - request *sapcontrol.GetSystemInstanceList
+func (_e *MockSAPControlConnector_Expecter) GetSystemInstanceListContext(ctx interface{}, request interface{}) *MockSAPControlConnector_GetSystemInstanceListContext_Call {
+	return &MockSAPControlConnector_GetSystemInstanceListContext_Call{Call: _e.mock.On("GetSystemInstanceListContext", ctx, request)}
+}
+
+func (_c *MockSAPControlConnector_GetSystemInstanceListContext_Call) Run(run func(ctx context.Context, request *sapcontrol.GetSystemInstanceList)) *MockSAPControlConnector_GetSystemInstanceListContext_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(*sapcontrol.GetSystemInstanceList))
+	})
+	return _c
+}
+
+func (_c *MockSAPControlConnector_GetSystemInstanceListContext_Call) Return(_a0 *sapcontrol.GetSystemInstanceListResponse, _a1 error) *MockSAPControlConnector_GetSystemInstanceListContext_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockSAPControlConnector_GetSystemInstanceListContext_Call) RunAndReturn(run func(context.Context, *sapcontrol.GetSystemInstanceList) (*sapcontrol.GetSystemInstanceListResponse, error)) *MockSAPControlConnector_GetSystemInstanceListContext_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // StartContext provides a mock function with given fields: ctx, request
 func (_m *MockSAPControlConnector) StartContext(ctx context.Context, request *sapcontrol.Start) (*sapcontrol.StartResponse, error) {
 	ret := _m.Called(ctx, request)
@@ -132,6 +187,61 @@ func (_c *MockSAPControlConnector_StartContext_Call) RunAndReturn(run func(conte
 	return _c
 }
 
+// StartSystemContext provides a mock function with given fields: ctx, request
+func (_m *MockSAPControlConnector) StartSystemContext(ctx context.Context, request *sapcontrol.StartSystem) (*sapcontrol.StartSystemResponse, error) {
+	ret := _m.Called(ctx, request)
+
+	var r0 *sapcontrol.StartSystemResponse
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *sapcontrol.StartSystem) (*sapcontrol.StartSystemResponse, error)); ok {
+		return rf(ctx, request)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *sapcontrol.StartSystem) *sapcontrol.StartSystemResponse); ok {
+		r0 = rf(ctx, request)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*sapcontrol.StartSystemResponse)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *sapcontrol.StartSystem) error); ok {
+		r1 = rf(ctx, request)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockSAPControlConnector_StartSystemContext_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'StartSystemContext'
+type MockSAPControlConnector_StartSystemContext_Call struct {
+	*mock.Call
+}
+
+// StartSystemContext is a helper method to define mock.On call
+//   - ctx context.Context
+//   - request *sapcontrol.StartSystem
+func (_e *MockSAPControlConnector_Expecter) StartSystemContext(ctx interface{}, request interface{}) *MockSAPControlConnector_StartSystemContext_Call {
+	return &MockSAPControlConnector_StartSystemContext_Call{Call: _e.mock.On("StartSystemContext", ctx, request)}
+}
+
+func (_c *MockSAPControlConnector_StartSystemContext_Call) Run(run func(ctx context.Context, request *sapcontrol.StartSystem)) *MockSAPControlConnector_StartSystemContext_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(*sapcontrol.StartSystem))
+	})
+	return _c
+}
+
+func (_c *MockSAPControlConnector_StartSystemContext_Call) Return(_a0 *sapcontrol.StartSystemResponse, _a1 error) *MockSAPControlConnector_StartSystemContext_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockSAPControlConnector_StartSystemContext_Call) RunAndReturn(run func(context.Context, *sapcontrol.StartSystem) (*sapcontrol.StartSystemResponse, error)) *MockSAPControlConnector_StartSystemContext_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // StopContext provides a mock function with given fields: ctx, request
 func (_m *MockSAPControlConnector) StopContext(ctx context.Context, request *sapcontrol.Stop) (*sapcontrol.StopResponse, error) {
 	ret := _m.Called(ctx, request)
@@ -183,6 +293,61 @@ func (_c *MockSAPControlConnector_StopContext_Call) Return(_a0 *sapcontrol.StopR
 }
 
 func (_c *MockSAPControlConnector_StopContext_Call) RunAndReturn(run func(context.Context, *sapcontrol.Stop) (*sapcontrol.StopResponse, error)) *MockSAPControlConnector_StopContext_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// StopSystemContext provides a mock function with given fields: ctx, request
+func (_m *MockSAPControlConnector) StopSystemContext(ctx context.Context, request *sapcontrol.StopSystem) (*sapcontrol.StopSystemResponse, error) {
+	ret := _m.Called(ctx, request)
+
+	var r0 *sapcontrol.StopSystemResponse
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *sapcontrol.StopSystem) (*sapcontrol.StopSystemResponse, error)); ok {
+		return rf(ctx, request)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *sapcontrol.StopSystem) *sapcontrol.StopSystemResponse); ok {
+		r0 = rf(ctx, request)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*sapcontrol.StopSystemResponse)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *sapcontrol.StopSystem) error); ok {
+		r1 = rf(ctx, request)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockSAPControlConnector_StopSystemContext_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'StopSystemContext'
+type MockSAPControlConnector_StopSystemContext_Call struct {
+	*mock.Call
+}
+
+// StopSystemContext is a helper method to define mock.On call
+//   - ctx context.Context
+//   - request *sapcontrol.StopSystem
+func (_e *MockSAPControlConnector_Expecter) StopSystemContext(ctx interface{}, request interface{}) *MockSAPControlConnector_StopSystemContext_Call {
+	return &MockSAPControlConnector_StopSystemContext_Call{Call: _e.mock.On("StopSystemContext", ctx, request)}
+}
+
+func (_c *MockSAPControlConnector_StopSystemContext_Call) Run(run func(ctx context.Context, request *sapcontrol.StopSystem)) *MockSAPControlConnector_StopSystemContext_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(*sapcontrol.StopSystem))
+	})
+	return _c
+}
+
+func (_c *MockSAPControlConnector_StopSystemContext_Call) Return(_a0 *sapcontrol.StopSystemResponse, _a1 error) *MockSAPControlConnector_StopSystemContext_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockSAPControlConnector_StopSystemContext_Call) RunAndReturn(run func(context.Context, *sapcontrol.StopSystem) (*sapcontrol.StopSystemResponse, error)) *MockSAPControlConnector_StopSystemContext_Call {
 	_c.Call.Return(run)
 	return _c
 }
