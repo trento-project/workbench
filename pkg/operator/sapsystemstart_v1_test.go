@@ -278,13 +278,17 @@ func (suite *SAPSystemStartOperatorTestSuite) TestSAPSystemStartCommitStartingEr
 		).
 		Once()
 
-	suite.mockSapcontrol.
+	startSystem := suite.mockSapcontrol.
 		On("StartSystemContext", ctx, mock.Anything).
 		Return(nil, errors.New("error starting")).
-		NotBefore(planGetInstances).
+		NotBefore(planGetInstances)
+
+	rollbackStopSystem := suite.mockSapcontrol.
 		On("StopSystemContext", ctx, mock.Anything).
 		Return(nil, nil).
-		NotBefore(planGetInstances).
+		NotBefore(startSystem)
+
+	suite.mockSapcontrol.
 		On("GetSystemInstanceListContext", mock.Anything, mock.Anything).
 		Return(
 			&sapcontrol.GetSystemInstanceListResponse{
@@ -296,7 +300,7 @@ func (suite *SAPSystemStartOperatorTestSuite) TestSAPSystemStartCommitStartingEr
 			}, nil,
 		).
 		Once().
-		NotBefore(planGetInstances)
+		NotBefore(rollbackStopSystem)
 
 	sapSystemStartOperator := operator.NewSAPSystemStart(
 		operator.OperatorArguments{
@@ -335,19 +339,23 @@ func (suite *SAPSystemStartOperatorTestSuite) TestSAPSystemStartVerifyError() {
 		).
 		Once()
 
+	startSystem := suite.mockSapcontrol.
+		On("StartSystemContext", ctx, mock.Anything).
+		Return(nil, nil).
+		NotBefore(planGetInstances)
+
 	verifyGetInstances := suite.mockSapcontrol.
 		On("GetSystemInstanceListContext", mock.Anything, mock.Anything).
 		Return(nil, errors.New("error getting instances in verify")).
 		Once().
-		NotBefore(planGetInstances)
+		NotBefore(startSystem)
 
-	suite.mockSapcontrol.
-		On("StartSystemContext", ctx, mock.Anything).
-		Return(nil, nil).
-		NotBefore(planGetInstances).
+	rollbackStopSystem := suite.mockSapcontrol.
 		On("StopSystemContext", ctx, mock.Anything).
 		Return(nil, nil).
-		NotBefore(verifyGetInstances).
+		NotBefore(verifyGetInstances)
+
+	suite.mockSapcontrol.
 		On("GetSystemInstanceListContext", mock.Anything, mock.Anything).
 		Return(
 			&sapcontrol.GetSystemInstanceListResponse{
@@ -358,7 +366,8 @@ func (suite *SAPSystemStartOperatorTestSuite) TestSAPSystemStartVerifyError() {
 				},
 			}, nil,
 		).
-		NotBefore(verifyGetInstances)
+		Once().
+		NotBefore(rollbackStopSystem)
 
 	sapSystemStartOperator := operator.NewSAPSystemStart(
 		operator.OperatorArguments{
