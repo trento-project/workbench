@@ -127,6 +127,13 @@ func StandardRegistry(options ...BaseOperatorOption) *Registry {
 					})
 				},
 			},
+			SapSystemStopOperatorName: map[string]OperatorBuilder{
+				"v1": func(operationID string, arguments OperatorArguments) Operator {
+					return NewSAPSystemStop(arguments, operationID, OperatorOptions[SAPSystemStop]{
+						BaseOperatorOptions: options,
+					})
+				},
+			},
 			SaptuneApplySolutionOperatorName: map[string]OperatorBuilder{
 				"v1": func(operationID string, arguments OperatorArguments) Operator {
 					return NewSaptuneApplySolution(arguments, operationID, OperatorOptions[SaptuneApplySolution]{
