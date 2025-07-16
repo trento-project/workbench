@@ -29,13 +29,13 @@ func (suite *SAPSystemStopOperatorTestSuite) SetupTest() {
 func (suite *SAPSystemStopOperatorTestSuite) TestSAPSystemStopInstanceNumberMissing() {
 	ctx := context.Background()
 
-	sapSystemStartOperator := operator.NewSAPSystemStop(
+	sapSystemStopOperator := operator.NewSAPSystemStop(
 		operator.OperatorArguments{},
 		"test-op",
 		operator.OperatorOptions[operator.SAPSystemStop]{},
 	)
 
-	report := sapSystemStartOperator.Run(ctx)
+	report := sapSystemStopOperator.Run(ctx)
 
 	suite.Nil(report.Success)
 	suite.Equal(operator.PLAN, report.Error.ErrorPhase)
@@ -45,7 +45,7 @@ func (suite *SAPSystemStopOperatorTestSuite) TestSAPSystemStopInstanceNumberMiss
 func (suite *SAPSystemStopOperatorTestSuite) TestSAPSystemStopInstanceNumberInvalid() {
 	ctx := context.Background()
 
-	sapSystemStartOperator := operator.NewSAPSystemStop(
+	sapSystemStopOperator := operator.NewSAPSystemStop(
 		operator.OperatorArguments{
 			"instance_number": 0,
 		},
@@ -53,7 +53,7 @@ func (suite *SAPSystemStopOperatorTestSuite) TestSAPSystemStopInstanceNumberInva
 		operator.OperatorOptions[operator.SAPSystemStop]{},
 	)
 
-	report := sapSystemStartOperator.Run(ctx)
+	report := sapSystemStopOperator.Run(ctx)
 
 	suite.Nil(report.Success)
 	suite.Equal(operator.PLAN, report.Error.ErrorPhase)
@@ -63,7 +63,7 @@ func (suite *SAPSystemStopOperatorTestSuite) TestSAPSystemStopInstanceNumberInva
 func (suite *SAPSystemStopOperatorTestSuite) TestSAPSystemStopTimeoutInvalid() {
 	ctx := context.Background()
 
-	sapSystemStartOperator := operator.NewSAPSystemStop(
+	sapSystemStopOperator := operator.NewSAPSystemStop(
 		operator.OperatorArguments{
 			"instance_number": "00",
 			"timeout":         "value",
@@ -72,7 +72,7 @@ func (suite *SAPSystemStopOperatorTestSuite) TestSAPSystemStopTimeoutInvalid() {
 		operator.OperatorOptions[operator.SAPSystemStop]{},
 	)
 
-	report := sapSystemStartOperator.Run(ctx)
+	report := sapSystemStopOperator.Run(ctx)
 
 	suite.Nil(report.Success)
 	suite.Equal(operator.PLAN, report.Error.ErrorPhase)
@@ -82,7 +82,7 @@ func (suite *SAPSystemStopOperatorTestSuite) TestSAPSystemStopTimeoutInvalid() {
 func (suite *SAPSystemStopOperatorTestSuite) TestSAPSystemStopInstanceTypeInvalid() {
 	ctx := context.Background()
 
-	sapSystemStartOperator := operator.NewSAPSystemStop(
+	sapSystemStopOperator := operator.NewSAPSystemStop(
 		operator.OperatorArguments{
 			"instance_number": "00",
 			"instance_type":   0,
@@ -91,7 +91,7 @@ func (suite *SAPSystemStopOperatorTestSuite) TestSAPSystemStopInstanceTypeInvali
 		operator.OperatorOptions[operator.SAPSystemStop]{},
 	)
 
-	report := sapSystemStartOperator.Run(ctx)
+	report := sapSystemStopOperator.Run(ctx)
 
 	suite.Nil(report.Success)
 	suite.Equal(operator.PLAN, report.Error.ErrorPhase)
@@ -101,7 +101,7 @@ func (suite *SAPSystemStopOperatorTestSuite) TestSAPSystemStopInstanceTypeInvali
 func (suite *SAPSystemStopOperatorTestSuite) TestSAPSystemStopInstanceTypeUnknown() {
 	ctx := context.Background()
 
-	sapSystemStartOperator := operator.NewSAPSystemStop(
+	sapSystemStopOperator := operator.NewSAPSystemStop(
 		operator.OperatorArguments{
 			"instance_number": "00",
 			"instance_type":   "unknown",
@@ -110,7 +110,7 @@ func (suite *SAPSystemStopOperatorTestSuite) TestSAPSystemStopInstanceTypeUnknow
 		operator.OperatorOptions[operator.SAPSystemStop]{},
 	)
 
-	report := sapSystemStartOperator.Run(ctx)
+	report := sapSystemStopOperator.Run(ctx)
 
 	suite.Nil(report.Success)
 	suite.Equal(operator.PLAN, report.Error.ErrorPhase)
@@ -125,7 +125,7 @@ func (suite *SAPSystemStopOperatorTestSuite) TestSAPSystemStopPlanError() {
 		Return(nil, errors.New("error getting instances")).
 		Once()
 
-	sapSystemStartOperator := operator.NewSAPSystemStop(
+	sapSystemStopOperator := operator.NewSAPSystemStop(
 		operator.OperatorArguments{
 			"instance_number": "00",
 			"timeout":         300.0,
@@ -138,7 +138,7 @@ func (suite *SAPSystemStopOperatorTestSuite) TestSAPSystemStopPlanError() {
 		},
 	)
 
-	report := sapSystemStartOperator.Run(ctx)
+	report := sapSystemStopOperator.Run(ctx)
 
 	suite.Nil(report.Success)
 	suite.Equal(operator.PLAN, report.Error.ErrorPhase)
@@ -164,7 +164,7 @@ func (suite *SAPSystemStopOperatorTestSuite) TestSAPSystemStopCommitAlreadyStopp
 		}, nil).
 		Once()
 
-	sapSystemStartOperator := operator.NewSAPSystemStop(
+	sapSystemStopOperator := operator.NewSAPSystemStop(
 		operator.OperatorArguments{
 			"instance_number": "00",
 		},
@@ -176,7 +176,7 @@ func (suite *SAPSystemStopOperatorTestSuite) TestSAPSystemStopCommitAlreadyStopp
 		},
 	)
 
-	report := sapSystemStartOperator.Run(ctx)
+	report := sapSystemStopOperator.Run(ctx)
 
 	expectedDiff := map[string]any{
 		"before": `{"stopped":true}`,
@@ -234,7 +234,7 @@ func (suite *SAPSystemStopOperatorTestSuite) TestSAPSystemStopCommitAlreadyStopp
 			}, nil).
 			Once()
 
-		sapSystemStartOperator := operator.NewSAPSystemStop(
+		sapSystemStopOperator := operator.NewSAPSystemStop(
 			operator.OperatorArguments{
 				"instance_number": "00",
 				"instance_type":   tt.instanceType,
@@ -247,7 +247,7 @@ func (suite *SAPSystemStopOperatorTestSuite) TestSAPSystemStopCommitAlreadyStopp
 			},
 		)
 
-		report := sapSystemStartOperator.Run(ctx)
+		report := sapSystemStopOperator.Run(ctx)
 
 		expectedDiff := map[string]any{
 			"before": `{"stopped":true}`,
@@ -302,7 +302,7 @@ func (suite *SAPSystemStopOperatorTestSuite) TestSAPSystemStopCommitStoppingErro
 		Once().
 		NotBefore(rollbackStartSystem)
 
-	sapSystemStartOperator := operator.NewSAPSystemStop(
+	sapSystemStopOperator := operator.NewSAPSystemStop(
 		operator.OperatorArguments{
 			"instance_number": "00",
 		},
@@ -314,7 +314,7 @@ func (suite *SAPSystemStopOperatorTestSuite) TestSAPSystemStopCommitStoppingErro
 		},
 	)
 
-	report := sapSystemStartOperator.Run(ctx)
+	report := sapSystemStopOperator.Run(ctx)
 
 	suite.Nil(report.Success)
 	suite.Equal(operator.COMMIT, report.Error.ErrorPhase)
@@ -369,7 +369,7 @@ func (suite *SAPSystemStopOperatorTestSuite) TestSAPSystemStopVerifyError() {
 		Once().
 		NotBefore(rollbackStartSystem)
 
-	sapSystemStartOperator := operator.NewSAPSystemStop(
+	sapSystemStopOperator := operator.NewSAPSystemStop(
 		operator.OperatorArguments{
 			"instance_number": "00",
 		},
@@ -381,7 +381,7 @@ func (suite *SAPSystemStopOperatorTestSuite) TestSAPSystemStopVerifyError() {
 		},
 	)
 
-	report := sapSystemStartOperator.Run(ctx)
+	report := sapSystemStopOperator.Run(ctx)
 
 	suite.Nil(report.Success)
 	suite.Equal(operator.VERIFY, report.Error.ErrorPhase)
@@ -410,7 +410,7 @@ func (suite *SAPSystemStopOperatorTestSuite) TestSAPSystemStopVerifyTimeout() {
 		On("StartSystemContext", ctx, mock.Anything).
 		Return(nil, nil)
 
-	sapSystemStartOperator := operator.NewSAPSystemStop(
+	sapSystemStopOperator := operator.NewSAPSystemStop(
 		operator.OperatorArguments{
 			"instance_number": "00",
 			"timeout":         0.0,
@@ -424,7 +424,7 @@ func (suite *SAPSystemStopOperatorTestSuite) TestSAPSystemStopVerifyTimeout() {
 		},
 	)
 
-	report := sapSystemStartOperator.Run(ctx)
+	report := sapSystemStopOperator.Run(ctx)
 
 	suite.Nil(report.Success)
 	suite.Equal(operator.ROLLBACK, report.Error.ErrorPhase)
@@ -463,7 +463,7 @@ func (suite *SAPSystemStopOperatorTestSuite) TestSAPSystemStopRollbackStoppingEr
 		).
 		Return(nil, errors.New("error starting"))
 
-	sapSystemStartOperator := operator.NewSAPSystemStop(
+	sapSystemStopOperator := operator.NewSAPSystemStop(
 		operator.OperatorArguments{
 			"instance_number": "00",
 			"instance_type":   "abap",
@@ -476,7 +476,7 @@ func (suite *SAPSystemStopOperatorTestSuite) TestSAPSystemStopRollbackStoppingEr
 		},
 	)
 
-	report := sapSystemStartOperator.Run(ctx)
+	report := sapSystemStopOperator.Run(ctx)
 
 	suite.Nil(report.Success)
 	suite.Equal(operator.ROLLBACK, report.Error.ErrorPhase)
@@ -559,7 +559,7 @@ func (suite *SAPSystemStopOperatorTestSuite) TestSAPSystemStopSuccess() {
 			Once().
 			NotBefore(stopSystem)
 
-		sapSystemStartOperator := operator.NewSAPSystemStop(
+		sapSystemStopOperator := operator.NewSAPSystemStop(
 			operator.OperatorArguments{
 				"instance_number": "00",
 				"instance_type":   tt.instanceType,
@@ -572,7 +572,7 @@ func (suite *SAPSystemStopOperatorTestSuite) TestSAPSystemStopSuccess() {
 			},
 		)
 
-		report := sapSystemStartOperator.Run(ctx)
+		report := sapSystemStopOperator.Run(ctx)
 
 		expectedDiff := map[string]any{
 			"before": `{"stopped":false}`,
@@ -634,7 +634,7 @@ func (suite *SAPSystemStopOperatorTestSuite) TestSAPSystemStopSuccessMultipleQue
 		).
 		Once()
 
-	sapSystemStartOperator := operator.NewSAPSystemStop(
+	sapSystemStopOperator := operator.NewSAPSystemStop(
 		operator.OperatorArguments{
 			"instance_number": "00",
 			"timeout":         5.0,
@@ -648,7 +648,7 @@ func (suite *SAPSystemStopOperatorTestSuite) TestSAPSystemStopSuccessMultipleQue
 		},
 	)
 
-	report := sapSystemStartOperator.Run(ctx)
+	report := sapSystemStopOperator.Run(ctx)
 
 	expectedDiff := map[string]any{
 		"before": `{"stopped":false}`,
