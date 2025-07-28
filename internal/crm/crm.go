@@ -1,6 +1,7 @@
 package crm
 
 import (
+	"context"
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
@@ -14,6 +15,7 @@ import (
 type Crm interface {
 	// GetClusterId returns the unique identifier for the cluster.
 	GetClusterId() (string, error)
+	IsHostOnline(ctx context.Context) bool
 }
 
 type CrmClient struct {
@@ -38,6 +40,17 @@ func (c *CrmClient) GetClusterId() (string, error) {
 		return "", fmt.Errorf("failed to read authkey file: %w", err)
 	}
 	return id, nil
+}
+
+func (c *CrmClient) IsHostOnline(ctx context.Context) bool {
+	output, err := c.executor.Exec(ctx, "crm", "status", "simple")
+	if err != nil {
+		return false
+	}
+
+	c.logger.Debug("CRM status output", "output", string(output))
+
+	return true
 }
 
 func md5sumFile(filePath string) (string, error) {

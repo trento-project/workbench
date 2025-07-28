@@ -2,6 +2,7 @@ package operator
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"time"
@@ -31,6 +32,10 @@ func WithCustomCrmClient(crmClient cluster.Cluster) CrmClusterStartOption {
 	}
 }
 
+type crmClusterStartDiffOutput struct {
+	Started bool `json:"started"`
+}
+
 func WithCustomCrmClient(crmClient crm.Crm) CrmClusterStartOption {
 	return func(c *CrmClusterStart) {
 		c.crmClient = crmClient
@@ -57,25 +62,19 @@ func NewCrmClusterStart(arguments OperatorArguments,
 }
 
 func (c *CrmClusterStart) plan(ctx context.Context) (bool, error) {
-	opArguments, err := parseCrmClusterStartArguments(c.arguments)
-	if err != nil {
-		return false, fmt.Errorf("error parsing arguments: %w", err)
-	}
-	c.parsedArguments = opArguments
+	isOnline := c.clusterClient.IsHostOnline(ctx)
+	isOnline := c.crmClient.IsHostOnline(ctx)
+	c.resources[beforeDiffField] = isOnline
 
-	// Check if the provided cluster ID matches the one found in the system.
-	foundClusterID, err := c.crmClient.GetClusterId()
-	if err != nil {
-		return false, fmt.Errorf("error getting cluster ID: %w", err)
-	}
-	if foundClusterID != c.parsedArguments.clusterID {
-		return false, fmt.Errorf("cluster ID mismatch: expected %s, found %s",
-			c.parsedArguments.clusterID, foundClusterID)
+	if isOnline {
+		c.logger.Info("CRM cluster is already online", "cluster_id", c.parsedArguments.clusterID)
+		c.resources[afterDiffField] = true
+		return true, nil
 	}
 
-	// TODO: check if the cluster is already started.
+	c.logger.Info("CRM cluster is offline, will attempt to start it", "cluster_id", c.parsedArguments.clusterID)
+	return false, nil
 
-	return true, nil
 }
 
 func (c *CrmClusterStart) commit(ctx context.Context) error {
@@ -91,9 +90,21 @@ func (c *CrmClusterStart) verify(ctx context.Context) error {
 }
 
 func (c *CrmClusterStart) operationDiff(ctx context.Context) map[string]any {
-	return map[string]any{
-		"error": errors.New("not implemented yet").Error(),
+	diff := make(map[string]any)
+
+	beforeDiffOutput := crmClusterStartDiffOutput{
+		Started: c.resources[beforeDiffField].(bool),
 	}
+	before, _ := json.Marshal(beforeDiffOutput)
+	diff["before"] = string(before)
+
+	afterDiffOutput := crmClusterStartDiffOutput{
+		Started: c.resources[afterDiffField].(bool),
+	}
+	after, _ := json.Marshal(afterDiffOutput)
+	diff["after"] = string(after)
+
+	return diff
 }
 
 func (c *CrmClusterStart) after(ctx context.Context) {

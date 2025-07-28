@@ -87,3 +87,32 @@ func (suite *CrmClusterStartOperatorTestSuite) TestCrmClusterStartClusterErrorGe
 	suite.Equal(operator.PLAN, report.Error.ErrorPhase)
 
 }
+
+func (suite *CrmClusterStartOperatorTestSuite) TestCrmClusterStartClusterAlreadyOnline() {
+	ctx := context.Background()
+
+	mockCrmClient := mocks.NewMockCrm(suite.T())
+	mockCrmClient.On("GetClusterId").Return("test-cluster-id", nil).Once()
+	mockCrmClient.On("IsHostOnline", ctx).Return(true).Once()
+
+	crmClusterStartOperator := operator.NewCrmClusterStart(
+		operator.OperatorArguments{
+			"cluster_id": "test-cluster-id",
+		},
+		"test-op",
+		operator.OperatorOptions[operator.CrmClusterStart]{
+			OperatorOptions: []operator.Option[operator.CrmClusterStart]{
+				operator.Option[operator.CrmClusterStart](operator.WithCustomClusterClient(mockCrmClient)),
+			},
+		},
+	)
+
+	report := crmClusterStartOperator.Run(ctx)
+
+	suite.NotNil(report.Success)
+	suite.Equal(operator.PLAN, report.Success.LastPhase)
+	suite.EqualValues(map[string]any{
+		"before": `{"started":true}`,
+		"after":  `{"started":true}`,
+	}, report.Success.Diff)
+}
