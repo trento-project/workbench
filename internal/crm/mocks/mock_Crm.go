@@ -76,6 +76,52 @@ func (_c *MockCrm_GetClusterId_Call) RunAndReturn(run func() (string, error)) *M
 	return _c
 }
 
+// IsHostOnline provides a mock function with given fields: ctx
+func (_m *MockCrm) IsHostOnline(ctx context.Context) bool {
+	ret := _m.Called(ctx)
+
+	if len(ret) == 0 {
+		panic("no return value specified for IsHostOnline")
+	}
+
+	var r0 bool
+	if rf, ok := ret.Get(0).(func(context.Context) bool); ok {
+		r0 = rf(ctx)
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+
+	return r0
+}
+
+// MockCrm_IsHostOnline_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'IsHostOnline'
+type MockCrm_IsHostOnline_Call struct {
+	*mock.Call
+}
+
+// IsHostOnline is a helper method to define mock.On call
+//   - ctx context.Context
+func (_e *MockCrm_Expecter) IsHostOnline(ctx interface{}) *MockCrm_IsHostOnline_Call {
+	return &MockCrm_IsHostOnline_Call{Call: _e.mock.On("IsHostOnline", ctx)}
+}
+
+func (_c *MockCrm_IsHostOnline_Call) Run(run func(ctx context.Context)) *MockCrm_IsHostOnline_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context))
+	})
+	return _c
+}
+
+func (_c *MockCrm_IsHostOnline_Call) Return(_a0 bool) *MockCrm_IsHostOnline_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *MockCrm_IsHostOnline_Call) RunAndReturn(run func(context.Context) bool) *MockCrm_IsHostOnline_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // NewMockCrm creates a new instance of MockCrm. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewMockCrm(t interface {
