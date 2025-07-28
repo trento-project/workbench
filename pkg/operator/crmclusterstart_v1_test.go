@@ -1,9 +1,13 @@
 package operator_test
 
 import (
+	"context"
+	"errors"
 	"testing"
 
 	"github.com/stretchr/testify/suite"
+	"github.com/trento-project/workbench/internal/crm/mocks"
+	"github.com/trento-project/workbench/pkg/operator"
 )
 
 type CrmClusterStartOperatorTestSuite struct {
@@ -16,4 +20,70 @@ func TestCrmClusterStartOperator(t *testing.T) {
 
 func (suite *CrmClusterStartOperatorTestSuite) SetupTest() {
 	// Setup code for the test suite can be added here
+}
+
+func (suite *CrmClusterStartOperatorTestSuite) TestCrmClusterStartArgMissingClusterId() {
+	ctx := context.Background()
+
+	crmClusterStartOperator := operator.NewCrmClusterStart(
+		operator.OperatorArguments{},
+		"test-op",
+		operator.OperatorOptions[operator.CrmClusterStart]{},
+	)
+
+	report := crmClusterStartOperator.Run(ctx)
+
+	suite.Nil(report.Success)
+	suite.Equal(operator.PLAN, report.Error.ErrorPhase)
+	suite.EqualValues("error parsing arguments: invalid or missing cluster_id argument", report.Error.Message)
+}
+
+func (suite *CrmClusterStartOperatorTestSuite) TestCrmClusterStartClusterIdMismatch() {
+	ctx := context.Background()
+
+	mockCrmClient := mocks.NewMockCrm(suite.T())
+	mockCrmClient.On("GetClusterId").Return("different-cluster-id", nil).Once()
+
+	crmClusterStartOperator := operator.NewCrmClusterStart(
+		operator.OperatorArguments{
+			"cluster_id": "test-cluster-id",
+		},
+		"test-op",
+		operator.OperatorOptions[operator.CrmClusterStart]{
+			OperatorOptions: []operator.Option[operator.CrmClusterStart]{
+				operator.Option[operator.CrmClusterStart](operator.WithCustomCrmClient(mockCrmClient)),
+			},
+		},
+	)
+
+	report := crmClusterStartOperator.Run(ctx)
+
+	suite.Nil(report.Success)
+	suite.Equal(operator.PLAN, report.Error.ErrorPhase)
+
+}
+
+func (suite *CrmClusterStartOperatorTestSuite) TestCrmClusterStartClusterErrorGetClusterId() {
+	ctx := context.Background()
+
+	mockCrmClient := mocks.NewMockCrm(suite.T())
+	mockCrmClient.On("GetClusterId").Return("", errors.New("any error")).Once()
+
+	crmClusterStartOperator := operator.NewCrmClusterStart(
+		operator.OperatorArguments{
+			"cluster_id": "test-cluster-id",
+		},
+		"test-op",
+		operator.OperatorOptions[operator.CrmClusterStart]{
+			OperatorOptions: []operator.Option[operator.CrmClusterStart]{
+				operator.Option[operator.CrmClusterStart](operator.WithCustomCrmClient(mockCrmClient)),
+			},
+		},
+	)
+
+	report := crmClusterStartOperator.Run(ctx)
+
+	suite.Nil(report.Success)
+	suite.Equal(operator.PLAN, report.Error.ErrorPhase)
+
 }
