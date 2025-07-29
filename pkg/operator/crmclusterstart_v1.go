@@ -87,7 +87,12 @@ func (c *CrmClusterStart) commit(ctx context.Context) error {
 }
 
 func (c *CrmClusterStart) rollback(ctx context.Context) error {
-	return errors.New("not implemented yet")
+	err := c.crmClient.StopCluster(ctx)
+	if err != nil {
+		return fmt.Errorf("error rolling back CRM cluster start: %w", err)
+	}
+	c.logger.Info("CRM cluster stop operation rolled back", "cluster_id", c.parsedArguments.clusterID)
+	return nil
 }
 
 func (c *CrmClusterStart) verify(ctx context.Context) error {
