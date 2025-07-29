@@ -53,7 +53,9 @@ func NewServiceDisable(
 	options OperatorOptions[ServiceDisable],
 ) *Executor {
 	serviceDisable := &ServiceDisable{
-		baseOperator:  newBaseOperator(operationID, arguments, options.BaseOperatorOptions...),
+		baseOperator: newBaseOperator(
+			PacemakerDisableOperatorName, operationID, arguments, options.BaseOperatorOptions...,
+		),
 		systemdLoader: systemd.NewDefaultSystemdLoader(),
 	}
 
@@ -64,6 +66,7 @@ func NewServiceDisable(
 	return &Executor{
 		phaser:      serviceDisable,
 		operationID: operationID,
+		logger:      serviceDisable.logger,
 	}
 }
 

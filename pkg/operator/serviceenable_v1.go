@@ -61,7 +61,9 @@ func NewServiceEnable(
 	options OperatorOptions[ServiceEnable],
 ) *Executor {
 	serviceEnable := &ServiceEnable{
-		baseOperator:  newBaseOperator(operationID, arguments, options.BaseOperatorOptions...),
+		baseOperator: newBaseOperator(
+			PacemakerEnableOperatorName, operationID, arguments, options.BaseOperatorOptions...,
+		),
 		systemdLoader: systemd.NewDefaultSystemdLoader(),
 	}
 
@@ -72,6 +74,7 @@ func NewServiceEnable(
 	return &Executor{
 		phaser:      serviceEnable,
 		operationID: operationID,
+		logger:      serviceEnable.logger,
 	}
 }
 

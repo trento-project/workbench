@@ -66,8 +66,10 @@ func NewSAPSystemStop(
 	options OperatorOptions[SAPSystemStop],
 ) *Executor {
 	sapSystemStop := &SAPSystemStop{
-		baseOperator: newBaseOperator(operationID, arguments, options.BaseOperatorOptions...),
-		interval:     defaultSapSystemStateInterval,
+		baseOperator: newBaseOperator(
+			SapSystemStopOperatorName, operationID, arguments, options.BaseOperatorOptions...,
+		),
+		interval: defaultSapSystemStateInterval,
 	}
 
 	for _, opt := range options.OperatorOptions {
@@ -77,6 +79,7 @@ func NewSAPSystemStop(
 	return &Executor{
 		phaser:      sapSystemStop,
 		operationID: operationID,
+		logger:      sapSystemStop.logger,
 	}
 }
 
