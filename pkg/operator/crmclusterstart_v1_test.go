@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/suite"
 	"github.com/trento-project/workbench/internal/crm/mocks"
@@ -124,7 +125,7 @@ func (suite *CrmClusterStartOperatorTestSuite) TestCrmClusterStartClusterRollbac
 	mockCrmClient.On("GetClusterId").Return("test-cluster-id", nil).Once()
 	mockCrmClient.On("IsHostOnline", ctx).Return(false).Once()
 	mockCrmClient.On("StartCluster", ctx).Return(errors.New("failed to start cluster")).Once()
-	mockCrmClient.On("StopCluster", ctx).Return(errors.New("failed to stop cluster")).Once()
+	mockCrmClient.On("StopCluster", ctx).Return(errors.New("failed to stop cluster"))
 
 	crmClusterStartOperator := operator.NewCrmClusterStart(
 		operator.OperatorArguments{
@@ -134,6 +135,7 @@ func (suite *CrmClusterStartOperatorTestSuite) TestCrmClusterStartClusterRollbac
 		operator.OperatorOptions[operator.CrmClusterStart]{
 			OperatorOptions: []operator.Option[operator.CrmClusterStart]{
 				operator.Option[operator.CrmClusterStart](operator.WithCustomCrmClient(mockCrmClient)),
+				operator.Option[operator.CrmClusterStart](operator.WithCustomRetry(2, 100*time.Millisecond, 1*time.Second)),
 			},
 		},
 	)
@@ -191,7 +193,7 @@ func (suite *CrmClusterStartOperatorTestSuite) TestCrmClusterStartClusterStartVe
 		operator.OperatorOptions[operator.CrmClusterStart]{
 			OperatorOptions: []operator.Option[operator.CrmClusterStart]{
 				operator.Option[operator.CrmClusterStart](operator.WithCustomCrmClient(mockCrmClient)),
-				operator.Option[operator.CrmClusterStart](operator.WithCustomRetry(2, 100*time.Millisecond, 1*time.Second, 2)),
+				operator.Option[operator.CrmClusterStart](operator.WithCustomRetry(2, 100*time.Millisecond, 1*time.Second)),
 			},
 		},
 	)

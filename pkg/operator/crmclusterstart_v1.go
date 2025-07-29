@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/trento-project/workbench/internal/crm"
+	"github.com/trento-project/workbench/internal/support"
 )
 
 const (
@@ -18,6 +19,7 @@ type CrmClusterStart struct {
 	baseOperator
 	parsedArguments *crmClusterStartArguments
 	crmClient       crm.Crm
+	retry           retry
 }
 
 type CrmClusterStartOption Option[CrmClusterStart]
@@ -42,12 +44,31 @@ func WithCustomCrmClient(crmClient crm.Crm) CrmClusterStartOption {
 	}
 }
 
+func WithCustomRetry(maxRetries int, initialDelay, maxDelay time.Duration, factor int) CrmClusterStartOption {
+	return func(c *CrmClusterStart) {
+		c.retryOptions = support.BackoffOptions{
+			InitialDelay: initialDelay,
+			MaxDelay:     maxDelay,
+			MaxRetries:   maxRetries,
+			Factor:       factor,
+		}
+	}
+}
+
 func NewCrmClusterStart(arguments OperatorArguments,
 	operationID string,
 	options OperatorOptions[CrmClusterStart]) *Executor {
 	crmClusterStart := &CrmClusterStart{
 		baseOperator: newBaseOperator(operationID, arguments, options.BaseOperatorOptions...),
 		crmClient:    crm.NewDefaultCrmClient(),
+		retry: struct {
+			initialDelay time.Duration
+			maxDelay     time.Duration
+			maxRetries   int
+		}{
+			maxDelay:   8 * time.Second,
+			maxRetries: 5,
+		},
 	}
 
 	for _, opt := range options.OperatorOptions {
@@ -62,46 +83,69 @@ func NewCrmClusterStart(arguments OperatorArguments,
 }
 
 func (c *CrmClusterStart) plan(ctx context.Context) (bool, error) {
-	isOnline := c.clusterClient.IsHostOnline(ctx)
+	// check if the cluster is already started.
 	isOnline := c.crmClient.IsHostOnline(ctx)
 	c.resources[beforeDiffField] = isOnline
 
 	if isOnline {
-		c.logger.Info("CRM cluster is already online", "cluster_id", c.parsedArguments.clusterID)
+		c.logger.Info("CRM cluster is already online, skipping start operation", "cluster_id", c.parsedArguments.clusterID, "phase", PLAN)
 		c.resources[afterDiffField] = true
 		return true, nil
 	}
 
-	c.logger.Info("CRM cluster is offline, will attempt to start it", "cluster_id", c.parsedArguments.clusterID)
+	c.logger.Info("CRM cluster is offline, will attempt to start it", "cluster_id", c.parsedArguments.clusterID, "phase", PLAN)
 	return false, nil
 
 }
 
 func (c *CrmClusterStart) commit(ctx context.Context) error {
+	c.logger.Info("Begin", "phase", COMMIT)
 	err := c.crmClient.StartCluster(ctx)
 	if err != nil {
 		return fmt.Errorf("error starting CRM cluster: %w", err)
 	}
-	c.logger.Info("CRM cluster start operation committed", "cluster_id", c.parsedArguments.clusterID)
+	c.logger.Info("Success", "phase", COMMIT, "cluster_id", c.parsedArguments.clusterID)
+
 	return nil
 }
 
 func (c *CrmClusterStart) rollback(ctx context.Context) error {
-	err := c.crmClient.StopCluster(ctx)
-	if err != nil {
-		return fmt.Errorf("error rolling back CRM cluster start: %w", err)
+	c.logger.Info("Begin", "phase", ROLLBACK)
+
+	result := <-support.AsyncExponentialBackoff(
+		ctx,
+		c.retry.maxRetries,
+		c.retry.initialDelay,
+		c.retryOptions,
+		},
+	)
+
+	if result.Err != nil {
+		c.logger.Error("Failed to rollback CRM cluster start operation", "error", result.Err, "phase", ROLLBACK)
+		return fmt.Errorf("error rolling back CRM cluster start: %w", result.Err)
 	}
-	c.logger.Info("CRM cluster stop operation rolled back", "cluster_id", c.parsedArguments.clusterID)
+
 	return nil
 }
 
 func (c *CrmClusterStart) verify(ctx context.Context) error {
-	isOnline := c.crmClient.IsHostOnline(ctx)
-	if !isOnline {
-		return fmt.Errorf("CRM cluster is still offline after start operation, expected online state")
+	result := <-support.AsyncExponentialBackoff(
+		ctx,
+		c.retry.maxRetries,
+		c.retry.initialDelay,
+		c.retryOptions,
+			return isOnline, nil
+		},
+			if !isOnline {
+				return false, fmt.Errorf("CRM cluster is not online, expected online state")
+			}
+			return true, nil
+
+	if result.Err != nil {
+		return fmt.Errorf("error verifying CRM cluster start: %w", result.Err)
 	}
-	c.logger.Info("CRM cluster is online after start operation", "cluster_id", c.parsedArguments.clusterID)
-	c.resources[afterDiffField] = isOnline
+		return result.Err
+	c.resources[afterDiffField] = true
 	return nil
 }
 
