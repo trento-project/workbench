@@ -1,39 +1,39 @@
 with-expecter: true
 keeptree: False
 packages:
-    github.com/trento-project/workbench/internal/support:
+  github.com/trento-project/workbench/internal/support:
+    config:
+      outpkg: "mocks"
+      dir: "internal/support/mocks"
+    interfaces:
+      CmdExecutor:
+  github.com/trento-project/workbench/internal/sapcontrol:
+    config:
+      outpkg: "mocks"
+      dir: "internal/sapcontrol/mocks"
+    interfaces:
+      SAPControlConnector:
+  github.com/trento-project/workbench/pkg/operator:
+    config:
+      outpkg: "operator"
+      dir: "pkg/operator"
+    interfaces:
+      phaser:
+      Operator:
         config:
           outpkg: "mocks"
-          dir: "internal/support/mocks"
-        interfaces:
-          CmdExecutor:
-    github.com/trento-project/workbench/internal/sapcontrol:
-        config:
-          outpkg: "mocks"
-          dir: "internal/sapcontrol/mocks"
-        interfaces:
-          SAPControlConnector:
-    github.com/trento-project/workbench/pkg/operator:
-        config:
-          outpkg: "operator"
-          dir: "pkg/operator"
-        interfaces:
-            phaser:
-            Operator:
-              config:
-                outpkg: "mocks"
-                dir: "pkg/operator/mocks"
-    github.com/trento-project/workbench/internal/saptune:
-        config:
-          outpkg: "mocks"
-          dir: "internal/saptune/mocks"
-        interfaces:
-          Saptune:
-    github.com/trento-project/workbench/internal/systemd:
-        config:
-          outpkg: "mocks"
-          dir: "internal/systemd/mocks"
-        interfaces:
-          DbusConnector:
-          Systemd:
-          SystemdLoader:
+          dir: "pkg/operator/mocks"
+  github.com/trento-project/workbench/internal/saptune:
+    config:
+      outpkg: "mocks"
+      dir: "internal/saptune/mocks"
+    interfaces:
+      Saptune:
+  github.com/trento-project/workbench/internal/systemd:
+    config:
+      outpkg: "mocks"
+      dir: "internal/systemd/mocks"
+    interfaces:
+      DbusConnector:
+      Systemd:
+      SystemdLoader:
