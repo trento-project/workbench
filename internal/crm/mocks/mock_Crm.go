@@ -122,6 +122,52 @@ func (_c *MockCrm_IsHostOnline_Call) RunAndReturn(run func(context.Context) bool
 	return _c
 }
 
+// StartCluster provides a mock function with given fields: ctx
+func (_m *MockCrm) StartCluster(ctx context.Context) error {
+	ret := _m.Called(ctx)
+
+	if len(ret) == 0 {
+		panic("no return value specified for StartCluster")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context) error); ok {
+		r0 = rf(ctx)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// MockCrm_StartCluster_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'StartCluster'
+type MockCrm_StartCluster_Call struct {
+	*mock.Call
+}
+
+// StartCluster is a helper method to define mock.On call
+//   - ctx context.Context
+func (_e *MockCrm_Expecter) StartCluster(ctx interface{}) *MockCrm_StartCluster_Call {
+	return &MockCrm_StartCluster_Call{Call: _e.mock.On("StartCluster", ctx)}
+}
+
+func (_c *MockCrm_StartCluster_Call) Run(run func(ctx context.Context)) *MockCrm_StartCluster_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context))
+	})
+	return _c
+}
+
+func (_c *MockCrm_StartCluster_Call) Return(_a0 error) *MockCrm_StartCluster_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *MockCrm_StartCluster_Call) RunAndReturn(run func(context.Context) error) *MockCrm_StartCluster_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // NewMockCrm creates a new instance of MockCrm. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewMockCrm(t interface {
