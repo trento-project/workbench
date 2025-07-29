@@ -16,6 +16,7 @@ type Crm interface {
 	// GetClusterId returns the unique identifier for the cluster.
 	GetClusterId() (string, error)
 	IsHostOnline(ctx context.Context) bool
+	StartCluster(ctx context.Context) error
 }
 
 type CrmClient struct {
@@ -51,6 +52,17 @@ func (c *CrmClient) IsHostOnline(ctx context.Context) bool {
 	c.logger.Debug("CRM status output", "output", string(output))
 
 	return true
+}
+
+func (c *CrmClient) StartCluster(ctx context.Context) error {
+	c.logger.Info("Starting CRM cluster")
+	output, err := c.executor.Exec(ctx, "crm", "cluster", "start")
+	if err != nil {
+		return fmt.Errorf("failed to start CRM cluster: %w, output: %s", err, string(output))
+	}
+
+	c.logger.Info("CRM cluster started successfully")
+	return nil
 }
 
 func md5sumFile(filePath string) (string, error) {

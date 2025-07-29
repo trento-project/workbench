@@ -78,7 +78,12 @@ func (c *CrmClusterStart) plan(ctx context.Context) (bool, error) {
 }
 
 func (c *CrmClusterStart) commit(ctx context.Context) error {
-	return errors.New("not implemented yet")
+	err := c.crmClient.StartCluster(ctx)
+	if err != nil {
+		return fmt.Errorf("error starting CRM cluster: %w", err)
+	}
+	c.logger.Info("CRM cluster start operation committed", "cluster_id", c.parsedArguments.clusterID)
+	return nil
 }
 
 func (c *CrmClusterStart) rollback(ctx context.Context) error {

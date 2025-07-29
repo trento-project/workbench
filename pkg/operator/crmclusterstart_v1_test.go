@@ -116,3 +116,30 @@ func (suite *CrmClusterStartOperatorTestSuite) TestCrmClusterStartClusterAlready
 		"after":  `{"started":true}`,
 	}, report.Success.Diff)
 }
+
+func (suite *CrmClusterStartOperatorTestSuite) TestCrmClusterStartClusterStartFailure() {
+	ctx := context.Background()
+
+	mockCrmClient := mocks.NewMockCrm(suite.T())
+	mockCrmClient.On("GetClusterId").Return("test-cluster-id", nil)
+	mockCrmClient.On("IsHostOnline", ctx).Return(false)
+	mockCrmClient.On("StartCluster", ctx).Return(errors.New("failed to start cluster"))
+
+	crmClusterStartOperator := operator.NewCrmClusterStart(
+		operator.OperatorArguments{
+			"cluster_id": "test-cluster-id",
+		},
+		"test-op",
+		operator.OperatorOptions[operator.CrmClusterStart]{
+			OperatorOptions: []operator.Option[operator.CrmClusterStart]{
+				operator.Option[operator.CrmClusterStart](operator.WithCustomCrmClient(mockCrmClient)),
+			},
+		},
+	)
+
+	report := crmClusterStartOperator.Run(ctx)
+
+	suite.Nil(report.Success)
+	suite.Equal(operator.ROLLBACK, report.Error.ErrorPhase)
+	suite.NotEmpty(report.Error.Message)
+}
