@@ -96,7 +96,13 @@ func (c *CrmClusterStart) rollback(ctx context.Context) error {
 }
 
 func (c *CrmClusterStart) verify(ctx context.Context) error {
-	return errors.New("not implemented yet")
+	isOnline := c.crmClient.IsHostOnline(ctx)
+	if !isOnline {
+		return fmt.Errorf("CRM cluster is still offline after start operation, expected online state")
+	}
+	c.logger.Info("CRM cluster is online after start operation", "cluster_id", c.parsedArguments.clusterID)
+	c.resources[afterDiffField] = isOnline
+	return nil
 }
 
 func (c *CrmClusterStart) operationDiff(ctx context.Context) map[string]any {

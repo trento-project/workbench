@@ -172,3 +172,64 @@ func (suite *CrmClusterStartOperatorTestSuite) TestCrmClusterStartClusterRollbac
 	suite.Equal(operator.COMMIT, report.Error.ErrorPhase)
 	suite.NotEmpty(report.Error.Message)
 }
+
+func (suite *CrmClusterStartOperatorTestSuite) TestCrmClusterStartClusterStartVerifyFailure() {
+	ctx := context.Background()
+
+	mockCrmClient := mocks.NewMockCrm(suite.T())
+	mockCrmClient.On("GetClusterId").Return("test-cluster-id", nil)
+	mockCrmClient.On("IsHostOnline", ctx).Return(false).Once()
+	mockCrmClient.On("StartCluster", ctx).Return(nil).Once()
+	mockCrmClient.On("IsHostOnline", ctx).Return(false).Once()
+	mockCrmClient.On("StopCluster", ctx).Return(nil).Once()
+
+	crmClusterStartOperator := operator.NewCrmClusterStart(
+		operator.OperatorArguments{
+			"cluster_id": "test-cluster-id",
+		},
+		"test-op",
+		operator.OperatorOptions[operator.CrmClusterStart]{
+			OperatorOptions: []operator.Option[operator.CrmClusterStart]{
+				operator.Option[operator.CrmClusterStart](operator.WithCustomCrmClient(mockCrmClient)),
+				operator.Option[operator.CrmClusterStart](operator.WithCustomRetry(2, 100*time.Millisecond, 1*time.Second, 2)),
+			},
+		},
+	)
+
+	report := crmClusterStartOperator.Run(ctx)
+
+	suite.Nil(report.Success)
+	suite.Equal(operator.VERIFY, report.Error.ErrorPhase)
+	suite.NotEmpty(report.Error.Message)
+}
+
+func (suite *CrmClusterStartOperatorTestSuite) TestCrmClusterStartClusterStartVerifySuccess() {
+	ctx := context.Background()
+
+	mockCrmClient := mocks.NewMockCrm(suite.T())
+	mockCrmClient.On("GetClusterId").Return("test-cluster-id", nil)
+	mockCrmClient.On("IsHostOnline", ctx).Return(false).Once()
+	mockCrmClient.On("StartCluster", ctx).Return(nil).Once()
+	mockCrmClient.On("IsHostOnline", ctx).Return(true).Once()
+
+	crmClusterStartOperator := operator.NewCrmClusterStart(
+		operator.OperatorArguments{
+			"cluster_id": "test-cluster-id",
+		},
+		"test-op",
+		operator.OperatorOptions[operator.CrmClusterStart]{
+			OperatorOptions: []operator.Option[operator.CrmClusterStart]{
+				operator.Option[operator.CrmClusterStart](operator.WithCustomCrmClient(mockCrmClient)),
+			},
+		},
+	)
+
+	report := crmClusterStartOperator.Run(ctx)
+
+	suite.NotNil(report.Success)
+	suite.Equal(operator.VERIFY, report.Success.LastPhase)
+	suite.EqualValues(map[string]any{
+		"before": `{"started":false}`,
+		"after":  `{"started":true}`,
+	}, report.Success.Diff)
+}
