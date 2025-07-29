@@ -17,6 +17,7 @@ type Crm interface {
 	GetClusterId() (string, error)
 	IsHostOnline(ctx context.Context) bool
 	StartCluster(ctx context.Context) error
+	StopCluster(ctx context.Context) error
 }
 
 type CrmClient struct {
@@ -62,6 +63,17 @@ func (c *CrmClient) StartCluster(ctx context.Context) error {
 	}
 
 	c.logger.Info("CRM cluster started successfully")
+	return nil
+}
+
+func (c *CrmClient) StopCluster(ctx context.Context) error {
+	c.logger.Info("Stopping CRM cluster")
+	output, err := c.executor.Exec(ctx, "crm", "cluster", "stop")
+	if err != nil {
+		return fmt.Errorf("failed to stop CRM cluster: %w, output: %s", err, string(output))
+	}
+
+	c.logger.Info("CRM cluster stopped successfully")
 	return nil
 }
 
