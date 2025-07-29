@@ -1,3 +1,30 @@
+// CrmClusterStart operator starts a CRM cluster.
+//
+// Arguments:
+//  cluster_id (required): String representing the expected cluster ID to start.
+//
+// # Execution Phases
+//
+// - PLAN:
+//   Checks if the CRM cluster is already online. If it is, the operation is skipped.
+//   If the cluster is offline, it checks if the cluster is idle before proceeding.
+//   If the cluster is not idle, it returns an error.
+//
+// - COMMIT:
+//   Starts the CRM cluster using the crmClient's StartCluster method.
+//
+// - VERIFY:
+//   Verifies if the CRM cluster is online after the start operation, using exponential backoff retries.
+//
+// - ROLLBACK:
+//   If an error occurs during the COMMIT or VERIFY phase, the cluster is stopped using exponential backoff retries.
+//
+// # Details
+//
+// This operator is designed to safely start a CRM cluster, ensuring that the cluster is only started if it is offline.
+// It uses a retry mechanism with exponential backoff for rollback and verification phases to handle transient failures.
+// The operator provides detailed logging for each phase and maintains before/after state for diff reporting.
+
 package operator
 
 import (
