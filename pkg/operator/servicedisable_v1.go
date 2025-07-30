@@ -48,13 +48,14 @@ func WithServiceToDisable(service string) ServiceDisableOption {
 }
 
 func NewServiceDisable(
+	name string,
 	arguments OperatorArguments,
 	operationID string,
 	options OperatorOptions[ServiceDisable],
 ) *Executor {
 	serviceDisable := &ServiceDisable{
 		baseOperator: newBaseOperator(
-			PacemakerDisableOperatorName, operationID, arguments, options.BaseOperatorOptions...,
+			name, operationID, arguments, options.BaseOperatorOptions...,
 		),
 		systemdLoader: systemd.NewDefaultSystemdLoader(),
 	}

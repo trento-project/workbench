@@ -56,13 +56,14 @@ func WithServiceToEnable(service string) ServiceEnableOption {
 }
 
 func NewServiceEnable(
+	name string,
 	arguments OperatorArguments,
 	operationID string,
 	options OperatorOptions[ServiceEnable],
 ) *Executor {
 	serviceEnable := &ServiceEnable{
 		baseOperator: newBaseOperator(
-			PacemakerEnableOperatorName, operationID, arguments, options.BaseOperatorOptions...,
+			name, operationID, arguments, options.BaseOperatorOptions...,
 		),
 		systemdLoader: systemd.NewDefaultSystemdLoader(),
 	}
