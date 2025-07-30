@@ -103,10 +103,10 @@ func (c *CrmClusterStart) plan(ctx context.Context) (bool, error) {
 	if isOnline {
 		c.logger.Info("CRM cluster is already online, skipping start operation")
 		c.resources[afterDiffField] = true
-	// // Ensure the provided cluster ID matches the expected cluster ID.
+		return true, nil
 	}
 
-	// Ensure the provided cluster ID matches the expected cluster ID.
+	// // Ensure the provided cluster ID matches the expected cluster ID.
 	err := c.ensureIsIdle(ctx)
 	if err != nil {
 		c.logger.Error("CRM cluster is not idle, cannot start", "error", err)
@@ -128,21 +128,21 @@ func (c *CrmClusterStart) plan(ctx context.Context) (bool, error) {
 func (c *CrmClusterStart) rollback(ctx context.Context) error {
 	// If the cluster is not idle, we cannot rollback the start operation.
 	err := c.ensureIsIdle(ctx)
-		c.logger.Error("CRM cluster is not idle, cannot rollback", "error", err)
-		return fmt.Errorf("cluster is not in IDLE state, cannot rollback: %w", err)
 	if err != nil {
+		return fmt.Errorf("cluster is not in IDLE state, cannot rollback: %w", err)
+	}
 
 	result := <-support.AsyncExponentialBackoff(
 		ctx,
-		c.retry.maxRetries,
-		c.retry.initialDelay,
 		c.retryOptions,
+			return true, c.clusterClient.StopCluster(ctx)
+			return true, c.crmClient.StopCluster(ctx)
 		},
 	)
 
-		c.logger.Error("Failed to rollback CRM cluster start operation", "error", result.Err)
-		return fmt.Errorf("error rolling back CRM cluster start: %w", result.Err)
 	if result.Err != nil {
+		return fmt.Errorf("error rolling back CRM cluster start: %w", result.Err)
+	}
 
 	return nil
 }
@@ -150,20 +150,20 @@ func (c *CrmClusterStart) rollback(ctx context.Context) error {
 func (c *CrmClusterStart) verify(ctx context.Context) error {
 	result := <-support.AsyncExponentialBackoff(
 		ctx,
-		c.retry.maxRetries,
-		c.retry.initialDelay,
 		c.retryOptions,
-			return isOnline, nil
-		},
+			isOnline := c.clusterClient.IsHostOnline(ctx)
+			isOnline := c.crmClient.IsHostOnline(ctx)
 			if !isOnline {
 				return false, fmt.Errorf("CRM cluster is not online, expected online state")
 			}
 			return true, nil
+		},
+	)
 
 	if result.Err != nil {
-		return fmt.Errorf("error verifying CRM cluster start: %w", result.Err)
-	}
 		return result.Err
+	}
+
 	c.resources[afterDiffField] = true
 	return nil
 }
@@ -192,9 +192,9 @@ func (c *CrmClusterStart) operationDiff(ctx context.Context) map[string]any {
 func (c *CrmClusterStart) ensureIsIdle(ctx context.Context) error {
 	result := <-support.AsyncExponentialBackoff(
 		ctx,
-		c.retry.maxRetries,
-		c.retry.initialDelay,
 		c.retryOptions,
+			isIdle, err := c.clusterClient.IsIdle(ctx)
+			isIdle, err := c.crmClient.IsIdle(ctx)
 			if err != nil {
 				return false, fmt.Errorf("error checking if CRM cluster is idle: %w", err)
 			} else if !isIdle {
