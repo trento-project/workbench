@@ -19,7 +19,11 @@ func TestCrm(t *testing.T) {
 	suite.Run(t, new(CrmTestSuite))
 }
 
-func (suite *CrmTestSuite) TestIsIdle() {
+func (suite *CrmTestSuite) SetupTest() {
+	// Setup code for the test suite can be added here
+}
+
+func (suite *CrmTestSuite) IsIdleTest() {
 	ctx := context.Background()
 
 	mockExecutor := mocks.NewMockCmdExecutor(suite.T())
@@ -32,7 +36,7 @@ func (suite *CrmTestSuite) TestIsIdle() {
 	suite.True(isIdle, "Cluster should be idle")
 }
 
-func (suite *CrmTestSuite) TestIsIdleError() {
+func (suite *CrmTestSuite) IsIdleErrorTest() {
 	ctx := context.Background()
 
 	mockExecutor := mocks.NewMockCmdExecutor(suite.T())
@@ -45,7 +49,7 @@ func (suite *CrmTestSuite) TestIsIdleError() {
 	suite.Error(err, "IsIdle should return an error")
 }
 
-func (suite *CrmTestSuite) TestIsIdleDifferentState() {
+func (suite *CrmTestSuite) IsIdleDifferentStateTest() {
 	ctx := context.Background()
 
 	mockExecutor := mocks.NewMockCmdExecutor(suite.T())
