@@ -56,12 +56,15 @@ func WithServiceToEnable(service string) ServiceEnableOption {
 }
 
 func NewServiceEnable(
+	name string,
 	arguments OperatorArguments,
 	operationID string,
 	options OperatorOptions[ServiceEnable],
 ) *Executor {
 	serviceEnable := &ServiceEnable{
-		baseOperator:  newBaseOperator(operationID, arguments, options.BaseOperatorOptions...),
+		baseOperator: newBaseOperator(
+			name, operationID, arguments, options.BaseOperatorOptions...,
+		),
 		systemdLoader: systemd.NewDefaultSystemdLoader(),
 	}
 
@@ -72,6 +75,7 @@ func NewServiceEnable(
 	return &Executor{
 		phaser:      serviceEnable,
 		operationID: operationID,
+		logger:      serviceEnable.logger,
 	}
 }
 

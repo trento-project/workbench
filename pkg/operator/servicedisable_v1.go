@@ -48,12 +48,15 @@ func WithServiceToDisable(service string) ServiceDisableOption {
 }
 
 func NewServiceDisable(
+	name string,
 	arguments OperatorArguments,
 	operationID string,
 	options OperatorOptions[ServiceDisable],
 ) *Executor {
 	serviceDisable := &ServiceDisable{
-		baseOperator:  newBaseOperator(operationID, arguments, options.BaseOperatorOptions...),
+		baseOperator: newBaseOperator(
+			name, operationID, arguments, options.BaseOperatorOptions...,
+		),
 		systemdLoader: systemd.NewDefaultSystemdLoader(),
 	}
 
@@ -64,6 +67,7 @@ func NewServiceDisable(
 	return &Executor{
 		phaser:      serviceDisable,
 		operationID: operationID,
+		logger:      serviceDisable.logger,
 	}
 }
 

@@ -27,6 +27,7 @@ type baseOperator struct {
 }
 
 func newBaseOperator(
+	name string,
 	operationID string,
 	arguments OperatorArguments,
 	options ...BaseOperatorOption,
@@ -41,7 +42,9 @@ func newBaseOperator(
 		opt(base)
 	}
 
-	base.logger = base.logger.With("operation_id", operationID)
+	base.logger = base.logger.
+		With("operation_id", operationID).
+		With("operator_name", name)
 
 	return *base
 }

@@ -150,7 +150,7 @@ func StandardRegistry(options ...BaseOperatorOption) *Registry {
 			},
 			PacemakerEnableOperatorName: map[string]OperatorBuilder{
 				"v1": func(operationID string, arguments OperatorArguments) Operator {
-					return NewServiceEnable(arguments, operationID, OperatorOptions[ServiceEnable]{
+					return NewServiceEnable(PacemakerEnableOperatorName, arguments, operationID, OperatorOptions[ServiceEnable]{
 						BaseOperatorOptions: options,
 						OperatorOptions: []Option[ServiceEnable]{
 							Option[ServiceEnable](WithServiceToEnable(pacemakerServiceName)),
@@ -160,7 +160,7 @@ func StandardRegistry(options ...BaseOperatorOption) *Registry {
 			},
 			PacemakerDisableOperatorName: map[string]OperatorBuilder{
 				"v1": func(operationID string, arguments OperatorArguments) Operator {
-					return NewServiceDisable(arguments, operationID, OperatorOptions[ServiceDisable]{
+					return NewServiceDisable(PacemakerDisableOperatorName, arguments, operationID, OperatorOptions[ServiceDisable]{
 						BaseOperatorOptions: options,
 						OperatorOptions: []Option[ServiceDisable]{
 							Option[ServiceDisable](WithServiceToDisable(pacemakerServiceName)),

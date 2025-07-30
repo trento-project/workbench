@@ -106,8 +106,10 @@ func NewClusterMaintenanceChange(
 	options OperatorOptions[ClusterMaintenanceChange],
 ) *Executor {
 	clusterMaintenance := &ClusterMaintenanceChange{
-		baseOperator: newBaseOperator(operationID, arguments, options.BaseOperatorOptions...),
-		executor:     support.CliExecutor{},
+		baseOperator: newBaseOperator(
+			ClusterMaintenanceChangeOperatorName, operationID, arguments, options.BaseOperatorOptions...,
+		),
+		executor: support.CliExecutor{},
 	}
 
 	for _, opt := range options.OperatorOptions {
@@ -117,6 +119,7 @@ func NewClusterMaintenanceChange(
 	return &Executor{
 		phaser:      clusterMaintenance,
 		operationID: operationID,
+		logger:      clusterMaintenance.logger,
 	}
 }
 

@@ -72,8 +72,10 @@ func NewSAPInstanceStart(
 	options OperatorOptions[SAPInstanceStart],
 ) *Executor {
 	sapInstanceStart := &SAPInstanceStart{
-		baseOperator: newBaseOperator(operationID, arguments, options.BaseOperatorOptions...),
-		interval:     defaultSapInstanceStateInterval,
+		baseOperator: newBaseOperator(
+			SapInstanceStartOperatorName, operationID, arguments, options.BaseOperatorOptions...,
+		),
+		interval: defaultSapInstanceStateInterval,
 	}
 
 	for _, opt := range options.OperatorOptions {
@@ -83,6 +85,7 @@ func NewSAPInstanceStart(
 	return &Executor{
 		phaser:      sapInstanceStart,
 		operationID: operationID,
+		logger:      sapInstanceStart.logger,
 	}
 }
 

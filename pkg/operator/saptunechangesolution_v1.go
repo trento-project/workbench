@@ -52,7 +52,9 @@ func NewSaptuneChangeSolution(
 	options OperatorOptions[SaptuneChangeSolution],
 ) *Executor {
 	saptuneChange := &SaptuneChangeSolution{
-		baseOperator: newBaseOperator(operationID, arguments, options.BaseOperatorOptions...),
+		baseOperator: newBaseOperator(
+			SaptuneChangeSolutionOperatorName, operationID, arguments, options.BaseOperatorOptions...,
+		),
 	}
 
 	saptuneChange.saptune = saptune.NewSaptuneClient(
@@ -67,6 +69,7 @@ func NewSaptuneChangeSolution(
 	return &Executor{
 		phaser:      saptuneChange,
 		operationID: operationID,
+		logger:      saptuneChange.logger,
 	}
 }
 

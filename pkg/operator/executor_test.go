@@ -3,6 +3,7 @@ package operator
 import (
 	"context"
 	"errors"
+	"log/slog"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -36,6 +37,7 @@ func TestExecutorHappyFlow(t *testing.T) {
 	executor := Executor{
 		phaser:      phaser,
 		operationID: "operation-id",
+		logger:      slog.Default(),
 	}
 
 	report := executor.Run(executionContext)
@@ -59,6 +61,7 @@ func TestExecutorPlanError(t *testing.T) {
 	executor := Executor{
 		phaser:      phaser,
 		operationID: "operation-id",
+		logger:      slog.Default(),
 	}
 
 	report := executor.Run(executionContext)
@@ -88,6 +91,7 @@ func TestExecutorPlanAlreadyApplied(t *testing.T) {
 	executor := Executor{
 		phaser:      phaser,
 		operationID: "operation-id",
+		logger:      slog.Default(),
 	}
 
 	report := executor.Run(executionContext)
@@ -122,6 +126,7 @@ func TestExecutorCommitErrorWithSuccessfulRollback(t *testing.T) {
 	executor := Executor{
 		phaser:      phaser,
 		operationID: "operation-id",
+		logger:      slog.Default(),
 	}
 
 	report := executor.Run(executionContext)
@@ -156,6 +161,7 @@ func TestExecutorCommitErrorWithFailedRollback(t *testing.T) {
 	executor := Executor{
 		phaser:      phaser,
 		operationID: "operation-id",
+		logger:      slog.Default(),
 	}
 
 	report := executor.Run(executionContext)
@@ -193,6 +199,7 @@ func TestExecutorVerifyErrorWithSuccessfulRollback(t *testing.T) {
 	executor := Executor{
 		phaser:      phaser,
 		operationID: "operation-id",
+		logger:      slog.Default(),
 	}
 
 	report := executor.Run(executionContext)
@@ -231,6 +238,7 @@ func TestExecutorVerifyErrorWithFailedRollback(t *testing.T) {
 	executor := Executor{
 		phaser:      phaser,
 		operationID: "operation-id",
+		logger:      slog.Default(),
 	}
 
 	report := executor.Run(executionContext)

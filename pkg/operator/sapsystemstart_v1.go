@@ -82,8 +82,10 @@ func NewSAPSystemStart(
 	options OperatorOptions[SAPSystemStart],
 ) *Executor {
 	sapSystemStart := &SAPSystemStart{
-		baseOperator: newBaseOperator(operationID, arguments, options.BaseOperatorOptions...),
-		interval:     defaultSapSystemStateInterval,
+		baseOperator: newBaseOperator(
+			SapSystemStartOperatorName, operationID, arguments, options.BaseOperatorOptions...,
+		),
+		interval: defaultSapSystemStateInterval,
 	}
 
 	for _, opt := range options.OperatorOptions {
@@ -93,6 +95,7 @@ func NewSAPSystemStart(
 	return &Executor{
 		phaser:      sapSystemStart,
 		operationID: operationID,
+		logger:      sapSystemStart.logger,
 	}
 }
 
