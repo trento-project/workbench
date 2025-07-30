@@ -93,8 +93,8 @@ func (suite *CrmClusterStartOperatorTestSuite) TestCrmClusterStartClusterRollbac
 		"test-op",
 		operator.OperatorOptions[operator.CrmClusterStart]{
 			OperatorOptions: []operator.Option[operator.CrmClusterStart]{
-				operator.Option[operator.CrmClusterStart](operator.WithCustomCrmClient(mockCrmClient)),
-				operator.Option[operator.CrmClusterStart](operator.WithCustomRetry(2, 100*time.Millisecond, 1*time.Second)),
+				operator.Option[operator.CrmClusterStart](operator.WithCustomClusterClient(mockCrmClient)),
+				operator.Option[operator.CrmClusterStart](operator.WithCustomRetry(2, 100*time.Millisecond, 1*time.Second, 1)),
 			},
 		},
 	)
