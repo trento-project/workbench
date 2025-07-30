@@ -114,7 +114,6 @@ func (c *CrmClusterStart) plan(ctx context.Context) (bool, error) {
 	}
 
 	return false, nil
-
 }
 
 	err := c.clusterClient.StartCluster(ctx)
@@ -127,6 +126,7 @@ func (c *CrmClusterStart) plan(ctx context.Context) (bool, error) {
 }
 
 func (c *CrmClusterStart) rollback(ctx context.Context) error {
+	// If the cluster is not idle, we cannot rollback the start operation.
 	err := c.ensureIsIdle(ctx)
 		c.logger.Error("CRM cluster is not idle, cannot rollback", "error", err)
 		return fmt.Errorf("cluster is not in IDLE state, cannot rollback: %w", err)
