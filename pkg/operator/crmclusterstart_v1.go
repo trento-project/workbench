@@ -1,8 +1,5 @@
 // CrmClusterStart operator starts a CRM cluster.
 //
-// Arguments:
-//  cluster_id (required): String representing the expected cluster ID to start.
-//
 // # Execution Phases
 //
 // - PLAN:
@@ -30,7 +27,6 @@ package operator
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"time"
 
@@ -44,22 +40,11 @@ const (
 
 type CrmClusterStart struct {
 	baseOperator
-	parsedArguments *crmClusterStartArguments
-	crmClient       crm.Crm
-	retry           retry
+	crmClient crm.Crm
+	retry     retry
 }
 
 type CrmClusterStartOption Option[CrmClusterStart]
-
-type crmClusterStartDiffOutput struct {
-	Started bool `json:"started"`
-}
-func WithCustomCrmClient(clusterClient cluster.Cluster) CrmClusterStartOption {
-func WithCustomCrmClient(crmClient cluster.Cluster) CrmClusterStartOption {
-	return func(c *CrmClusterStart) {
-		c.clusterClient = clusterClient
-	}
-}
 
 type crmClusterStartDiffOutput struct {
 	Started bool `json:"started"`
@@ -115,11 +100,12 @@ func (c *CrmClusterStart) plan(ctx context.Context) (bool, error) {
 	c.resources[beforeDiffField] = isOnline
 
 	if isOnline {
-		c.logger.Info("CRM cluster is already online, skipping start operation", "cluster_id", c.parsedArguments.clusterID, "phase", PLAN)
+		c.logger.Info("CRM cluster is already online, skipping start operation")
 		c.resources[afterDiffField] = true
-		return true, nil
+	// // Ensure the provided cluster ID matches the expected cluster ID.
 	}
 
+	// Ensure the provided cluster ID matches the expected cluster ID.
 	err := c.ensureIsIdle(ctx)
 	if err != nil {
 		c.logger.Error("CRM cluster is not idle, cannot start", "error", err)
@@ -136,7 +122,6 @@ func (c *CrmClusterStart) commit(ctx context.Context) error {
 	if err != nil {
 		return fmt.Errorf("error starting CRM cluster: %w", err)
 	}
-	c.logger.Info("Success", "phase", COMMIT, "cluster_id", c.parsedArguments.clusterID)
 
 	return nil
 }
@@ -227,19 +212,4 @@ func (c *CrmClusterStart) ensureIsIdle(ctx context.Context) error {
 	)
 
 	return result.Err
-}
-
-func parseCrmClusterStartArguments(rawArguments OperatorArguments) (*crmClusterStartArguments, error) {
-	if rawArguments == nil {
-		return nil, errors.New("arguments cannot be nil")
-	}
-
-	clusterID, ok := rawArguments["cluster_id"].(string)
-	if !ok || clusterID == "" {
-		return nil, errors.New("invalid or missing cluster_id argument")
-	}
-
-	return &crmClusterStartArguments{
-		clusterID: clusterID,
-	}, nil
 }
