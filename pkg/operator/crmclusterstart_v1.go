@@ -117,8 +117,7 @@ func (c *CrmClusterStart) plan(ctx context.Context) (bool, error) {
 
 }
 
-func (c *CrmClusterStart) commit(ctx context.Context) error {
-
+	err := c.clusterClient.StartCluster(ctx)
 	err := c.crmClient.StartCluster(ctx)
 	if err != nil {
 		return fmt.Errorf("error starting CRM cluster: %w", err)
@@ -128,13 +127,10 @@ func (c *CrmClusterStart) commit(ctx context.Context) error {
 }
 
 func (c *CrmClusterStart) rollback(ctx context.Context) error {
-	c.logger.Info("Begin", "phase", ROLLBACK)
-
 	err := c.ensureIsIdle(ctx)
-	if err != nil {
-		c.logger.Error("CRM cluster is not idle, cannot rollback", "error", err, "phase", ROLLBACK)
+		c.logger.Error("CRM cluster is not idle, cannot rollback", "error", err)
 		return fmt.Errorf("cluster is not in IDLE state, cannot rollback: %w", err)
-	}
+	if err != nil {
 
 	result := <-support.AsyncExponentialBackoff(
 		ctx,
@@ -144,10 +140,9 @@ func (c *CrmClusterStart) rollback(ctx context.Context) error {
 		},
 	)
 
-	if result.Err != nil {
-		c.logger.Error("Failed to rollback CRM cluster start operation", "error", result.Err, "phase", ROLLBACK)
+		c.logger.Error("Failed to rollback CRM cluster start operation", "error", result.Err)
 		return fmt.Errorf("error rolling back CRM cluster start: %w", result.Err)
-	}
+	if result.Err != nil {
 
 	return nil
 }
@@ -195,14 +190,11 @@ func (c *CrmClusterStart) operationDiff(ctx context.Context) map[string]any {
 // This is a safety check to ensure that the cluster is in a stable state.
 // If the cluster is not idle, we will retry until it becomes idle or the maximum retries are reached.
 func (c *CrmClusterStart) ensureIsIdle(ctx context.Context) error {
-
 	result := <-support.AsyncExponentialBackoff(
 		ctx,
 		c.retry.maxRetries,
 		c.retry.initialDelay,
-		c.retry.maxDelay,
-		func() (bool, error) {
-			isIdle, err := c.crmClient.IsIdle(ctx)
+		c.retryOptions,
 			if err != nil {
 				return false, fmt.Errorf("error checking if CRM cluster is idle: %w", err)
 			} else if !isIdle {
