@@ -120,13 +120,18 @@ func (c *CrmClusterStart) plan(ctx context.Context) (bool, error) {
 		return true, nil
 	}
 
-	c.logger.Info("CRM cluster is offline, will attempt to start it", "cluster_id", c.parsedArguments.clusterID, "phase", PLAN)
+	err := c.ensureIsIdle(ctx)
+	if err != nil {
+		c.logger.Error("CRM cluster is not idle, cannot start", "error", err)
+		return false, fmt.Errorf("cluster is not in IDLE state, cannot proceed: %w", err)
+	}
+
 	return false, nil
 
 }
 
 func (c *CrmClusterStart) commit(ctx context.Context) error {
-	c.logger.Info("Begin", "phase", COMMIT)
+
 	err := c.crmClient.StartCluster(ctx)
 	if err != nil {
 		return fmt.Errorf("error starting CRM cluster: %w", err)
@@ -138,6 +143,12 @@ func (c *CrmClusterStart) commit(ctx context.Context) error {
 
 func (c *CrmClusterStart) rollback(ctx context.Context) error {
 	c.logger.Info("Begin", "phase", ROLLBACK)
+
+	err := c.ensureIsIdle(ctx)
+	if err != nil {
+		c.logger.Error("CRM cluster is not idle, cannot rollback", "error", err, "phase", ROLLBACK)
+		return fmt.Errorf("cluster is not in IDLE state, cannot rollback: %w", err)
+	}
 
 	result := <-support.AsyncExponentialBackoff(
 		ctx,
@@ -194,8 +205,28 @@ func (c *CrmClusterStart) operationDiff(ctx context.Context) map[string]any {
 	return diff
 }
 
-func (c *CrmClusterStart) after(ctx context.Context) {
-	// not implemented yet
+// Ensure the CRM cluster is idle before proceeding with the operation.
+// This is a safety check to ensure that the cluster is in a stable state.
+// If the cluster is not idle, we will retry until it becomes idle or the maximum retries are reached.
+func (c *CrmClusterStart) ensureIsIdle(ctx context.Context) error {
+
+	result := <-support.AsyncExponentialBackoff(
+		ctx,
+		c.retry.maxRetries,
+		c.retry.initialDelay,
+		c.retry.maxDelay,
+		func() (bool, error) {
+			isIdle, err := c.crmClient.IsIdle(ctx)
+			if err != nil {
+				return false, fmt.Errorf("error checking if CRM cluster is idle: %w", err)
+			} else if !isIdle {
+				return false, fmt.Errorf("CRM cluster is not idle, expected S_IDLE state")
+			}
+			return true, nil
+		},
+	)
+
+	return result.Err
 }
 
 func parseCrmClusterStartArguments(rawArguments OperatorArguments) (*crmClusterStartArguments, error) {

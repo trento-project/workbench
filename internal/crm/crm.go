@@ -8,6 +8,7 @@ import (
 	"io"
 	"log/slog"
 	"os"
+	"regexp"
 
 	"github.com/trento-project/workbench/internal/support"
 )
@@ -16,6 +17,7 @@ type Crm interface {
 	// GetClusterId returns the unique identifier for the cluster.
 	GetClusterId() (string, error)
 	IsHostOnline(ctx context.Context) bool
+	IsIdle(ctx context.Context) (bool, error)
 	StartCluster(ctx context.Context) error
 	StopCluster(ctx context.Context) error
 }
@@ -26,9 +28,16 @@ type CrmClient struct {
 }
 
 func NewDefaultCrmClient() Crm {
+	return NewCrmClient(
+		support.CliExecutor{},
+		slog.Default(),
+	)
+}
+
+func NewCrmClient(executor support.CmdExecutor, logger *slog.Logger) Crm {
 	return &CrmClient{
-		executor: support.CliExecutor{},
-		logger:   slog.Default(),
+		executor: executor,
+		logger:   logger,
 	}
 }
 
@@ -75,6 +84,22 @@ func (c *CrmClient) StopCluster(ctx context.Context) error {
 
 	c.logger.Info("CRM cluster stopped successfully")
 	return nil
+}
+
+func (c *CrmClient) IsIdle(ctx context.Context) (bool, error) {
+	idleOutput, err := c.executor.Exec(ctx, "cs_clusterstate", "-i")
+	if err != nil {
+		return false, fmt.Errorf("error running cs_clusterstate: %w", err)
+	}
+
+	const clusterIdlePattern = `S_IDLE`
+	clusterIdlePatternCompiled := regexp.MustCompile(clusterIdlePattern)
+
+	if !clusterIdlePatternCompiled.Match(idleOutput) {
+		return false, fmt.Errorf("cluster is not in S_IDLE state")
+	}
+
+	return true, nil
 }
 
 func md5sumFile(filePath string) (string, error) {
