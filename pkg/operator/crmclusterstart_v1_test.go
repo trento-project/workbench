@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/suite"
-	"github.com/trento-project/workbench/internal/crm/mocks"
+	"github.com/trento-project/workbench/internal/cluster/mocks"
 	"github.com/trento-project/workbench/pkg/operator"
 )
 

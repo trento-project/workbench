@@ -1,45 +1,43 @@
-package crm
+package cluster
 
 import (
 	"context"
-	"crypto/md5"
-	"encoding/hex"
 	"fmt"
-	"io"
 	"log/slog"
-	"os"
 	"regexp"
 
 	"github.com/trento-project/workbench/internal/support"
 )
 
-type Crm interface {
+var clusterIdlePatternCompiled = regexp.MustCompile("S_IDLE")
+
+type Cluster interface {
 	IsHostOnline(ctx context.Context) bool
 	IsIdle(ctx context.Context) (bool, error)
 	StartCluster(ctx context.Context) error
 	StopCluster(ctx context.Context) error
 }
 
-type CrmClient struct {
+type ClusterClient struct {
 	executor support.CmdExecutor
 	logger   *slog.Logger
 }
 
-func NewDefaultCrmClient() Crm {
-	return NewCrmClient(
+func NewDefaultClusterClient() Cluster {
+	return NewClusterClient(
 		support.CliExecutor{},
 		slog.Default(),
 	)
 }
 
-func NewCrmClient(executor support.CmdExecutor, logger *slog.Logger) Crm {
-	return &CrmClient{
+func NewClusterClient(executor support.CmdExecutor, logger *slog.Logger) Cluster {
+	return &ClusterClient{
 		executor: executor,
 		logger:   logger,
 	}
 }
 
-func (c *CrmClient) IsHostOnline(ctx context.Context) bool {
+func (c *ClusterClient) IsHostOnline(ctx context.Context) bool {
 	output, err := c.executor.Exec(ctx, "crm", "status", "simple")
 	if err != nil {
 		return false
@@ -50,7 +48,7 @@ func (c *CrmClient) IsHostOnline(ctx context.Context) bool {
 	return true
 }
 
-func (c *CrmClient) StartCluster(ctx context.Context) error {
+func (c *ClusterClient) StartCluster(ctx context.Context) error {
 	c.logger.Info("Starting CRM cluster")
 	output, err := c.executor.Exec(ctx, "crm", "cluster", "start")
 	if err != nil {
@@ -61,7 +59,7 @@ func (c *CrmClient) StartCluster(ctx context.Context) error {
 	return nil
 }
 
-func (c *CrmClient) StopCluster(ctx context.Context) error {
+func (c *ClusterClient) StopCluster(ctx context.Context) error {
 	c.logger.Info("Stopping CRM cluster")
 	output, err := c.executor.Exec(ctx, "crm", "cluster", "stop")
 	if err != nil {
@@ -72,32 +70,15 @@ func (c *CrmClient) StopCluster(ctx context.Context) error {
 	return nil
 }
 
-func (c *CrmClient) IsIdle(ctx context.Context) (bool, error) {
+func (c *ClusterClient) IsIdle(ctx context.Context) (bool, error) {
 	idleOutput, err := c.executor.Exec(ctx, "cs_clusterstate", "-i")
 	if err != nil {
 		return false, fmt.Errorf("error running cs_clusterstate: %w", err)
 	}
 
-	const clusterIdlePattern = `S_IDLE`
-	clusterIdlePatternCompiled := regexp.MustCompile(clusterIdlePattern)
-
 	if !clusterIdlePatternCompiled.Match(idleOutput) {
-		return false, fmt.Errorf("cluster is not in S_IDLE state")
+		return false, nil
 	}
 
 	return true, nil
-}
-
-func md5sumFile(filePath string) (string, error) {
-	file, err := os.Open(filePath)
-	if err != nil {
-		return "", err
-	}
-	defer file.Close()
-
-	hash := md5.New() //nolint:gosec
-	if _, err := io.Copy(hash, file); err != nil {
-		return "", err
-	}
-	return hex.EncodeToString(hash.Sum(nil)), nil
 }

@@ -1,4 +1,4 @@
-package crm_test
+package cluster_test
 
 import (
 	"context"
@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/suite"
-	"github.com/trento-project/workbench/internal/crm"
+	"github.com/trento-project/workbench/internal/cluster"
 	"github.com/trento-project/workbench/internal/support/mocks"
 )
 
@@ -29,7 +29,7 @@ func (suite *CrmTestSuite) IsIdleTest() {
 	mockExecutor := mocks.NewMockCmdExecutor(suite.T())
 	mockExecutor.On("Exec", ctx, "cs_clusterstate", "-i").Return([]byte("Cluster state: S_IDLE"), nil)
 
-	crmClient := crm.NewCrmClient(mockExecutor, slog.Default())
+	crmClient := cluster.NewClusterClient(mockExecutor, slog.Default())
 
 	isIdle, err := crmClient.IsIdle(ctx)
 	suite.NoError(err, "IsIdle should not return an error")
@@ -42,7 +42,7 @@ func (suite *CrmTestSuite) IsIdleErrorTest() {
 	mockExecutor := mocks.NewMockCmdExecutor(suite.T())
 	mockExecutor.On("Exec", ctx, "cs_clusterstate", "-i").Return([]byte(""), errors.New("command failed"))
 
-	crmClient := crm.NewCrmClient(mockExecutor, slog.Default())
+	crmClient := cluster.NewClusterClient(mockExecutor, slog.Default())
 
 	_, err := crmClient.IsIdle(ctx)
 
@@ -55,7 +55,7 @@ func (suite *CrmTestSuite) IsIdleDifferentStateTest() {
 	mockExecutor := mocks.NewMockCmdExecutor(suite.T())
 	mockExecutor.On("Exec", ctx, "cs_clusterstate", "-i").Return([]byte("Cluster state: S_TRANSITION_ENGINE"), nil)
 
-	crmClient := crm.NewCrmClient(mockExecutor, slog.Default())
+	crmClient := cluster.NewClusterClient(mockExecutor, slog.Default())
 
 	isIdle, err := crmClient.IsIdle(ctx)
 	suite.NoError(err, "IsIdle should not return an error")

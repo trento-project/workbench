@@ -30,7 +30,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/trento-project/workbench/internal/crm"
+	"github.com/trento-project/workbench/internal/cluster"
 	"github.com/trento-project/workbench/internal/support"
 )
 
@@ -39,9 +39,9 @@ const (
 )
 
 type CrmClusterStart struct {
-	baseOperator
-	crmClient crm.Crm
-	retry     retry
+	clusterClient    cluster.Cluster
+	crmClient    cluster.Cluster
+	retryOptions support.BackoffOptions
 }
 
 type CrmClusterStartOption Option[CrmClusterStart]
@@ -49,8 +49,8 @@ type CrmClusterStartOption Option[CrmClusterStart]
 type crmClusterStartDiffOutput struct {
 	Started bool `json:"started"`
 }
-
-func WithCustomCrmClient(crmClient crm.Crm) CrmClusterStartOption {
+func WithCustomCrmClient(clusterClient cluster.Cluster) CrmClusterStartOption {
+func WithCustomCrmClient(crmClient cluster.Cluster) CrmClusterStartOption {
 	return func(c *CrmClusterStart) {
 		c.crmClient = crmClient
 	}
@@ -71,15 +71,16 @@ func NewCrmClusterStart(arguments OperatorArguments,
 	operationID string,
 	options OperatorOptions[CrmClusterStart]) *Executor {
 	crmClusterStart := &CrmClusterStart{
-		baseOperator: newBaseOperator(operationID, arguments, options.BaseOperatorOptions...),
-		crmClient:    crm.NewDefaultCrmClient(),
-		retry: struct {
-			initialDelay time.Duration
-			maxDelay     time.Duration
-			maxRetries   int
-		}{
-			maxDelay:   8 * time.Second,
-			maxRetries: 5,
+		baseOperator: newBaseOperator(
+			CrmClusterStartOperatorName, operationID, arguments, options.BaseOperatorOptions...,
+		clusterClient: cluster.NewDefaultClusterClient(),
+		crmClient: cluster.NewDefaultClusterClient(),
+		// wait before each execution: 0s, 1.5s, 4.5s, 13.5s, 40.5s
+		retryOptions: support.BackoffOptions{
+			InitialDelay: 500 * time.Millisecond,
+			MaxDelay:     1 * time.Minute,
+			MaxRetries:   5,
+			Factor:       3,
 		},
 	}
 
