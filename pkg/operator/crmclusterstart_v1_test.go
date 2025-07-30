@@ -23,77 +23,10 @@ func (suite *CrmClusterStartOperatorTestSuite) SetupTest() {
 	// Setup code for the test suite can be added here
 }
 
-func (suite *CrmClusterStartOperatorTestSuite) TestCrmClusterStartArgMissingClusterId() {
-	ctx := context.Background()
-
-	crmClusterStartOperator := operator.NewCrmClusterStart(
-		operator.OperatorArguments{},
-		"test-op",
-		operator.OperatorOptions[operator.CrmClusterStart]{},
-	)
-
-	report := crmClusterStartOperator.Run(ctx)
-
-	suite.Nil(report.Success)
-	suite.Equal(operator.PLAN, report.Error.ErrorPhase)
-	suite.EqualValues("error parsing arguments: invalid or missing cluster_id argument", report.Error.Message)
-}
-
-func (suite *CrmClusterStartOperatorTestSuite) TestCrmClusterStartClusterIdMismatch() {
-	ctx := context.Background()
-
-	mockCrmClient := mocks.NewMockCrm(suite.T())
-	mockCrmClient.On("GetClusterId").Return("different-cluster-id", nil).Once()
-
-	crmClusterStartOperator := operator.NewCrmClusterStart(
-		operator.OperatorArguments{
-			"cluster_id": "test-cluster-id",
-		},
-		"test-op",
-		operator.OperatorOptions[operator.CrmClusterStart]{
-			OperatorOptions: []operator.Option[operator.CrmClusterStart]{
-				operator.Option[operator.CrmClusterStart](operator.WithCustomCrmClient(mockCrmClient)),
-			},
-		},
-	)
-
-	report := crmClusterStartOperator.Run(ctx)
-
-	suite.Nil(report.Success)
-	suite.Equal(operator.PLAN, report.Error.ErrorPhase)
-
-}
-
-func (suite *CrmClusterStartOperatorTestSuite) TestCrmClusterStartClusterErrorGetClusterId() {
-	ctx := context.Background()
-
-	mockCrmClient := mocks.NewMockCrm(suite.T())
-	mockCrmClient.On("GetClusterId").Return("", errors.New("any error")).Once()
-
-	crmClusterStartOperator := operator.NewCrmClusterStart(
-		operator.OperatorArguments{
-			"cluster_id": "test-cluster-id",
-		},
-		"test-op",
-		operator.OperatorOptions[operator.CrmClusterStart]{
-			OperatorOptions: []operator.Option[operator.CrmClusterStart]{
-				operator.Option[operator.CrmClusterStart](operator.WithCustomCrmClient(mockCrmClient)),
-			},
-		},
-	)
-
-	report := crmClusterStartOperator.Run(ctx)
-
-	suite.Nil(report.Success)
-	suite.Equal(operator.PLAN, report.Error.ErrorPhase)
-
-}
-
 func (suite *CrmClusterStartOperatorTestSuite) TestCrmClusterStartClusterAlreadyOnline() {
 	ctx := context.Background()
 
 	mockCrmClient := mocks.NewMockCrm(suite.T())
-	mockCrmClient.On("GetClusterId").Return("test-cluster-id", nil).Once()
 	mockCrmClient.On("IsHostOnline", ctx).Return(true).Once()
 
 	crmClusterStartOperator := operator.NewCrmClusterStart(
@@ -122,7 +55,6 @@ func (suite *CrmClusterStartOperatorTestSuite) TestCrmClusterStartClusterNotIdle
 	ctx := context.Background()
 
 	mockCrmClient := mocks.NewMockCrm(suite.T())
-	mockCrmClient.On("GetClusterId").Return("test-cluster-id", nil)
 	mockCrmClient.On("IsHostOnline", ctx).Return(false)
 	mockCrmClient.On("IsIdle", ctx).Return(false, nil)
 
@@ -149,7 +81,6 @@ func (suite *CrmClusterStartOperatorTestSuite) TestCrmClusterStartClusterRollbac
 	ctx := context.Background()
 
 	mockCrmClient := mocks.NewMockCrm(suite.T())
-	mockCrmClient.On("GetClusterId").Return("test-cluster-id", nil).Once()
 	mockCrmClient.On("IsHostOnline", ctx).Return(false).Once()
 	mockCrmClient.On("StartCluster", ctx).Return(errors.New("failed to start cluster")).Once()
 	mockCrmClient.On("IsIdle", ctx).Return(true, nil)
@@ -179,7 +110,6 @@ func (suite *CrmClusterStartOperatorTestSuite) TestCrmClusterStartClusterRollbac
 	ctx := context.Background()
 
 	mockCrmClient := mocks.NewMockCrm(suite.T())
-	mockCrmClient.On("GetClusterId").Return("test-cluster-id", nil).Once()
 	mockCrmClient.On("IsHostOnline", ctx).Return(false).Once()
 	mockCrmClient.On("StartCluster", ctx).Return(errors.New("failed to start cluster")).Once()
 	mockCrmClient.On("IsIdle", ctx).Return(true, nil).Once() // this is called in the plan phase
@@ -192,7 +122,7 @@ func (suite *CrmClusterStartOperatorTestSuite) TestCrmClusterStartClusterRollbac
 		"test-op",
 		operator.OperatorOptions[operator.CrmClusterStart]{
 			OperatorOptions: []operator.Option[operator.CrmClusterStart]{
-				operator.Option[operator.CrmClusterStart](operator.WithCustomCrmClient(mockCrmClient)),
+				operator.Option[operator.CrmClusterStart](operator.WithCustomClusterClient(mockCrmClient)),
 				operator.Option[operator.CrmClusterStart](operator.WithCustomRetry(2, 100*time.Millisecond, 1*time.Second, 2)),
 			},
 		},
@@ -209,7 +139,6 @@ func (suite *CrmClusterStartOperatorTestSuite) TestCrmClusterStartClusterRollbac
 	ctx := context.Background()
 
 	mockCrmClient := mocks.NewMockCrm(suite.T())
-	mockCrmClient.On("GetClusterId").Return("test-cluster-id", nil).Once()
 	mockCrmClient.On("IsIdle", ctx).Return(true, nil)
 	mockCrmClient.On("IsHostOnline", ctx).Return(false).Once()
 	mockCrmClient.On("StartCluster", ctx).Return(errors.New("failed to start cluster")).Once()
@@ -238,7 +167,6 @@ func (suite *CrmClusterStartOperatorTestSuite) TestCrmClusterStartClusterStartVe
 	ctx := context.Background()
 
 	mockCrmClient := mocks.NewMockCrm(suite.T())
-	mockCrmClient.On("GetClusterId").Return("test-cluster-id", nil)
 	mockCrmClient.On("IsIdle", ctx).Return(true, nil)
 	mockCrmClient.On("IsHostOnline", ctx).Return(false).Once()
 	mockCrmClient.On("StartCluster", ctx).Return(nil).Once()
@@ -269,7 +197,6 @@ func (suite *CrmClusterStartOperatorTestSuite) TestCrmClusterStartClusterStartVe
 	ctx := context.Background()
 
 	mockCrmClient := mocks.NewMockCrm(suite.T())
-	mockCrmClient.On("GetClusterId").Return("test-cluster-id", nil)
 	mockCrmClient.On("IsHostOnline", ctx).Return(false).Once()
 	mockCrmClient.On("IsIdle", ctx).Return(true, nil)
 	mockCrmClient.On("StartCluster", ctx).Return(nil).Once()
@@ -282,7 +209,7 @@ func (suite *CrmClusterStartOperatorTestSuite) TestCrmClusterStartClusterStartVe
 		"test-op",
 		operator.OperatorOptions[operator.CrmClusterStart]{
 			OperatorOptions: []operator.Option[operator.CrmClusterStart]{
-				operator.Option[operator.CrmClusterStart](operator.WithCustomCrmClient(mockCrmClient)),
+				operator.Option[operator.CrmClusterStart](operator.WithCustomClusterClient(mockCrmClient)),
 			},
 		},
 	)

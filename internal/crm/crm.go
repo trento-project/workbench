@@ -14,8 +14,6 @@ import (
 )
 
 type Crm interface {
-	// GetClusterId returns the unique identifier for the cluster.
-	GetClusterId() (string, error)
 	IsHostOnline(ctx context.Context) bool
 	IsIdle(ctx context.Context) (bool, error)
 	StartCluster(ctx context.Context) error
@@ -39,18 +37,6 @@ func NewCrmClient(executor support.CmdExecutor, logger *slog.Logger) Crm {
 		executor: executor,
 		logger:   logger,
 	}
-}
-
-// By default, Trento uses the cluster ID as the MD5 hash of the authkey file
-// located at /etc/corosync/authkey. This is used to uniquely identify the cluster
-// in the CRM operations. If the file does not exist or cannot be read, an error
-// will be returned, and the operation will not proceed.
-func (c *CrmClient) GetClusterId() (string, error) {
-	id, err := md5sumFile("/etc/corosync/authkey")
-	if err != nil {
-		return "", fmt.Errorf("failed to read authkey file: %w", err)
-	}
-	return id, nil
 }
 
 func (c *CrmClient) IsHostOnline(ctx context.Context) bool {
