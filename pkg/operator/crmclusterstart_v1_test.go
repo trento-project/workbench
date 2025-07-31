@@ -51,32 +51,6 @@ func (suite *CrmClusterStartOperatorTestSuite) TestCrmClusterStartClusterAlready
 	}, report.Success.Diff)
 }
 
-func (suite *CrmClusterStartOperatorTestSuite) TestCrmClusterStartClusterNotIdle() {
-	ctx := context.Background()
-
-	mockCrmClient := mocks.NewMockCrm(suite.T())
-	mockCrmClient.On("IsHostOnline", ctx).Return(false)
-	mockCrmClient.On("IsIdle", ctx).Return(false, nil)
-
-	crmClusterStartOperator := operator.NewCrmClusterStart(
-		operator.OperatorArguments{
-			"cluster_id": "test-cluster-id",
-		},
-		"test-op",
-		operator.OperatorOptions[operator.CrmClusterStart]{
-			OperatorOptions: []operator.Option[operator.CrmClusterStart]{
-				operator.Option[operator.CrmClusterStart](operator.WithCustomCrmClient(mockCrmClient)),
-				operator.Option[operator.CrmClusterStart](operator.WithCustomRetry(2, 100*time.Millisecond, 1*time.Second, 2)),
-			},
-		},
-	)
-
-	report := crmClusterStartOperator.Run(ctx)
-
-	suite.Nil(report.Success)
-	suite.Equal(operator.PLAN, report.Error.ErrorPhase)
-}
-
 func (suite *CrmClusterStartOperatorTestSuite) TestCrmClusterStartClusterRollbackFailure() {
 	ctx := context.Background()
 
@@ -112,7 +86,6 @@ func (suite *CrmClusterStartOperatorTestSuite) TestCrmClusterStartClusterRollbac
 	mockCrmClient := mocks.NewMockCrm(suite.T())
 	mockCrmClient.On("IsHostOnline", ctx).Return(false).Once()
 	mockCrmClient.On("StartCluster", ctx).Return(errors.New("failed to start cluster")).Once()
-	mockCrmClient.On("IsIdle", ctx).Return(true, nil).Once() // this is called in the plan phase
 	mockCrmClient.On("IsIdle", ctx).Return(false, nil)
 
 	crmClusterStartOperator := operator.NewCrmClusterStart(
@@ -180,8 +153,8 @@ func (suite *CrmClusterStartOperatorTestSuite) TestCrmClusterStartClusterStartVe
 		"test-op",
 		operator.OperatorOptions[operator.CrmClusterStart]{
 			OperatorOptions: []operator.Option[operator.CrmClusterStart]{
-				operator.Option[operator.CrmClusterStart](operator.WithCustomCrmClient(mockCrmClient)),
-				operator.Option[operator.CrmClusterStart](operator.WithCustomRetry(2, 100*time.Millisecond, 1*time.Second)),
+				operator.Option[operator.CrmClusterStart](operator.WithCustomClusterClient(mockCrmClient)),
+				operator.Option[operator.CrmClusterStart](operator.WithCustomRetry(2, 100*time.Millisecond, 1*time.Second, 2)),
 			},
 		},
 	)
@@ -198,7 +171,6 @@ func (suite *CrmClusterStartOperatorTestSuite) TestCrmClusterStartClusterStartVe
 
 	mockCrmClient := mocks.NewMockCrm(suite.T())
 	mockCrmClient.On("IsHostOnline", ctx).Return(false).Once()
-	mockCrmClient.On("IsIdle", ctx).Return(true, nil)
 	mockCrmClient.On("StartCluster", ctx).Return(nil).Once()
 	mockCrmClient.On("IsHostOnline", ctx).Return(true)
 
