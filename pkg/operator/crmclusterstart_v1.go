@@ -106,13 +106,6 @@ func (c *CrmClusterStart) plan(ctx context.Context) (bool, error) {
 		return true, nil
 	}
 
-	// // Ensure the provided cluster ID matches the expected cluster ID.
-	err := c.ensureIsIdle(ctx)
-	if err != nil {
-		c.logger.Error("CRM cluster is not idle, cannot start", "error", err)
-		return false, fmt.Errorf("cluster is not in IDLE state, cannot proceed: %w", err)
-	}
-
 	return false, nil
 }
 
