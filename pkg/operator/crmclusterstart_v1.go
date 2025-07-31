@@ -52,7 +52,7 @@ type crmClusterStartDiffOutput struct {
 
 func WithCustomClusterClient(clusterClient cluster.Cluster) CrmClusterStartOption {
 	return func(c *CrmClusterStart) {
-		c.crmClient = crmClient
+		c.clusterClient = clusterClient
 	}
 }
 
