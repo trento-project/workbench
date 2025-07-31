@@ -39,9 +39,9 @@ const (
 )
 
 type CrmClusterStart struct {
-	clusterClient    cluster.Cluster
-	crmClient    cluster.Cluster
-	retryOptions support.BackoffOptions
+	baseOperator
+	clusterClient cluster.Cluster
+	retryOptions  support.BackoffOptions
 }
 
 type CrmClusterStartOption Option[CrmClusterStart]
@@ -49,8 +49,8 @@ type CrmClusterStartOption Option[CrmClusterStart]
 type crmClusterStartDiffOutput struct {
 	Started bool `json:"started"`
 }
-func WithCustomCrmClient(clusterClient cluster.Cluster) CrmClusterStartOption {
-func WithCustomCrmClient(crmClient cluster.Cluster) CrmClusterStartOption {
+
+func WithCustomClusterClient(clusterClient cluster.Cluster) CrmClusterStartOption {
 	return func(c *CrmClusterStart) {
 		c.crmClient = crmClient
 	}
@@ -73,8 +73,8 @@ func NewCrmClusterStart(arguments OperatorArguments,
 	crmClusterStart := &CrmClusterStart{
 		baseOperator: newBaseOperator(
 			CrmClusterStartOperatorName, operationID, arguments, options.BaseOperatorOptions...,
+		),
 		clusterClient: cluster.NewDefaultClusterClient(),
-		crmClient: cluster.NewDefaultClusterClient(),
 		// wait before each execution: 0s, 1.5s, 4.5s, 13.5s, 40.5s
 		retryOptions: support.BackoffOptions{
 			InitialDelay: 500 * time.Millisecond,
@@ -97,7 +97,7 @@ func NewCrmClusterStart(arguments OperatorArguments,
 
 func (c *CrmClusterStart) plan(ctx context.Context) (bool, error) {
 	// check if the cluster is already started.
-	isOnline := c.crmClient.IsHostOnline(ctx)
+	isOnline := c.clusterClient.IsHostOnline(ctx)
 	c.resources[beforeDiffField] = isOnline
 
 	if isOnline {
@@ -109,8 +109,8 @@ func (c *CrmClusterStart) plan(ctx context.Context) (bool, error) {
 	return false, nil
 }
 
+func (c *CrmClusterStart) commit(ctx context.Context) error {
 	err := c.clusterClient.StartCluster(ctx)
-	err := c.crmClient.StartCluster(ctx)
 	if err != nil {
 		return fmt.Errorf("error starting CRM cluster: %w", err)
 	}
@@ -128,8 +128,8 @@ func (c *CrmClusterStart) rollback(ctx context.Context) error {
 	result := <-support.AsyncExponentialBackoff(
 		ctx,
 		c.retryOptions,
+		func() (bool, error) {
 			return true, c.clusterClient.StopCluster(ctx)
-			return true, c.crmClient.StopCluster(ctx)
 		},
 	)
 
@@ -144,8 +144,8 @@ func (c *CrmClusterStart) verify(ctx context.Context) error {
 	result := <-support.AsyncExponentialBackoff(
 		ctx,
 		c.retryOptions,
+		func() (bool, error) {
 			isOnline := c.clusterClient.IsHostOnline(ctx)
-			isOnline := c.crmClient.IsHostOnline(ctx)
 			if !isOnline {
 				return false, fmt.Errorf("CRM cluster is not online, expected online state")
 			}
@@ -186,8 +186,8 @@ func (c *CrmClusterStart) ensureIsIdle(ctx context.Context) error {
 	result := <-support.AsyncExponentialBackoff(
 		ctx,
 		c.retryOptions,
+		func() (bool, error) {
 			isIdle, err := c.clusterClient.IsIdle(ctx)
-			isIdle, err := c.crmClient.IsIdle(ctx)
 			if err != nil {
 				return false, fmt.Errorf("error checking if CRM cluster is idle: %w", err)
 			} else if !isIdle {
