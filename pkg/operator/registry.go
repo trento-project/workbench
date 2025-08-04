@@ -115,6 +115,14 @@ func StandardRegistry(options ...BaseOperatorOption) *Registry {
 				},
 			},
 
+			CrmClusterStopOperatorName: map[string]OperatorBuilder{
+				"v1": func(operationID string, arguments OperatorArguments) Operator {
+					return NewCrmClusterStop(arguments, operationID, OperatorOptions[CrmClusterStop]{
+						BaseOperatorOptions: options,
+					})
+				},
+			},
+
 			SapInstanceStartOperatorName: map[string]OperatorBuilder{
 				"v1": func(operationID string, arguments OperatorArguments) Operator {
 					return NewSAPInstanceStart(arguments, operationID, OperatorOptions[SAPInstanceStart]{
