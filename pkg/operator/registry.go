@@ -123,6 +123,14 @@ func StandardRegistry(options ...BaseOperatorOption) *Registry {
 				},
 			},
 
+			HostRebootOperatorName: map[string]OperatorBuilder{
+				"v1": func(operationID string, arguments OperatorArguments) Operator {
+					return NewHostReboot(arguments, operationID, OperatorOptions[HostReboot]{
+						BaseOperatorOptions: options,
+					})
+				},
+			},
+
 			SapInstanceStartOperatorName: map[string]OperatorBuilder{
 				"v1": func(operationID string, arguments OperatorArguments) Operator {
 					return NewSAPInstanceStart(arguments, operationID, OperatorOptions[SAPInstanceStart]{
