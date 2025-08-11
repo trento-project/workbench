@@ -243,6 +243,122 @@ func (_c *MockDbusConnector_GetUnitPropertyContext_Call) RunAndReturn(run func(c
 	return _c
 }
 
+// ListJobsContext provides a mock function with given fields: ctx
+func (_m *MockDbusConnector) ListJobsContext(ctx context.Context) ([]v22dbus.JobStatus, error) {
+	ret := _m.Called(ctx)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ListJobsContext")
+	}
+
+	var r0 []v22dbus.JobStatus
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context) ([]v22dbus.JobStatus, error)); ok {
+		return rf(ctx)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context) []v22dbus.JobStatus); ok {
+		r0 = rf(ctx)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]v22dbus.JobStatus)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
+		r1 = rf(ctx)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockDbusConnector_ListJobsContext_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ListJobsContext'
+type MockDbusConnector_ListJobsContext_Call struct {
+	*mock.Call
+}
+
+// ListJobsContext is a helper method to define mock.On call
+//   - ctx context.Context
+func (_e *MockDbusConnector_Expecter) ListJobsContext(ctx interface{}) *MockDbusConnector_ListJobsContext_Call {
+	return &MockDbusConnector_ListJobsContext_Call{Call: _e.mock.On("ListJobsContext", ctx)}
+}
+
+func (_c *MockDbusConnector_ListJobsContext_Call) Run(run func(ctx context.Context)) *MockDbusConnector_ListJobsContext_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context))
+	})
+	return _c
+}
+
+func (_c *MockDbusConnector_ListJobsContext_Call) Return(_a0 []v22dbus.JobStatus, _a1 error) *MockDbusConnector_ListJobsContext_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockDbusConnector_ListJobsContext_Call) RunAndReturn(run func(context.Context) ([]v22dbus.JobStatus, error)) *MockDbusConnector_ListJobsContext_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// ListUnitsContext provides a mock function with given fields: ctx
+func (_m *MockDbusConnector) ListUnitsContext(ctx context.Context) ([]v22dbus.UnitStatus, error) {
+	ret := _m.Called(ctx)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ListUnitsContext")
+	}
+
+	var r0 []v22dbus.UnitStatus
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context) ([]v22dbus.UnitStatus, error)); ok {
+		return rf(ctx)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context) []v22dbus.UnitStatus); ok {
+		r0 = rf(ctx)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]v22dbus.UnitStatus)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
+		r1 = rf(ctx)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockDbusConnector_ListUnitsContext_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ListUnitsContext'
+type MockDbusConnector_ListUnitsContext_Call struct {
+	*mock.Call
+}
+
+// ListUnitsContext is a helper method to define mock.On call
+//   - ctx context.Context
+func (_e *MockDbusConnector_Expecter) ListUnitsContext(ctx interface{}) *MockDbusConnector_ListUnitsContext_Call {
+	return &MockDbusConnector_ListUnitsContext_Call{Call: _e.mock.On("ListUnitsContext", ctx)}
+}
+
+func (_c *MockDbusConnector_ListUnitsContext_Call) Run(run func(ctx context.Context)) *MockDbusConnector_ListUnitsContext_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context))
+	})
+	return _c
+}
+
+func (_c *MockDbusConnector_ListUnitsContext_Call) Return(_a0 []v22dbus.UnitStatus, _a1 error) *MockDbusConnector_ListUnitsContext_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockDbusConnector_ListUnitsContext_Call) RunAndReturn(run func(context.Context) ([]v22dbus.UnitStatus, error)) *MockDbusConnector_ListUnitsContext_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // ReloadContext provides a mock function with given fields: ctx
 func (_m *MockDbusConnector) ReloadContext(ctx context.Context) error {
 	ret := _m.Called(ctx)
