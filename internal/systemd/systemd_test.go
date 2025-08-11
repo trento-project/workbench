@@ -9,9 +9,9 @@ import (
 	"github.com/coreos/go-systemd/v22/dbus"
 	innerDbus "github.com/godbus/dbus/v5"
 	"github.com/stretchr/testify/suite"
+	"github.com/trento-project/workbench/internal/dbus/mocks"
 	"github.com/trento-project/workbench/internal/support"
 	"github.com/trento-project/workbench/internal/systemd"
-	"github.com/trento-project/workbench/internal/systemd/mocks"
 )
 
 type SystemdTestSuite struct {

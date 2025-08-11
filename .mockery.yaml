@@ -40,6 +40,11 @@ packages:
       outpkg: "mocks"
       dir: "internal/systemd/mocks"
     interfaces:
-      DbusConnector:
       Systemd:
       SystemdLoader:
+  github.com/trento-project/workbench/internal/dbus:
+    config:
+      outpkg: "mocks"
+      dir: "internal/dbus/mocks"
+    interfaces:
+      DbusConnector:

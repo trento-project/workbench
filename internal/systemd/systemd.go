@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+
+	"github.com/trento-project/workbench/internal/dbus"
 )
 
 type Systemd interface {
@@ -14,7 +16,7 @@ type Systemd interface {
 }
 
 type SystemdConnector struct {
-	dbusConnection DbusConnector
+	dbusConnection dbus.DbusConnector
 	logger         *slog.Logger
 }
 
@@ -34,7 +36,7 @@ func NewDefaultSystemdLoader() SystemdLoader {
 	return &defaultSystemdLoader{}
 }
 
-func WithCustomDbusConnector(dbusConnection DbusConnector) SystemdConnectorOption {
+func WithCustomDbusConnector(dbusConnection dbus.DbusConnector) SystemdConnectorOption {
 	return func(s *SystemdConnector) {
 		s.dbusConnection = dbusConnection
 	}
@@ -53,7 +55,7 @@ func NewSystemd(ctx context.Context, logger *slog.Logger, options ...SystemdConn
 		return systemdInstance, nil
 	}
 
-	dbusConnection, err := NewDbusConnector(ctx)
+	dbusConnection, err := dbus.NewDbusConnector(ctx)
 	if err != nil {
 		logger.Error("failed to create dbus connection", "error", err)
 		return nil, err
