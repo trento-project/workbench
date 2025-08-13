@@ -1,4 +1,4 @@
-package systemd
+package dbus
 
 import (
 	"context"
@@ -12,6 +12,8 @@ type DbusConnector interface {
 	EnableUnitFilesContext(ctx context.Context, files []string, runtime bool, force bool) (bool, []dbus.EnableUnitFileChange, error)
 	DisableUnitFilesContext(ctx context.Context, files []string, runtime bool) ([]dbus.DisableUnitFileChange, error)
 	ReloadContext(ctx context.Context) error
+	ListJobsContext(ctx context.Context) ([]dbus.JobStatus, error)
+	ListUnitsContext(ctx context.Context) ([]dbus.UnitStatus, error)
 	// NewWithContext establishes a connection to any available bus and authenticates.
 	// Callers should call Close() when done with the connection.
 	// see https://pkg.go.dev/github.com/coreos/go-systemd/v22@v22.5.0/dbus#NewWithContext
