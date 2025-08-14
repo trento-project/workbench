@@ -519,6 +519,7 @@ func (suite *SAPSystemStartOperatorTestSuite) TestSAPSystemStartSuccess() {
 	for _, tt := range cases {
 		ctx := context.Background()
 		suite.mockSapcontrol = mocks.NewMockSAPControlConnector(suite.T())
+		timeout := 60.0
 
 		green := sapcontrol.STATECOLORSAPControlGREEN
 		gray := sapcontrol.STATECOLORSAPControlGRAY
@@ -540,7 +541,10 @@ func (suite *SAPSystemStartOperatorTestSuite) TestSAPSystemStartSuccess() {
 				"StartSystemContext",
 				ctx,
 				mock.MatchedBy(func(req *sapcontrol.StartSystem) bool {
-					return *req.Options == tt.options
+					if *req.Options == tt.options && req.Waittimeout == int32(timeout) {
+						return true
+					}
+					return false
 				}),
 			).
 			Return(nil, nil).
@@ -561,6 +565,7 @@ func (suite *SAPSystemStartOperatorTestSuite) TestSAPSystemStartSuccess() {
 			operator.OperatorArguments{
 				"instance_number": "00",
 				"instance_type":   tt.instanceType,
+				"timeout":         timeout,
 			},
 			"test-op",
 			operator.OperatorOptions[operator.SAPSystemStart]{
