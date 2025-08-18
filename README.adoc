@@ -1,4 +1,4 @@
-== Workbench - Trento Agent Operators
+= Workbench - Trento Agent Operators
 
 This library contains the code for `+agent-operators+`. An `+operator+`
 is a unit of code that can perform write operations on target machines.
@@ -6,7 +6,7 @@ is a unit of code that can perform write operations on target machines.
 Each operator knows how to execute actions and how to roll them back in
 case of failure.
 
-=== Install
+== Install
 
 Install the library
 
@@ -16,9 +16,9 @@ Install the cli tool
 
 `+go install github.com/trento-project/workbench+`
 
-=== Moving Parts
+== Moving Parts
 
-==== Operator
+=== Operator
 
 .flowchart
 image::flow_chart.png[flowchart]
@@ -43,7 +43,7 @@ stages:
 The documentation for each of the operators can be found in the
 operators go source.
 
-===== PLAN
+==== PLAN
 
 The goal of the PLAN stage is to collect information about the
 operations and verify prerequisites. +
@@ -58,7 +58,7 @@ administrators if the rollback fails.
 If an error occurs during the PLAN phase, no rollback is needed; the
 operation is simply aborted with the plan error.
 
-===== COMMIT
+==== COMMIT
 
 The COMMIT phase executes the actual write operations on the system,
 utilizing the information collected during the PLAN phase. +
@@ -70,7 +70,7 @@ an error. +
 Idempotency should be implemented appropriately based on the type of
 operations to be performed.
 
-===== VERIFY
+==== VERIFY
 
 The VERIFY phase ensures that the actions applied during the COMMIT
 phase have produced the expected results on the system. +
@@ -79,7 +79,7 @@ If an error occurs during this phase, the rollback process is initiated.
 This phase is also when the `+after+` state is recorded for the diff,
 highlighting changes made during the commit phase.
 
-===== ROLLBACK
+==== ROLLBACK
 
 The ROLLBACK phase must implement mechanisms to revert any changes made
 during the COMMIT phase. +
@@ -91,7 +91,7 @@ Be sure to provide clear error messages and log actions appropriately.
 
 If the rollback fails, the error is returned without further action.
 
-==== Executor
+=== Executor
 
 The Executor is a wrapper around an operator. The operator implements
 the phase interface and must be wrapped in an Executor.
@@ -100,7 +100,7 @@ The Executor manages operations transactionally. +
 For library users, the Executor is transparent—using an Operator means
 it is already wrapped within an Executor.
 
-==== Registry
+=== Registry
 
 The Registry holds all available operators. Each operator has a version.
 By default, if no version is specified when requesting an operator, the
@@ -129,7 +129,7 @@ type OperatorBuilder func(operationID string, arguments OperatorArguments) Opera
 The `+operationID+` is a unique identifier for the operation, and
 `+arguments+` are modeled as `+map[string]any+`.
 
-==== CLI
+=== CLI
 
 The Workbench library also exposes a `+CLI+` to run operators without
 importing the library. The CLI is intended only for testing and
@@ -138,7 +138,7 @@ development purposes.
 The CLI follows the same rules as the library, implementing only the
 operators exposed by the registry.
 
-===== Usage
+==== Usage
 
 ....
 Usage:
@@ -158,7 +158,7 @@ option to pass the arguments.
 
 The arguments must be provided as a JSON string.
 
-===== Example
+==== Example
 
 [source,bash]
 ----
