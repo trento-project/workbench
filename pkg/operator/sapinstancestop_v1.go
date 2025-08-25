@@ -159,7 +159,7 @@ func (s *SAPInstanceStop) rollback(ctx context.Context) error {
 	return nil
 }
 
-func (s *SAPInstanceStop) operationDiff(ctx context.Context) map[string]any {
+func (s *SAPInstanceStop) operationDiff(_ context.Context) map[string]any {
 	diff := make(map[string]any)
 
 	beforeDiffOutput := sapInstanceStopDiffOutput{

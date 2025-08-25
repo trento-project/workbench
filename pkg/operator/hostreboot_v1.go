@@ -62,7 +62,7 @@ func WithCustomDbusConstructor(constructor func(ctx context.Context) (dbus.DbusC
 
 func WithStaticDbusConnector(connector dbus.DbusConnector) HostRebootOption {
 	return func(o *HostReboot) {
-		o.dbusConstructor = func(ctx context.Context) (dbus.DbusConnector, error) {
+		o.dbusConstructor = func(_ context.Context) (dbus.DbusConnector, error) {
 			return connector, nil
 		}
 	}
@@ -141,7 +141,7 @@ func (h *HostReboot) verify(ctx context.Context) error {
 	return nil
 }
 
-func (h *HostReboot) operationDiff(ctx context.Context) map[string]any {
+func (h *HostReboot) operationDiff(_ context.Context) map[string]any {
 	diff := make(map[string]any)
 
 	beforeDiffOutput := hostRebootDiffOutput{

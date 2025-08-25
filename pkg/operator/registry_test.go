@@ -20,15 +20,15 @@ func TestRegistryTest(t *testing.T) {
 func (suite *RegistryTest) TestRegistryAvailableOperators() {
 	registry := operator.NewRegistry(operator.OperatorBuildersTree{
 		operator.SaptuneApplySolutionOperatorName: map[string]operator.OperatorBuilder{
-			"v1": func(operationID string, arguments operator.OperatorArguments) operator.Operator { return nil },
-			"v2": func(operationID string, arguments operator.OperatorArguments) operator.Operator { return nil },
+			"v1": func(_ string, _ operator.OperatorArguments) operator.Operator { return nil },
+			"v2": func(_ string, _ operator.OperatorArguments) operator.Operator { return nil },
 		},
 		"test": map[string]operator.OperatorBuilder{
-			"v1": func(operationID string, arguments operator.OperatorArguments) operator.Operator { return nil },
-			"v2": func(operationID string, arguments operator.OperatorArguments) operator.Operator { return nil },
+			"v1": func(_ string, _ operator.OperatorArguments) operator.Operator { return nil },
+			"v2": func(_ string, _ operator.OperatorArguments) operator.Operator { return nil },
 		},
 		"test2": map[string]operator.OperatorBuilder{
-			"v1": func(operationID string, arguments operator.OperatorArguments) operator.Operator { return nil },
+			"v1": func(_ string, _ operator.OperatorArguments) operator.Operator { return nil },
 		},
 	})
 
@@ -50,15 +50,15 @@ func (suite *RegistryTest) TestRegistryAvailableOperators() {
 func (suite *RegistryTest) TestGetOperatorBuilderNotFound() {
 	registry := operator.NewRegistry(operator.OperatorBuildersTree{
 		operator.SaptuneApplySolutionOperatorName: map[string]operator.OperatorBuilder{
-			"v1": func(operationID string, arguments operator.OperatorArguments) operator.Operator { return nil },
-			"v2": func(operationID string, arguments operator.OperatorArguments) operator.Operator { return nil },
+			"v1": func(_ string, _ operator.OperatorArguments) operator.Operator { return nil },
+			"v2": func(_ string, _ operator.OperatorArguments) operator.Operator { return nil },
 		},
 		"test": map[string]operator.OperatorBuilder{
-			"v1": func(operationID string, arguments operator.OperatorArguments) operator.Operator { return nil },
-			"v2": func(operationID string, arguments operator.OperatorArguments) operator.Operator { return nil },
+			"v1": func(_ string, _ operator.OperatorArguments) operator.Operator { return nil },
+			"v2": func(_ string, _ operator.OperatorArguments) operator.Operator { return nil },
 		},
 		"test2": map[string]operator.OperatorBuilder{
-			"v1": func(operationID string, arguments operator.OperatorArguments) operator.Operator { return nil },
+			"v1": func(_ string, _ operator.OperatorArguments) operator.Operator { return nil },
 		},
 	})
 	_, err := registry.GetOperatorBuilder("other@v1")
@@ -70,15 +70,15 @@ func (suite *RegistryTest) TestGetOperatorBuilderFoundWithVersion() {
 	foundOperator := mocks.NewMockOperator(suite.T())
 	registry := operator.NewRegistry(operator.OperatorBuildersTree{
 		operator.SaptuneApplySolutionOperatorName: map[string]operator.OperatorBuilder{
-			"v1": func(operationID string, arguments operator.OperatorArguments) operator.Operator { return foundOperator },
-			"v2": func(operationID string, arguments operator.OperatorArguments) operator.Operator { return nil },
+			"v1": func(_ string, _ operator.OperatorArguments) operator.Operator { return foundOperator },
+			"v2": func(_ string, _ operator.OperatorArguments) operator.Operator { return nil },
 		},
 		"test": map[string]operator.OperatorBuilder{
-			"v1": func(operationID string, arguments operator.OperatorArguments) operator.Operator { return nil },
-			"v2": func(operationID string, arguments operator.OperatorArguments) operator.Operator { return nil },
+			"v1": func(_ string, _ operator.OperatorArguments) operator.Operator { return nil },
+			"v2": func(_ string, _ operator.OperatorArguments) operator.Operator { return nil },
 		},
 		"test2": map[string]operator.OperatorBuilder{
-			"v1": func(operationID string, arguments operator.OperatorArguments) operator.Operator { return nil },
+			"v1": func(_ string, _ operator.OperatorArguments) operator.Operator { return nil },
 		},
 	})
 
@@ -92,15 +92,15 @@ func (suite *RegistryTest) TestGetOperatorBuilderFoundWithoutVersionGetLast() {
 	foundOperator := mocks.NewMockOperator(suite.T())
 	registry := operator.NewRegistry(operator.OperatorBuildersTree{
 		operator.SaptuneApplySolutionOperatorName: map[string]operator.OperatorBuilder{
-			"v1": func(operationID string, arguments operator.OperatorArguments) operator.Operator { return nil },
-			"v2": func(operationID string, arguments operator.OperatorArguments) operator.Operator { return foundOperator },
+			"v1": func(_ string, _ operator.OperatorArguments) operator.Operator { return nil },
+			"v2": func(_ string, _ operator.OperatorArguments) operator.Operator { return foundOperator },
 		},
 		"test": map[string]operator.OperatorBuilder{
-			"v1": func(operationID string, arguments operator.OperatorArguments) operator.Operator { return nil },
-			"v2": func(operationID string, arguments operator.OperatorArguments) operator.Operator { return nil },
+			"v1": func(_ string, _ operator.OperatorArguments) operator.Operator { return nil },
+			"v2": func(_ string, _ operator.OperatorArguments) operator.Operator { return nil },
 		},
 		"test2": map[string]operator.OperatorBuilder{
-			"v1": func(operationID string, arguments operator.OperatorArguments) operator.Operator { return nil },
+			"v1": func(_ string, _ operator.OperatorArguments) operator.Operator { return nil },
 		},
 	})
 

@@ -133,7 +133,7 @@ func (se *ServiceEnable) rollback(ctx context.Context) error {
 	return se.systemdConnector.Disable(ctx, se.service)
 }
 
-func (se *ServiceEnable) operationDiff(ctx context.Context) map[string]any {
+func (se *ServiceEnable) operationDiff(_ context.Context) map[string]any {
 	return computeOperationDiff(se.resources)
 }
 

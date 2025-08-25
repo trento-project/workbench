@@ -166,7 +166,7 @@ func (s *SAPInstanceStart) rollback(ctx context.Context) error {
 	return nil
 }
 
-func (s *SAPInstanceStart) operationDiff(ctx context.Context) map[string]any {
+func (s *SAPInstanceStart) operationDiff(_ context.Context) map[string]any {
 	diff := make(map[string]any)
 
 	beforeDiffOutput := sapInstanceStartDiffOutput{

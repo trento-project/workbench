@@ -161,7 +161,7 @@ func (c *CrmClusterStart) verify(ctx context.Context) error {
 	return nil
 }
 
-func (c *CrmClusterStart) operationDiff(ctx context.Context) map[string]any {
+func (c *CrmClusterStart) operationDiff(_ context.Context) map[string]any {
 	diff := make(map[string]any)
 
 	beforeDiffOutput := crmClusterStartDiffOutput{

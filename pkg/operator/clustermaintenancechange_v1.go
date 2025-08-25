@@ -213,7 +213,7 @@ func (c *ClusterMaintenanceChange) rollback(ctx context.Context) error {
 	return nil
 }
 
-func (c *ClusterMaintenanceChange) operationDiff(ctx context.Context) map[string]any {
+func (c *ClusterMaintenanceChange) operationDiff(_ context.Context) map[string]any {
 	diff := make(map[string]any)
 
 	beforeDiffOutput := diffOutput{

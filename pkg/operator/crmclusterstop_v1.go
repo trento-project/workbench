@@ -157,7 +157,7 @@ func (c *CrmClusterStop) verify(ctx context.Context) error {
 	return nil
 }
 
-func (c *CrmClusterStop) operationDiff(ctx context.Context) map[string]any {
+func (c *CrmClusterStop) operationDiff(_ context.Context) map[string]any {
 	diff := make(map[string]any)
 
 	beforeDiffOutput := CrmClusterStopDiffOutput{

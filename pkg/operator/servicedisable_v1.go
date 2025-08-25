@@ -125,10 +125,10 @@ func (sd *ServiceDisable) rollback(ctx context.Context) error {
 	return sd.systemdConnector.Enable(ctx, sd.service)
 }
 
-func (sd *ServiceDisable) operationDiff(ctx context.Context) map[string]any {
+func (sd *ServiceDisable) operationDiff(_ context.Context) map[string]any {
 	return computeOperationDiff(sd.resources)
 }
 
-func (sd *ServiceDisable) after(ctx context.Context) {
+func (sd *ServiceDisable) after(_ context.Context) {
 	sd.systemdConnector.Close()
 }
