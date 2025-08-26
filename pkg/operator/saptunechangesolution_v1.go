@@ -159,14 +159,26 @@ func (sc *SaptuneChangeSolution) rollback(ctx context.Context) error {
 func (sc *SaptuneChangeSolution) operationDiff(_ context.Context) map[string]any {
 	diff := make(map[string]any)
 
+	beforeSolution, ok := sc.resources[beforeDiffField].(string)
+	if !ok {
+		panic(fmt.Sprintf("invalid beforeSolution value: cannot parse '%s' to string",
+			sc.resources[beforeDiffField]))
+	}
+
+	afterSolution, ok := sc.resources[afterDiffField].(string)
+	if !ok {
+		panic(fmt.Sprintf("invalid afterSolution value: cannot parse '%s' to string",
+			sc.resources[afterDiffField]))
+	}
+
 	beforeDiffOutput := saptuneOperationDiffOutput{
-		Solution: sc.resources[beforeDiffField].(string),
+		Solution: beforeSolution,
 	}
 	before, _ := json.Marshal(beforeDiffOutput)
 	diff[beforeDiffField] = string(before)
 
 	afterDiffOutput := saptuneOperationDiffOutput{
-		Solution: sc.resources[afterDiffField].(string),
+		Solution: afterSolution,
 	}
 	after, _ := json.Marshal(afterDiffOutput)
 	diff[afterDiffField] = string(after)

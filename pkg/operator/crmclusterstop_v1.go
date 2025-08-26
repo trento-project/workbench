@@ -160,14 +160,26 @@ func (c *CrmClusterStop) verify(ctx context.Context) error {
 func (c *CrmClusterStop) operationDiff(_ context.Context) map[string]any {
 	diff := make(map[string]any)
 
+	beforeStopped, ok := c.resources[beforeDiffField].(bool)
+	if !ok {
+		panic(fmt.Sprintf("invalid beforeStopped value: cannot parse '%s' to bool",
+			c.resources[beforeDiffField]))
+	}
+
+	afterStopped, ok := c.resources[afterDiffField].(bool)
+	if !ok {
+		panic(fmt.Sprintf("invalid afterStopped value: cannot parse '%s' to bool",
+			c.resources[afterDiffField]))
+	}
+
 	beforeDiffOutput := CrmClusterStopDiffOutput{
-		Stopped: c.resources[beforeDiffField].(bool),
+		Stopped: beforeStopped,
 	}
 	before, _ := json.Marshal(beforeDiffOutput)
 	diff["before"] = string(before)
 
 	afterDiffOutput := CrmClusterStopDiffOutput{
-		Stopped: c.resources[afterDiffField].(bool),
+		Stopped: afterStopped,
 	}
 	after, _ := json.Marshal(afterDiffOutput)
 	diff["after"] = string(after)

@@ -144,14 +144,26 @@ func (se *ServiceEnable) after(_ context.Context) {
 func computeOperationDiff(resources map[string]any) map[string]any {
 	diff := make(map[string]any)
 
+	beforeEnabled, ok := resources[beforeDiffField].(bool)
+	if !ok {
+		panic(fmt.Sprintf("invalid beforeEnabled value: cannot parse '%s' to bool",
+			resources[beforeDiffField]))
+	}
+
+	afterEnabled, ok := resources[afterDiffField].(bool)
+	if !ok {
+		panic(fmt.Sprintf("invalid afterEnabled value: cannot parse '%s' to bool",
+			resources[afterDiffField]))
+	}
+
 	beforeDiffOutput := serviceEnablementDiffOutput{
-		Enabled: resources[beforeDiffField].(bool),
+		Enabled: beforeEnabled,
 	}
 	before, _ := json.Marshal(beforeDiffOutput)
 	diff[beforeDiffField] = string(before)
 
 	afterDiffOutput := serviceEnablementDiffOutput{
-		Enabled: resources[afterDiffField].(bool),
+		Enabled: afterEnabled,
 	}
 	after, _ := json.Marshal(afterDiffOutput)
 	diff[afterDiffField] = string(after)

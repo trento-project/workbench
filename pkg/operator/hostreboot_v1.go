@@ -144,15 +144,25 @@ func (h *HostReboot) verify(ctx context.Context) error {
 func (h *HostReboot) operationDiff(_ context.Context) map[string]any {
 	diff := make(map[string]any)
 
+	beforeScheduled, ok := h.resources[beforeDiffField].(bool)
+	if !ok {
+		panic(fmt.Sprintf("invalid beforeScheduled value: cannot parse '%s' to bool",
+			h.resources[beforeDiffField]))
+	}
+
 	beforeDiffOutput := hostRebootDiffOutput{
-		Scheduled: h.resources[beforeDiffField].(bool),
+		Scheduled: beforeScheduled,
 	}
 	before, _ := json.Marshal(beforeDiffOutput)
 	diff["before"] = string(before)
 
 	afterScheduled := false
 	if after, exists := h.resources[afterDiffField]; exists {
-		afterScheduled = after.(bool)
+		afterScheduled, ok = after.(bool)
+		if !ok {
+			panic(fmt.Sprintf("invalid afterScheduled value: cannot parse '%s' to bool",
+				h.resources[afterDiffField]))
+		}
 	}
 
 	afterDiffOutput := hostRebootDiffOutput{
