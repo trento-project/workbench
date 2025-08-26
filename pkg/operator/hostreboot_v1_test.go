@@ -149,7 +149,7 @@ func (suite *HostRebootOperatorTestSuite) TestHostRebootOperatorAlreadyScheduled
 func (suite *HostRebootOperatorTestSuite) TestHostRebootOperatorDbusConnectionError() {
 	ctx := context.Background()
 
-	failingConstructor := func(_ context.Context) (dbus.DbusConnector, error) {
+	failingConstructor := func(_ context.Context) (dbus.Connector, error) {
 		return nil, errors.New("dbus constructor failure")
 	}
 

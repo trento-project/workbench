@@ -39,7 +39,7 @@ const (
 type HostReboot struct {
 	baseOperator
 	executor        support.CmdExecutor
-	dbusConstructor func(ctx context.Context) (dbus.DbusConnector, error)
+	dbusConstructor func(ctx context.Context) (dbus.Connector, error)
 }
 
 type HostRebootOption Option[HostReboot]
@@ -54,22 +54,22 @@ func WithCustomHostRebootExecutor(executor support.CmdExecutor) HostRebootOption
 	}
 }
 
-func WithCustomDbusConstructor(constructor func(ctx context.Context) (dbus.DbusConnector, error)) HostRebootOption {
+func WithCustomDbusConstructor(constructor func(ctx context.Context) (dbus.Connector, error)) HostRebootOption {
 	return func(o *HostReboot) {
 		o.dbusConstructor = constructor
 	}
 }
 
-func WithStaticDbusConnector(connector dbus.DbusConnector) HostRebootOption {
+func WithStaticDbusConnector(connector dbus.Connector) HostRebootOption {
 	return func(o *HostReboot) {
-		o.dbusConstructor = func(_ context.Context) (dbus.DbusConnector, error) {
+		o.dbusConstructor = func(_ context.Context) (dbus.Connector, error) {
 			return connector, nil
 		}
 	}
 }
 
-func defaultDbusConstructor(ctx context.Context) (dbus.DbusConnector, error) {
-	connector, err := dbus.NewDbusConnector(ctx)
+func defaultDbusConstructor(ctx context.Context) (dbus.Connector, error) {
+	connector, err := dbus.NewConnector(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create D-Bus connector: %w", err)
 	}

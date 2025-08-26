@@ -16,7 +16,7 @@ type Systemd interface {
 }
 
 type SystemdConnector struct {
-	dbusConnection dbus.DbusConnector
+	dbusConnection dbus.Connector
 	logger         *slog.Logger
 }
 
@@ -36,7 +36,7 @@ func NewDefaultSystemdLoader() SystemdLoader {
 	return &defaultSystemdLoader{}
 }
 
-func WithCustomDbusConnector(dbusConnection dbus.DbusConnector) SystemdConnectorOption {
+func WithCustomDbusConnector(dbusConnection dbus.Connector) SystemdConnectorOption {
 	return func(s *SystemdConnector) {
 		s.dbusConnection = dbusConnection
 	}
@@ -55,7 +55,7 @@ func NewSystemd(ctx context.Context, logger *slog.Logger, options ...SystemdConn
 		return systemdInstance, nil
 	}
 
-	dbusConnection, err := dbus.NewDbusConnector(ctx)
+	dbusConnection, err := dbus.NewConnector(ctx)
 	if err != nil {
 		logger.Error("failed to create dbus connection", "error", err)
 		return nil, err
