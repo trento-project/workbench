@@ -76,7 +76,7 @@ func (saptune *saptuneClient) ApplySolution(ctx context.Context, solution string
 			"solution", solution,
 			"error_output", applyOutput)
 
-		return fmt.Errorf("could not perform saptune solution apply %s, error: %s",
+		return fmt.Errorf("could not perform saptune solution apply %s, error: %w",
 			solution,
 			err,
 		)
@@ -92,7 +92,7 @@ func (saptune *saptuneClient) ChangeSolution(ctx context.Context, solution strin
 			"solution", solution,
 			"error_output", changeSolutionOutput)
 
-		return fmt.Errorf("could not perform saptune change solution %s, error: %s",
+		return fmt.Errorf("could not perform saptune change solution %s, error: %w",
 			solution,
 			err,
 		)
@@ -106,7 +106,7 @@ func (saptune *saptuneClient) RevertSolution(ctx context.Context, solution strin
 	if err != nil {
 		saptune.logger.Error("could not perform saptune solution revert", "solution", solution, "error_output", revertOutput)
 
-		return fmt.Errorf("could not perform saptune solution revert %s, error: %s",
+		return fmt.Errorf("could not perform saptune solution revert %s, error: %w",
 			solution,
 			err,
 		)
