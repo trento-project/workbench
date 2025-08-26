@@ -52,19 +52,22 @@ type SaptuneApplySolutionOption Option[SaptuneApplySolution]
 //
 // - PLAN:
 //   The operator checks for the presence of the saptune binary and verifies its version.
-//   The minimum required version is 3.1.0. If saptune is not installed or the version does not meet the minimum requirement,
-//   the operation will fail.
+//   The minimum required version is 3.1.0. If saptune is not installed or the version does not meet the minimum
+//   requirement, the operation will fail.
+//
 //   The initially applied solution, if any, is collected as the "before" diff.
 //   The operator checks if the requested solution is already applied. If it is, no action is taken,
 //   ensuring idempotency without returning an error.
 //
 // - COMMIT:
-//   If there is any other solution already applied, an error is raised, because only one solution can be applied at a time.
+//   If there is any other solution already applied, an error is raised, because only one solution can be
+//   applied at a time.
 // 	 If otherwise there is no solution applied the saptune command to apply the solution will be executed.
 //
 // - VERIFY:
 //   The operator verifies whether the solution has been correctly applied to the system.
-//   If not, an error is raised. If successful, the current state of the applied solution is collected as the "after" diff.
+//   If not, an error is raised. If successful, the current state of the applied solution is collected as
+//   the "after" diff.
 //
 // - ROLLBACK:
 //   If an error occurs during the COMMIT or VERIFY phase, the saptune revert command is executed

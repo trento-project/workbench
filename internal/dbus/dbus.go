@@ -6,11 +6,19 @@ import (
 	"github.com/coreos/go-systemd/v22/dbus"
 )
 
-// Connector acts as an abstract interface for the dbus functionalities exposed by the package "github.com/coreos/go-systemd/v22/dbus"
+// Connector acts as an abstract interface for the dbus functionalities exposed
+// by the package "github.com/coreos/go-systemd/v22/dbus"
 type Connector interface {
 	GetUnitPropertyContext(ctx context.Context, unit string, propertyName string) (*dbus.Property, error)
-	EnableUnitFilesContext(ctx context.Context, files []string, runtime bool, force bool) (bool, []dbus.EnableUnitFileChange, error)
-	DisableUnitFilesContext(ctx context.Context, files []string, runtime bool) ([]dbus.DisableUnitFileChange, error)
+	EnableUnitFilesContext(ctx context.Context, files []string, runtime bool, force bool) (
+		bool,
+		[]dbus.EnableUnitFileChange,
+		error,
+	)
+	DisableUnitFilesContext(ctx context.Context, files []string, runtime bool) (
+		[]dbus.DisableUnitFileChange,
+		error,
+	)
 	ReloadContext(ctx context.Context) error
 	ListJobsContext(ctx context.Context) ([]dbus.JobStatus, error)
 	ListUnitsContext(ctx context.Context) ([]dbus.UnitStatus, error)

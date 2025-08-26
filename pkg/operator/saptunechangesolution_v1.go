@@ -25,14 +25,18 @@ type SaptuneChangeSolutionOption Option[SaptuneChangeSolution]
 // - COMMIT:
 //   If there is no other solution already applied, an error is raised,
 //   effectively allowing a transition from a solution to another but not from no solution to some solution.
-// 	 If otherwise there is a solution applied that is not the currently applied one the saptune command to change the solution will be executed.
+// 	 If otherwise there is a solution applied that is not the currently applied one the saptune command to change the
+//   solution will be executed.
 //
 // - VERIFY:
-//   The operator verifies whether the solution has been correctly changed to the requested one. If not, an error is raised.
+//   The operator verifies whether the solution has been correctly changed to the requested one.
+//   If not, an error is raised.
+//
 //   On success, the current state of the applied solution is collected as the "after" diff.
 //
 // - ROLLBACK:
-//   If an error occurs during the COMMIT or VERIFY phase, the saptune solution is changed back to the initially applied one.
+//   If an error occurs during the COMMIT or VERIFY phase, the saptune solution is changed back to the initially
+//   applied one.
 
 type SaptuneChangeSolution struct {
 	baseOperator
@@ -53,7 +57,10 @@ func NewSaptuneChangeSolution(
 ) *Executor {
 	saptuneChange := &SaptuneChangeSolution{
 		baseOperator: newBaseOperator(
-			SaptuneChangeSolutionOperatorName, operationID, arguments, options.BaseOperatorOptions...,
+			SaptuneChangeSolutionOperatorName,
+			operationID,
+			arguments,
+			options.BaseOperatorOptions...,
 		),
 	}
 
@@ -144,7 +151,8 @@ func (sc *SaptuneChangeSolution) rollback(ctx context.Context) error {
 		return nil
 	}
 
-	sc.logger.Info("Changing solution to the initially applied one", "appliedSolution", initiallyAppliedSolution)
+	sc.logger.Info("Changing solution to the initially applied one",
+		"appliedSolution", initiallyAppliedSolution)
 	return sc.saptune.ChangeSolution(ctx, initiallyAppliedSolution)
 }
 
