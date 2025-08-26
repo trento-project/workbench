@@ -38,12 +38,12 @@ type ServiceEnableOption Option[ServiceEnable]
 
 type ServiceEnable struct {
 	baseOperator
-	systemdLoader    systemd.SystemdLoader
+	systemdLoader    systemd.Loader
 	systemdConnector systemd.Systemd
 	service          string
 }
 
-func WithCustomServiceEnableSystemdLoader(systemdLoader systemd.SystemdLoader) ServiceEnableOption {
+func WithCustomServiceEnableSystemdLoader(systemdLoader systemd.Loader) ServiceEnableOption {
 	return func(se *ServiceEnable) {
 		se.systemdLoader = systemdLoader
 	}

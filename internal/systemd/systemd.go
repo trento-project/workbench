@@ -22,7 +22,7 @@ type Connector struct {
 
 type ConnectorOption func(*Connector)
 
-type SystemdLoader interface {
+type Loader interface {
 	NewSystemd(ctx context.Context, logger *slog.Logger, options ...ConnectorOption) (Systemd, error)
 }
 
@@ -32,7 +32,7 @@ func (d *defaultSystemdLoader) NewSystemd(ctx context.Context, logger *slog.Logg
 	return NewSystemd(ctx, logger, options...)
 }
 
-func NewDefaultSystemdLoader() SystemdLoader {
+func NewDefaultSystemdLoader() Loader {
 	return &defaultSystemdLoader{}
 }
 

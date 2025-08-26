@@ -30,12 +30,12 @@ type ServiceDisableOption Option[ServiceDisable]
 
 type ServiceDisable struct {
 	baseOperator
-	systemdLoader    systemd.SystemdLoader
+	systemdLoader    systemd.Loader
 	systemdConnector systemd.Systemd
 	service          string
 }
 
-func WithCustomServiceDisableSystemdLoader(systemdLoader systemd.SystemdLoader) ServiceDisableOption {
+func WithCustomServiceDisableSystemdLoader(systemdLoader systemd.Loader) ServiceDisableOption {
 	return func(sd *ServiceDisable) {
 		sd.systemdLoader = systemdLoader
 	}
