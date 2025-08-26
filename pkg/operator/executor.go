@@ -16,7 +16,7 @@ type phaser interface {
 }
 
 type Executor struct {
-	currentPhase OPERATION_PHASES
+	currentPhase OperatorPhases
 	phaser       phaser
 	operationID  string
 	logger       *slog.Logger

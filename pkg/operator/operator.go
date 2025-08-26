@@ -4,16 +4,16 @@ import (
 	"context"
 )
 
-type OPERATION_PHASES string
+type OperatorPhases string
 
 type OperatorArguments map[string]any
 type Option[T any] func(*T)
 
 const (
-	PLAN     OPERATION_PHASES = "PLAN"
-	COMMIT   OPERATION_PHASES = "COMMIT"
-	VERIFY   OPERATION_PHASES = "VERIFY"
-	ROLLBACK OPERATION_PHASES = "ROLLBACK"
+	PLAN     OperatorPhases = "PLAN"
+	COMMIT   OperatorPhases = "COMMIT"
+	VERIFY   OperatorPhases = "VERIFY"
+	ROLLBACK OperatorPhases = "ROLLBACK"
 )
 
 type Operator interface {
