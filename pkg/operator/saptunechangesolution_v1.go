@@ -148,17 +148,17 @@ func (sc *SaptuneChangeSolution) rollback(ctx context.Context) error {
 	return sc.saptune.ChangeSolution(ctx, initiallyAppliedSolution)
 }
 
-func (sa *SaptuneChangeSolution) operationDiff(_ context.Context) map[string]any {
+func (sc *SaptuneChangeSolution) operationDiff(_ context.Context) map[string]any {
 	diff := make(map[string]any)
 
 	beforeDiffOutput := saptuneOperationDiffOutput{
-		Solution: sa.resources[beforeDiffField].(string),
+		Solution: sc.resources[beforeDiffField].(string),
 	}
 	before, _ := json.Marshal(beforeDiffOutput)
 	diff[beforeDiffField] = string(before)
 
 	afterDiffOutput := saptuneOperationDiffOutput{
-		Solution: sa.resources[afterDiffField].(string),
+		Solution: sc.resources[afterDiffField].(string),
 	}
 	after, _ := json.Marshal(afterDiffOutput)
 	diff[afterDiffField] = string(after)
