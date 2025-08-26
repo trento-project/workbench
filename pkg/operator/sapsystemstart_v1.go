@@ -189,14 +189,26 @@ func (s *SAPSystemStart) rollback(ctx context.Context) error {
 func (s *SAPSystemStart) operationDiff(_ context.Context) map[string]any {
 	diff := make(map[string]any)
 
+	beforeStarted, ok := s.resources[beforeDiffField].(bool)
+	if !ok {
+		panic(fmt.Sprintf("invalid beforeStarted value: cannot parse '%s' to bool",
+			s.resources[beforeDiffField]))
+	}
+
+	afterStarted, ok := s.resources[afterDiffField].(bool)
+	if !ok {
+		panic(fmt.Sprintf("invalid afterStarted value: cannot parse '%s' to bool",
+			s.resources[afterDiffField]))
+	}
+
 	beforeDiffOutput := sapSystemStartDiffOutput{
-		Started: s.resources[beforeDiffField].(bool),
+		Started: beforeStarted,
 	}
 	before, _ := json.Marshal(beforeDiffOutput)
 	diff["before"] = string(before)
 
 	afterDiffOutput := sapSystemStartDiffOutput{
-		Started: s.resources[afterDiffField].(bool),
+		Started: afterStarted,
 	}
 	after, _ := json.Marshal(afterDiffOutput)
 	diff["after"] = string(after)

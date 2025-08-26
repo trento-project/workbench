@@ -96,7 +96,15 @@ func (s *Connector) IsEnabled(ctx context.Context, service string) (bool, error)
 		return false, fmt.Errorf("failed to get unit file state for service %s: %w", service, err)
 	}
 
-	return unitFileState.Value.Value().(string) == "enabled", nil
+	value, ok := unitFileState.Value.Value().(string)
+	if !ok {
+		s.logger.Error("unexpected type for unit file state", "service", service,
+			"type", fmt.Sprintf("%T", unitFileState.Value.Value()))
+		return false, fmt.Errorf("unexpected type for unit file state of service %s: %T",
+			service, unitFileState.Value.Value())
+	}
+
+	return value == "enabled", nil
 }
 
 func (s *Connector) Close() {

@@ -217,8 +217,20 @@ func (c *ClusterMaintenanceChange) rollback(ctx context.Context) error {
 func (c *ClusterMaintenanceChange) operationDiff(_ context.Context) map[string]any {
 	diff := make(map[string]any)
 
+	beforeMaintenance, ok := c.resources[beforeDiffField].(bool)
+	if !ok {
+		panic(fmt.Sprintf("invalid beforeMaintenance value: cannot parse '%s' to bool",
+			c.resources[beforeDiffField]))
+	}
+
+	afterMaintenance, ok := c.resources[afterDiffField].(bool)
+	if !ok {
+		panic(fmt.Sprintf("invalid afterMaintenance value: cannot parse '%s' to bool",
+			c.resources[afterDiffField]))
+	}
+
 	beforeDiffOutput := diffOutput{
-		Maintenance: c.resources[beforeDiffField].(bool),
+		Maintenance: beforeMaintenance,
 		ResourceID:  c.parsedArguments.resourceID,
 		NodeID:      c.parsedArguments.nodeID,
 	}
@@ -226,7 +238,7 @@ func (c *ClusterMaintenanceChange) operationDiff(_ context.Context) map[string]a
 	diff["before"] = string(before)
 
 	afterDiffOutput := diffOutput{
-		Maintenance: c.resources[afterDiffField].(bool),
+		Maintenance: afterMaintenance,
 		ResourceID:  c.parsedArguments.resourceID,
 		NodeID:      c.parsedArguments.nodeID,
 	}

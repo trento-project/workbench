@@ -162,14 +162,26 @@ func (s *SAPInstanceStop) rollback(ctx context.Context) error {
 func (s *SAPInstanceStop) operationDiff(_ context.Context) map[string]any {
 	diff := make(map[string]any)
 
+	beforeStopped, ok := s.resources[beforeDiffField].(bool)
+	if !ok {
+		panic(fmt.Sprintf("invalid beforeStopped value: cannot parse '%s' to bool",
+			s.resources[beforeDiffField]))
+	}
+
+	afterStopped, ok := s.resources[afterDiffField].(bool)
+	if !ok {
+		panic(fmt.Sprintf("invalid afterStopped value: cannot parse '%s' to bool",
+			s.resources[afterDiffField]))
+	}
+
 	beforeDiffOutput := sapInstanceStopDiffOutput{
-		Stopped: s.resources[beforeDiffField].(bool),
+		Stopped: beforeStopped,
 	}
 	before, _ := json.Marshal(beforeDiffOutput)
 	diff["before"] = string(before)
 
 	afterDiffOutput := sapInstanceStopDiffOutput{
-		Stopped: s.resources[afterDiffField].(bool),
+		Stopped: afterStopped,
 	}
 	after, _ := json.Marshal(afterDiffOutput)
 	diff["after"] = string(after)
