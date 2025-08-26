@@ -217,32 +217,32 @@ func (h *HostReboot) isRebootScheduled(ctx context.Context) (bool, error) {
 	}
 
 	// Check for systemd-shutdown processes
-	return h.hasActiveShutdownProcess(ctx)
+	return h.hasActiveShutdownProcess(ctx), nil
 }
 
 // hasActiveShutdownProcess checks if there are any active shutdown processes
 // This is a fallback method to detect scheduled shutdowns
-func (h *HostReboot) hasActiveShutdownProcess(ctx context.Context) (bool, error) {
+func (h *HostReboot) hasActiveShutdownProcess(ctx context.Context) bool {
 	// Check if shutdown command is running or if there's a scheduled shutdown
 	_, err := h.executor.Exec(ctx, "pgrep", "-f", "shutdown")
 	if err == nil {
 		h.logger.Debug("Found active shutdown process")
-		return true, nil
+		return true
 	}
 
 	// Check for systemd-shutdown
 	_, err = h.executor.Exec(ctx, "pgrep", "-f", "systemd-shutdown")
 	if err == nil {
 		h.logger.Debug("Found systemd-shutdown process")
-		return true, nil
+		return true
 	}
 
 	// Check if there's a /run/systemd/shutdown/scheduled file
 	_, err = h.executor.Exec(ctx, "test", "-f", "/run/systemd/shutdown/scheduled")
 	if err == nil {
 		h.logger.Debug("Found systemd shutdown scheduled file")
-		return true, nil
+		return true
 	}
 
-	return false, nil
+	return false
 }
