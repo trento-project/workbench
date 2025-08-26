@@ -20,15 +20,15 @@ type Connector struct {
 	logger         *slog.Logger
 }
 
-type SystemdConnectorOption func(*Connector)
+type ConnectorOption func(*Connector)
 
 type SystemdLoader interface {
-	NewSystemd(ctx context.Context, logger *slog.Logger, options ...SystemdConnectorOption) (Systemd, error)
+	NewSystemd(ctx context.Context, logger *slog.Logger, options ...ConnectorOption) (Systemd, error)
 }
 
 type defaultSystemdLoader struct{}
 
-func (d *defaultSystemdLoader) NewSystemd(ctx context.Context, logger *slog.Logger, options ...SystemdConnectorOption) (Systemd, error) {
+func (d *defaultSystemdLoader) NewSystemd(ctx context.Context, logger *slog.Logger, options ...ConnectorOption) (Systemd, error) {
 	return NewSystemd(ctx, logger, options...)
 }
 
@@ -36,13 +36,13 @@ func NewDefaultSystemdLoader() SystemdLoader {
 	return &defaultSystemdLoader{}
 }
 
-func WithCustomDbusConnector(dbusConnection dbus.Connector) SystemdConnectorOption {
+func WithCustomDbusConnector(dbusConnection dbus.Connector) ConnectorOption {
 	return func(s *Connector) {
 		s.dbusConnection = dbusConnection
 	}
 }
 
-func NewSystemd(ctx context.Context, logger *slog.Logger, options ...SystemdConnectorOption) (Systemd, error) {
+func NewSystemd(ctx context.Context, logger *slog.Logger, options ...ConnectorOption) (Systemd, error) {
 	systemdInstance := &Connector{
 		logger: logger,
 	}
