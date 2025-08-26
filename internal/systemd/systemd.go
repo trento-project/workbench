@@ -15,12 +15,12 @@ type Systemd interface {
 	Close()
 }
 
-type SystemdConnector struct {
+type Connector struct {
 	dbusConnection dbus.Connector
 	logger         *slog.Logger
 }
 
-type SystemdConnectorOption func(*SystemdConnector)
+type SystemdConnectorOption func(*Connector)
 
 type SystemdLoader interface {
 	NewSystemd(ctx context.Context, logger *slog.Logger, options ...SystemdConnectorOption) (Systemd, error)
@@ -37,13 +37,13 @@ func NewDefaultSystemdLoader() SystemdLoader {
 }
 
 func WithCustomDbusConnector(dbusConnection dbus.Connector) SystemdConnectorOption {
-	return func(s *SystemdConnector) {
+	return func(s *Connector) {
 		s.dbusConnection = dbusConnection
 	}
 }
 
 func NewSystemd(ctx context.Context, logger *slog.Logger, options ...SystemdConnectorOption) (Systemd, error) {
-	systemdInstance := &SystemdConnector{
+	systemdInstance := &Connector{
 		logger: logger,
 	}
 
@@ -65,7 +65,7 @@ func NewSystemd(ctx context.Context, logger *slog.Logger, options ...SystemdConn
 	return systemdInstance, nil
 }
 
-func (s *SystemdConnector) Enable(ctx context.Context, service string) error {
+func (s *Connector) Enable(ctx context.Context, service string) error {
 	_, _, err := s.dbusConnection.EnableUnitFilesContext(ctx, []string{service}, false, true)
 	if err != nil {
 		s.logger.Error("failed to enable service", "service", service, "error", err)
@@ -75,7 +75,7 @@ func (s *SystemdConnector) Enable(ctx context.Context, service string) error {
 	return s.reload(ctx, service)
 }
 
-func (s *SystemdConnector) Disable(ctx context.Context, service string) error {
+func (s *Connector) Disable(ctx context.Context, service string) error {
 	_, err := s.dbusConnection.DisableUnitFilesContext(ctx, []string{service}, false)
 	if err != nil {
 		s.logger.Error("failed to disable service", "service", service, "error", err)
@@ -85,7 +85,7 @@ func (s *SystemdConnector) Disable(ctx context.Context, service string) error {
 	return s.reload(ctx, service)
 }
 
-func (s *SystemdConnector) IsEnabled(ctx context.Context, service string) (bool, error) {
+func (s *Connector) IsEnabled(ctx context.Context, service string) (bool, error) {
 	unitFileState, err := s.dbusConnection.GetUnitPropertyContext(ctx, service, "UnitFileState")
 	if err != nil {
 		s.logger.Error("failed to get unit file state for service", "service", service, "error", err)
@@ -95,11 +95,11 @@ func (s *SystemdConnector) IsEnabled(ctx context.Context, service string) (bool,
 	return unitFileState.Value.Value().(string) == "enabled", nil
 }
 
-func (s *SystemdConnector) Close() {
+func (s *Connector) Close() {
 	s.dbusConnection.Close()
 }
 
-func (s *SystemdConnector) reload(ctx context.Context, service string) error {
+func (s *Connector) reload(ctx context.Context, service string) error {
 	err := s.dbusConnection.ReloadContext(ctx)
 	if err != nil {
 		s.logger.Error("failed to reload service", "service", service, "error", err)
