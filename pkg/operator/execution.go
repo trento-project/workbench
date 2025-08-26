@@ -28,11 +28,11 @@ type ExecutionReport struct {
 	Error       *ExecutionError
 }
 
-func executionReportWithError(error error, phase PhaseName, operationID string) *ExecutionReport {
+func executionReportWithError(err error, phase PhaseName, operationID string) *ExecutionReport {
 	return &ExecutionReport{
 		OperationID: operationID,
 		Error: &ExecutionError{
-			Message:    error.Error(),
+			Message:    err.Error(),
 			ErrorPhase: phase,
 		},
 	}
