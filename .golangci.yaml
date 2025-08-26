@@ -41,12 +41,15 @@ linters:
       - path: _test\.go
         linters:
           - lll
-        path: _test\.go
-        rules:
-      # sapcontrol generated code, ignore var naming issues
-      - linters:
+      # sapcontrol generated code, ignore naming issues
+      - path: internal/sapcontrol/webservice\.go
+        linters:
           - revive
         text: "var-naming:*"
+      - path: internal/sapcontrol/webservice\.go
+        linters:
+          - revive
+        text: "exported:*"
         path: internal/sapcontrol/webservice\.go
         disable: true
     paths:
