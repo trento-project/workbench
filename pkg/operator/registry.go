@@ -17,7 +17,7 @@ func (e *NotFoundError) Error() string {
 type Builder func(operationID string, arguments Arguments) Operator
 
 // map[operatorName]map[operatorVersion]OperatorBuilder
-type OperatorBuildersTree map[string]map[string]Builder
+type BuildersTree map[string]map[string]Builder
 
 func extractOperatorNameAndVersion(operatorName string) (string, string, error) {
 	parts := strings.Split(operatorName, "@")
@@ -35,10 +35,10 @@ func extractOperatorNameAndVersion(operatorName string) (string, string, error) 
 }
 
 type Registry struct {
-	operators OperatorBuildersTree
+	operators BuildersTree
 }
 
-func NewRegistry(operators OperatorBuildersTree) *Registry {
+func NewRegistry(operators BuildersTree) *Registry {
 	return &Registry{
 		operators: operators,
 	}
@@ -98,7 +98,7 @@ func (m *Registry) getLatestVersionForOperator(name string) (string, error) {
 
 func StandardRegistry(options ...BaseOperatorOption) *Registry {
 	return &Registry{
-		operators: OperatorBuildersTree{
+		operators: BuildersTree{
 			ClusterMaintenanceChangeOperatorName: map[string]Builder{
 				"v1": func(operationID string, arguments Arguments) Operator {
 					return NewClusterMaintenanceChange(arguments, operationID, Options[ClusterMaintenanceChange]{

@@ -18,7 +18,7 @@ func TestRegistryTest(t *testing.T) {
 }
 
 func (suite *RegistryTest) TestRegistryAvailableOperators() {
-	registry := operator.NewRegistry(operator.OperatorBuildersTree{
+	registry := operator.NewRegistry(operator.BuildersTree{
 		operator.SaptuneApplySolutionOperatorName: map[string]operator.Builder{
 			"v1": func(_ string, _ operator.Arguments) operator.Operator { return nil },
 			"v2": func(_ string, _ operator.Arguments) operator.Operator { return nil },
@@ -48,7 +48,7 @@ func (suite *RegistryTest) TestRegistryAvailableOperators() {
 }
 
 func (suite *RegistryTest) TestGetOperatorBuilderNotFound() {
-	registry := operator.NewRegistry(operator.OperatorBuildersTree{
+	registry := operator.NewRegistry(operator.BuildersTree{
 		operator.SaptuneApplySolutionOperatorName: map[string]operator.Builder{
 			"v1": func(_ string, _ operator.Arguments) operator.Operator { return nil },
 			"v2": func(_ string, _ operator.Arguments) operator.Operator { return nil },
@@ -68,7 +68,7 @@ func (suite *RegistryTest) TestGetOperatorBuilderNotFound() {
 
 func (suite *RegistryTest) TestGetOperatorBuilderFoundWithVersion() {
 	foundOperator := mocks.NewMockOperator(suite.T())
-	registry := operator.NewRegistry(operator.OperatorBuildersTree{
+	registry := operator.NewRegistry(operator.BuildersTree{
 		operator.SaptuneApplySolutionOperatorName: map[string]operator.Builder{
 			"v1": func(_ string, _ operator.Arguments) operator.Operator { return foundOperator },
 			"v2": func(_ string, _ operator.Arguments) operator.Operator { return nil },
@@ -90,7 +90,7 @@ func (suite *RegistryTest) TestGetOperatorBuilderFoundWithVersion() {
 
 func (suite *RegistryTest) TestGetOperatorBuilderFoundWithoutVersionGetLast() {
 	foundOperator := mocks.NewMockOperator(suite.T())
-	registry := operator.NewRegistry(operator.OperatorBuildersTree{
+	registry := operator.NewRegistry(operator.BuildersTree{
 		operator.SaptuneApplySolutionOperatorName: map[string]operator.Builder{
 			"v1": func(_ string, _ operator.Arguments) operator.Operator { return nil },
 			"v2": func(_ string, _ operator.Arguments) operator.Operator { return foundOperator },
