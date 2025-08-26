@@ -6,11 +6,11 @@ import (
 	"strings"
 )
 
-type OperatorNotFoundError struct {
+type NotFoundError struct {
 	Name string
 }
 
-func (e *OperatorNotFoundError) Error() string {
+func (e *NotFoundError) Error() string {
 	return fmt.Sprintf("operator %s not found", e.Name)
 }
 
@@ -60,7 +60,7 @@ func (m *Registry) GetOperatorBuilder(name string) (OperatorBuilder, error) {
 	if g, found := m.operators[operatorName][version]; found {
 		return g, nil
 	}
-	return nil, &OperatorNotFoundError{Name: name}
+	return nil, &NotFoundError{Name: name}
 }
 
 func (m *Registry) AvailableOperators() []string {
@@ -84,7 +84,7 @@ func (m *Registry) AvailableOperators() []string {
 func (m *Registry) getLatestVersionForOperator(name string) (string, error) {
 	availableOperators, found := m.operators[name]
 	if !found {
-		return "", &OperatorNotFoundError{Name: name}
+		return "", &NotFoundError{Name: name}
 	}
 	versions := []string{}
 	for v := range availableOperators {
