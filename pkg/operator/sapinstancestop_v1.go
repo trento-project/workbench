@@ -177,13 +177,19 @@ func (s *SAPInstanceStop) operationDiff(_ context.Context) map[string]any {
 	beforeDiffOutput := sapInstanceStopDiffOutput{
 		Stopped: beforeStopped,
 	}
-	before, _ := json.Marshal(beforeDiffOutput)
+	before, err := json.Marshal(beforeDiffOutput)
+	if err != nil {
+		panic(fmt.Sprintf("error marshalling before diff output: %v", err))
+	}
 	diff["before"] = string(before)
 
 	afterDiffOutput := sapInstanceStopDiffOutput{
 		Stopped: afterStopped,
 	}
-	after, _ := json.Marshal(afterDiffOutput)
+	after, err := json.Marshal(afterDiffOutput)
+	if err != nil {
+		panic(fmt.Sprintf("error marshalling after diff output: %v", err))
+	}
 	diff["after"] = string(after)
 
 	return diff
