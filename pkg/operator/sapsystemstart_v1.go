@@ -40,7 +40,8 @@ type SAPSystemStartOption Option[SAPSystemStart]
 // Arguments:
 //  instance_number (required): String with the instance number of local instance to start the whole system
 //  timeout: Timeout in seconds to wait until the system is started
-//  instance_type: Instance type to filter in the StartSystem process. Values: all|abap|j2ee|scs|enqrep. Default value: all
+//  instance_type: Instance type to filter in the StartSystem process. Values: all|abap|j2ee|scs|enqrep.
+//  Default value: all
 //
 // # Execution Phases
 //

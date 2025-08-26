@@ -28,7 +28,11 @@ type Loader interface {
 
 type defaultSystemdLoader struct{}
 
-func (d *defaultSystemdLoader) NewSystemd(ctx context.Context, logger *slog.Logger, options ...ConnectorOption) (Systemd, error) {
+func (d *defaultSystemdLoader) NewSystemd(
+	ctx context.Context,
+	logger *slog.Logger,
+	options ...ConnectorOption,
+) (Systemd, error) {
 	return NewSystemd(ctx, logger, options...)
 }
 

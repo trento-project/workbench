@@ -24,7 +24,8 @@ type SAPSystemStopOption Option[SAPSystemStop]
 // Arguments:
 //  instance_number (required): String with the instance number of local instance to stop the whole system
 //  timeout: Timeout in seconds to wait until the system is stopped
-//  instance_type: Instance type to filter in the StopSystem process. Values: all|abap|j2ee|scs|enqrep. Default value: all
+//  instance_type: Instance type to filter in the StopSystem process. Values: all|abap|j2ee|scs|enqrep.
+//  Default value: all
 //
 // # Execution Phases
 //
