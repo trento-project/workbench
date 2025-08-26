@@ -32,7 +32,7 @@ func (suite *SAPSystemStartOperatorTestSuite) TestSAPSystemStartInstanceNumberMi
 	sapSystemStartOperator := operator.NewSAPSystemStart(
 		operator.Arguments{},
 		"test-op",
-		operator.OperatorOptions[operator.SAPSystemStart]{},
+		operator.Options[operator.SAPSystemStart]{},
 	)
 
 	report := sapSystemStartOperator.Run(ctx)
@@ -50,7 +50,7 @@ func (suite *SAPSystemStartOperatorTestSuite) TestSAPSystemStartInstanceNumberIn
 			"instance_number": 0,
 		},
 		"test-op",
-		operator.OperatorOptions[operator.SAPSystemStart]{},
+		operator.Options[operator.SAPSystemStart]{},
 	)
 
 	report := sapSystemStartOperator.Run(ctx)
@@ -69,7 +69,7 @@ func (suite *SAPSystemStartOperatorTestSuite) TestSAPSystemStartTimeoutInvalid()
 			"timeout":         "value",
 		},
 		"test-op",
-		operator.OperatorOptions[operator.SAPSystemStart]{},
+		operator.Options[operator.SAPSystemStart]{},
 	)
 
 	report := sapSystemStartOperator.Run(ctx)
@@ -88,7 +88,7 @@ func (suite *SAPSystemStartOperatorTestSuite) TestSAPSystemStartInstanceTypeInva
 			"instance_type":   0,
 		},
 		"test-op",
-		operator.OperatorOptions[operator.SAPSystemStart]{},
+		operator.Options[operator.SAPSystemStart]{},
 	)
 
 	report := sapSystemStartOperator.Run(ctx)
@@ -107,7 +107,7 @@ func (suite *SAPSystemStartOperatorTestSuite) TestSAPSystemStartInstanceTypeUnkn
 			"instance_type":   "unknown",
 		},
 		"test-op",
-		operator.OperatorOptions[operator.SAPSystemStart]{},
+		operator.Options[operator.SAPSystemStart]{},
 	)
 
 	report := sapSystemStartOperator.Run(ctx)
@@ -131,7 +131,7 @@ func (suite *SAPSystemStartOperatorTestSuite) TestSAPSystemStartPlanError() {
 			"timeout":         300.0,
 		},
 		"test-op",
-		operator.OperatorOptions[operator.SAPSystemStart]{
+		operator.Options[operator.SAPSystemStart]{
 			OperatorOptions: []operator.Option[operator.SAPSystemStart]{
 				operator.Option[operator.SAPSystemStart](operator.WithCustomStartSystemSapcontrol(suite.mockSapcontrol)),
 			},
@@ -169,7 +169,7 @@ func (suite *SAPSystemStartOperatorTestSuite) TestSAPSystemStartCommitAlreadySta
 			"instance_number": "00",
 		},
 		"test-op",
-		operator.OperatorOptions[operator.SAPSystemStart]{
+		operator.Options[operator.SAPSystemStart]{
 			OperatorOptions: []operator.Option[operator.SAPSystemStart]{
 				operator.Option[operator.SAPSystemStart](operator.WithCustomStartSystemSapcontrol(suite.mockSapcontrol)),
 			},
@@ -240,7 +240,7 @@ func (suite *SAPSystemStartOperatorTestSuite) TestSAPSystemStartCommitAlreadySta
 				"instance_type":   tt.instanceType,
 			},
 			"test-op",
-			operator.OperatorOptions[operator.SAPSystemStart]{
+			operator.Options[operator.SAPSystemStart]{
 				OperatorOptions: []operator.Option[operator.SAPSystemStart]{
 					operator.Option[operator.SAPSystemStart](operator.WithCustomStartSystemSapcontrol(suite.mockSapcontrol)),
 				},
@@ -307,7 +307,7 @@ func (suite *SAPSystemStartOperatorTestSuite) TestSAPSystemStartCommitStartingEr
 			"instance_number": "00",
 		},
 		"test-op",
-		operator.OperatorOptions[operator.SAPSystemStart]{
+		operator.Options[operator.SAPSystemStart]{
 			OperatorOptions: []operator.Option[operator.SAPSystemStart]{
 				operator.Option[operator.SAPSystemStart](operator.WithCustomStartSystemSapcontrol(suite.mockSapcontrol)),
 			},
@@ -374,7 +374,7 @@ func (suite *SAPSystemStartOperatorTestSuite) TestSAPSystemStartVerifyError() {
 			"instance_number": "00",
 		},
 		"test-op",
-		operator.OperatorOptions[operator.SAPSystemStart]{
+		operator.Options[operator.SAPSystemStart]{
 			OperatorOptions: []operator.Option[operator.SAPSystemStart]{
 				operator.Option[operator.SAPSystemStart](operator.WithCustomStartSystemSapcontrol(suite.mockSapcontrol)),
 			},
@@ -416,7 +416,7 @@ func (suite *SAPSystemStartOperatorTestSuite) TestSAPSystemStartVerifyTimeout() 
 			"timeout":         0.0,
 		},
 		"test-op",
-		operator.OperatorOptions[operator.SAPSystemStart]{
+		operator.Options[operator.SAPSystemStart]{
 			OperatorOptions: []operator.Option[operator.SAPSystemStart]{
 				operator.Option[operator.SAPSystemStart](operator.WithCustomStartSystemSapcontrol(suite.mockSapcontrol)),
 				operator.Option[operator.SAPSystemStart](operator.WithCustomStartSystemInterval(0 * time.Second)),
@@ -469,7 +469,7 @@ func (suite *SAPSystemStartOperatorTestSuite) TestSAPSystemStartRollbackStopping
 			"instance_type":   "abap",
 		},
 		"test-op",
-		operator.OperatorOptions[operator.SAPSystemStart]{
+		operator.Options[operator.SAPSystemStart]{
 			OperatorOptions: []operator.Option[operator.SAPSystemStart]{
 				operator.Option[operator.SAPSystemStart](operator.WithCustomStartSystemSapcontrol(suite.mockSapcontrol)),
 			},
@@ -563,7 +563,7 @@ func (suite *SAPSystemStartOperatorTestSuite) TestSAPSystemStartSuccess() {
 				"instance_type":   tt.instanceType,
 			},
 			"test-op",
-			operator.OperatorOptions[operator.SAPSystemStart]{
+			operator.Options[operator.SAPSystemStart]{
 				OperatorOptions: []operator.Option[operator.SAPSystemStart]{
 					operator.Option[operator.SAPSystemStart](operator.WithCustomStartSystemSapcontrol(suite.mockSapcontrol)),
 				},
@@ -638,7 +638,7 @@ func (suite *SAPSystemStartOperatorTestSuite) TestSAPSystemStartSuccessMultipleQ
 			"timeout":         5.0,
 		},
 		"test-op",
-		operator.OperatorOptions[operator.SAPSystemStart]{
+		operator.Options[operator.SAPSystemStart]{
 			OperatorOptions: []operator.Option[operator.SAPSystemStart]{
 				operator.Option[operator.SAPSystemStart](operator.WithCustomStartSystemSapcontrol(suite.mockSapcontrol)),
 				operator.Option[operator.SAPSystemStart](operator.WithCustomStartSystemInterval(0 * time.Second)),

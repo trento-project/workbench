@@ -51,7 +51,7 @@ func NewServiceDisable(
 	name string,
 	arguments Arguments,
 	operationID string,
-	options OperatorOptions[ServiceDisable],
+	options Options[ServiceDisable],
 ) *Executor {
 	serviceDisable := &ServiceDisable{
 		baseOperator: newBaseOperator(

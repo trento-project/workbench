@@ -49,7 +49,7 @@ func WithSaptuneClientChange(saptuneClient saptune.Saptune) SaptuneChangeSolutio
 func NewSaptuneChangeSolution(
 	arguments Arguments,
 	operationID string,
-	options OperatorOptions[SaptuneChangeSolution],
+	options Options[SaptuneChangeSolution],
 ) *Executor {
 	saptuneChange := &SaptuneChangeSolution{
 		baseOperator: newBaseOperator(

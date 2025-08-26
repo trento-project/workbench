@@ -20,7 +20,7 @@ type Operator interface {
 	Run(ctx context.Context) *ExecutionReport
 }
 
-type OperatorOptions[T any] struct {
+type Options[T any] struct {
 	BaseOperatorOptions []BaseOperatorOption
 	OperatorOptions     []Option[T]
 }

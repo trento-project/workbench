@@ -31,7 +31,7 @@ func (suite *SaptuneChangeSolutionOperatorTestSuite) TestSaptuneChangeSolutionPl
 			"foo": "HANA",
 		},
 		"test-op",
-		operator.OperatorOptions[operator.SaptuneChangeSolution]{},
+		operator.Options[operator.SaptuneChangeSolution]{},
 	)
 
 	report := saptuneSolutionChangeOperator.Run(ctx)
@@ -49,7 +49,7 @@ func (suite *SaptuneChangeSolutionOperatorTestSuite) TestSaptuneChangeSolutionPl
 			"solution": "",
 		},
 		"test-op",
-		operator.OperatorOptions[operator.SaptuneChangeSolution]{},
+		operator.Options[operator.SaptuneChangeSolution]{},
 	)
 
 	report := saptuneSolutionChangeOperator.Run(ctx)
@@ -73,7 +73,7 @@ func (suite *SaptuneChangeSolutionOperatorTestSuite) TestSaptuneChangeSolutionPl
 			"solution": "HANA",
 		},
 		"test-op",
-		operator.OperatorOptions[operator.SaptuneChangeSolution]{
+		operator.Options[operator.SaptuneChangeSolution]{
 			OperatorOptions: []operator.Option[operator.SaptuneChangeSolution]{
 				operator.Option[operator.SaptuneChangeSolution](operator.WithSaptuneClientChange(suite.mockSaptuneClient)),
 			},
@@ -108,7 +108,7 @@ func (suite *SaptuneChangeSolutionOperatorTestSuite) TestSaptuneChangeSolutionPl
 			"solution": "HANA",
 		},
 		"test-op",
-		operator.OperatorOptions[operator.SaptuneChangeSolution]{
+		operator.Options[operator.SaptuneChangeSolution]{
 			OperatorOptions: []operator.Option[operator.SaptuneChangeSolution]{
 				operator.Option[operator.SaptuneChangeSolution](operator.WithSaptuneClientChange(suite.mockSaptuneClient)),
 			},
@@ -144,7 +144,7 @@ func (suite *SaptuneChangeSolutionOperatorTestSuite) TestSaptuneChangeSolutionCo
 			"solution": "HANA",
 		},
 		"test-op",
-		operator.OperatorOptions[operator.SaptuneChangeSolution]{
+		operator.Options[operator.SaptuneChangeSolution]{
 			OperatorOptions: []operator.Option[operator.SaptuneChangeSolution]{
 				operator.Option[operator.SaptuneChangeSolution](operator.WithSaptuneClientChange(suite.mockSaptuneClient)),
 			},
@@ -198,7 +198,7 @@ func (suite *SaptuneChangeSolutionOperatorTestSuite) TestSaptuneChangeSolutionCo
 			"solution": "HANA",
 		},
 		"test-op",
-		operator.OperatorOptions[operator.SaptuneChangeSolution]{
+		operator.Options[operator.SaptuneChangeSolution]{
 			OperatorOptions: []operator.Option[operator.SaptuneChangeSolution]{
 				operator.Option[operator.SaptuneChangeSolution](operator.WithSaptuneClientChange(suite.mockSaptuneClient)),
 			},
@@ -251,7 +251,7 @@ func (suite *SaptuneChangeSolutionOperatorTestSuite) TestSaptuneChangeSolutionCo
 			"solution": "HANA",
 		},
 		"test-op",
-		operator.OperatorOptions[operator.SaptuneChangeSolution]{
+		operator.Options[operator.SaptuneChangeSolution]{
 			OperatorOptions: []operator.Option[operator.SaptuneChangeSolution]{
 				operator.Option[operator.SaptuneChangeSolution](operator.WithSaptuneClientChange(suite.mockSaptuneClient)),
 			},
@@ -313,7 +313,7 @@ func (suite *SaptuneChangeSolutionOperatorTestSuite) TestSaptuneChangeSolutionVe
 			"solution": "HANA",
 		},
 		"test-op",
-		operator.OperatorOptions[operator.SaptuneChangeSolution]{
+		operator.Options[operator.SaptuneChangeSolution]{
 			OperatorOptions: []operator.Option[operator.SaptuneChangeSolution]{
 				operator.Option[operator.SaptuneChangeSolution](operator.WithSaptuneClientChange(suite.mockSaptuneClient)),
 			},
@@ -375,7 +375,7 @@ func (suite *SaptuneChangeSolutionOperatorTestSuite) TestSaptuneChangeSolutionVe
 			"solution": "HANA",
 		},
 		"test-op",
-		operator.OperatorOptions[operator.SaptuneChangeSolution]{
+		operator.Options[operator.SaptuneChangeSolution]{
 			OperatorOptions: []operator.Option[operator.SaptuneChangeSolution]{
 				operator.Option[operator.SaptuneChangeSolution](operator.WithSaptuneClientChange(suite.mockSaptuneClient)),
 			},
@@ -438,7 +438,7 @@ func (suite *SaptuneChangeSolutionOperatorTestSuite) TestSaptuneChangeSolutionVe
 			"solution": "HANA",
 		},
 		"test-op",
-		operator.OperatorOptions[operator.SaptuneChangeSolution]{
+		operator.Options[operator.SaptuneChangeSolution]{
 			OperatorOptions: []operator.Option[operator.SaptuneChangeSolution]{
 				operator.Option[operator.SaptuneChangeSolution](operator.WithSaptuneClientChange(suite.mockSaptuneClient)),
 			},
@@ -500,7 +500,7 @@ func (suite *SaptuneChangeSolutionOperatorTestSuite) TestSaptuneChangeSolutionVe
 			"solution": "HANA",
 		},
 		"test-op",
-		operator.OperatorOptions[operator.SaptuneChangeSolution]{
+		operator.Options[operator.SaptuneChangeSolution]{
 			OperatorOptions: []operator.Option[operator.SaptuneChangeSolution]{
 				operator.Option[operator.SaptuneChangeSolution](operator.WithSaptuneClientChange(suite.mockSaptuneClient)),
 			},
@@ -535,7 +535,7 @@ func (suite *SaptuneChangeSolutionOperatorTestSuite) TestSaptuneChangeSolutionSu
 			"solution": "HANA",
 		},
 		"test-op",
-		operator.OperatorOptions[operator.SaptuneChangeSolution]{
+		operator.Options[operator.SaptuneChangeSolution]{
 			OperatorOptions: []operator.Option[operator.SaptuneChangeSolution]{
 				operator.Option[operator.SaptuneChangeSolution](operator.WithSaptuneClientChange(suite.mockSaptuneClient)),
 			},
@@ -592,7 +592,7 @@ func (suite *SaptuneChangeSolutionOperatorTestSuite) TestSaptuneChangeSolutionSu
 			"solution": "HANA",
 		},
 		"test-op",
-		operator.OperatorOptions[operator.SaptuneChangeSolution]{
+		operator.Options[operator.SaptuneChangeSolution]{
 			OperatorOptions: []operator.Option[operator.SaptuneChangeSolution]{
 				operator.Option[operator.SaptuneChangeSolution](operator.WithSaptuneClientChange(suite.mockSaptuneClient)),
 			},

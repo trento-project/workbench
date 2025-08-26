@@ -89,7 +89,7 @@ func WithSaptuneClientApply(saptuneClient saptune.Saptune) SaptuneApplySolutionO
 func NewSaptuneApplySolution(
 	arguments Arguments,
 	operationID string,
-	options OperatorOptions[SaptuneApplySolution],
+	options Options[SaptuneApplySolution],
 ) *Executor {
 	saptuneApply := &SaptuneApplySolution{
 		baseOperator: newBaseOperator(

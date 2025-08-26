@@ -25,7 +25,7 @@ func buildServiceDisableOperator(suite *ServiceDisableOperatorTestSuite) operato
 		"servicedisableoperator",
 		operator.Arguments{},
 		"test-op",
-		operator.OperatorOptions[operator.ServiceDisable]{
+		operator.Options[operator.ServiceDisable]{
 			BaseOperatorOptions: []operator.BaseOperatorOption{
 				operator.WithCustomLogger(suite.logger),
 			},

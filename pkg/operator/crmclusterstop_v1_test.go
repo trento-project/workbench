@@ -34,7 +34,7 @@ func (suite *CrmClusterStopOperatorTestSuite) TestCrmClusterStopClusterAlreadyOf
 			"cluster_id": "test-cluster-id",
 		},
 		"test-op",
-		operator.OperatorOptions[operator.CrmClusterStop]{
+		operator.Options[operator.CrmClusterStop]{
 			OperatorOptions: []operator.Option[operator.CrmClusterStop]{
 				operator.Option[operator.CrmClusterStop](operator.WithCustomClusterClientStop(mockCrmClient)),
 			},
@@ -64,7 +64,7 @@ func (suite *CrmClusterStopOperatorTestSuite) TestCrmClusterStopClusterRollbackF
 			"cluster_id": "test-cluster-id",
 		},
 		"test-op",
-		operator.OperatorOptions[operator.CrmClusterStop]{
+		operator.Options[operator.CrmClusterStop]{
 			OperatorOptions: []operator.Option[operator.CrmClusterStop]{
 				operator.Option[operator.CrmClusterStop](operator.WithCustomClusterClientStop(mockCrmClient)),
 				operator.Option[operator.CrmClusterStop](operator.WithCustomRetryStop(2, 100*time.Millisecond, 1*time.Second, 1)),
@@ -93,7 +93,7 @@ func (suite *CrmClusterStopOperatorTestSuite) TestCrmClusterStopClusterRollbackS
 			"cluster_id": "test-cluster-id",
 		},
 		"test-op",
-		operator.OperatorOptions[operator.CrmClusterStop]{
+		operator.Options[operator.CrmClusterStop]{
 			OperatorOptions: []operator.Option[operator.CrmClusterStop]{
 				operator.Option[operator.CrmClusterStop](operator.WithCustomClusterClientStop(mockCrmClient)),
 			},
@@ -122,7 +122,7 @@ func (suite *CrmClusterStopOperatorTestSuite) TestCrmClusterStopClusterStartVeri
 			"cluster_id": "test-cluster-id",
 		},
 		"test-op",
-		operator.OperatorOptions[operator.CrmClusterStop]{
+		operator.Options[operator.CrmClusterStop]{
 			OperatorOptions: []operator.Option[operator.CrmClusterStop]{
 				operator.Option[operator.CrmClusterStop](operator.WithCustomClusterClientStop(mockCrmClient)),
 				operator.Option[operator.CrmClusterStop](operator.WithCustomRetryStop(2, 100*time.Millisecond, 1*time.Second, 2)),
@@ -151,7 +151,7 @@ func (suite *CrmClusterStopOperatorTestSuite) TestCrmClusterStopVerifySuccess() 
 			"cluster_id": "test-cluster-id",
 		},
 		"test-op",
-		operator.OperatorOptions[operator.CrmClusterStop]{
+		operator.Options[operator.CrmClusterStop]{
 			OperatorOptions: []operator.Option[operator.CrmClusterStop]{
 				operator.Option[operator.CrmClusterStop](operator.WithCustomClusterClientStop(mockCrmClient)),
 			},

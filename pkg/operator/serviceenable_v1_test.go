@@ -25,7 +25,7 @@ func buildServiceEnableOperator(suite *ServiceEnableOperatorTestSuite) operator.
 		"serviceenableoperator",
 		operator.Arguments{},
 		"test-op",
-		operator.OperatorOptions[operator.ServiceEnable]{
+		operator.Options[operator.ServiceEnable]{
 			BaseOperatorOptions: []operator.BaseOperatorOption{
 				operator.WithCustomLogger(suite.logger),
 			},

@@ -28,7 +28,7 @@ func buildHostRebootOperator(suite *HostRebootOperatorTestSuite,
 	return operator.NewHostReboot(
 		operator.Arguments{},
 		"test-op",
-		operator.OperatorOptions[operator.HostReboot]{
+		operator.Options[operator.HostReboot]{
 			BaseOperatorOptions: []operator.BaseOperatorOption{
 				operator.WithCustomLogger(suite.logger),
 			},
@@ -156,7 +156,7 @@ func (suite *HostRebootOperatorTestSuite) TestHostRebootOperatorDbusConnectionEr
 	report := operator.NewHostReboot(
 		operator.Arguments{},
 		"test-op",
-		operator.OperatorOptions[operator.HostReboot]{
+		operator.Options[operator.HostReboot]{
 			BaseOperatorOptions: []operator.BaseOperatorOption{
 				operator.WithCustomLogger(suite.logger),
 			},

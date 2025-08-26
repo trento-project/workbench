@@ -101,7 +101,7 @@ func StandardRegistry(options ...BaseOperatorOption) *Registry {
 		operators: OperatorBuildersTree{
 			ClusterMaintenanceChangeOperatorName: map[string]OperatorBuilder{
 				"v1": func(operationID string, arguments Arguments) Operator {
-					return NewClusterMaintenanceChange(arguments, operationID, OperatorOptions[ClusterMaintenanceChange]{
+					return NewClusterMaintenanceChange(arguments, operationID, Options[ClusterMaintenanceChange]{
 						BaseOperatorOptions: options,
 					})
 				},
@@ -109,7 +109,7 @@ func StandardRegistry(options ...BaseOperatorOption) *Registry {
 
 			CrmClusterStartOperatorName: map[string]OperatorBuilder{
 				"v1": func(operationID string, arguments Arguments) Operator {
-					return NewCrmClusterStart(arguments, operationID, OperatorOptions[CrmClusterStart]{
+					return NewCrmClusterStart(arguments, operationID, Options[CrmClusterStart]{
 						BaseOperatorOptions: options,
 					})
 				},
@@ -117,7 +117,7 @@ func StandardRegistry(options ...BaseOperatorOption) *Registry {
 
 			CrmClusterStopOperatorName: map[string]OperatorBuilder{
 				"v1": func(operationID string, arguments Arguments) Operator {
-					return NewCrmClusterStop(arguments, operationID, OperatorOptions[CrmClusterStop]{
+					return NewCrmClusterStop(arguments, operationID, Options[CrmClusterStop]{
 						BaseOperatorOptions: options,
 					})
 				},
@@ -125,7 +125,7 @@ func StandardRegistry(options ...BaseOperatorOption) *Registry {
 
 			HostRebootOperatorName: map[string]OperatorBuilder{
 				"v1": func(operationID string, arguments Arguments) Operator {
-					return NewHostReboot(arguments, operationID, OperatorOptions[HostReboot]{
+					return NewHostReboot(arguments, operationID, Options[HostReboot]{
 						BaseOperatorOptions: options,
 					})
 				},
@@ -133,49 +133,49 @@ func StandardRegistry(options ...BaseOperatorOption) *Registry {
 
 			SapInstanceStartOperatorName: map[string]OperatorBuilder{
 				"v1": func(operationID string, arguments Arguments) Operator {
-					return NewSAPInstanceStart(arguments, operationID, OperatorOptions[SAPInstanceStart]{
+					return NewSAPInstanceStart(arguments, operationID, Options[SAPInstanceStart]{
 						BaseOperatorOptions: options,
 					})
 				},
 			},
 			SapInstanceStopOperatorName: map[string]OperatorBuilder{
 				"v1": func(operationID string, arguments Arguments) Operator {
-					return NewSAPInstanceStop(arguments, operationID, OperatorOptions[SAPInstanceStop]{
+					return NewSAPInstanceStop(arguments, operationID, Options[SAPInstanceStop]{
 						BaseOperatorOptions: options,
 					})
 				},
 			},
 			SapSystemStartOperatorName: map[string]OperatorBuilder{
 				"v1": func(operationID string, arguments Arguments) Operator {
-					return NewSAPSystemStart(arguments, operationID, OperatorOptions[SAPSystemStart]{
+					return NewSAPSystemStart(arguments, operationID, Options[SAPSystemStart]{
 						BaseOperatorOptions: options,
 					})
 				},
 			},
 			SapSystemStopOperatorName: map[string]OperatorBuilder{
 				"v1": func(operationID string, arguments Arguments) Operator {
-					return NewSAPSystemStop(arguments, operationID, OperatorOptions[SAPSystemStop]{
+					return NewSAPSystemStop(arguments, operationID, Options[SAPSystemStop]{
 						BaseOperatorOptions: options,
 					})
 				},
 			},
 			SaptuneApplySolutionOperatorName: map[string]OperatorBuilder{
 				"v1": func(operationID string, arguments Arguments) Operator {
-					return NewSaptuneApplySolution(arguments, operationID, OperatorOptions[SaptuneApplySolution]{
+					return NewSaptuneApplySolution(arguments, operationID, Options[SaptuneApplySolution]{
 						BaseOperatorOptions: options,
 					})
 				},
 			},
 			SaptuneChangeSolutionOperatorName: map[string]OperatorBuilder{
 				"v1": func(operationID string, arguments Arguments) Operator {
-					return NewSaptuneChangeSolution(arguments, operationID, OperatorOptions[SaptuneChangeSolution]{
+					return NewSaptuneChangeSolution(arguments, operationID, Options[SaptuneChangeSolution]{
 						BaseOperatorOptions: options,
 					})
 				},
 			},
 			PacemakerEnableOperatorName: map[string]OperatorBuilder{
 				"v1": func(operationID string, arguments Arguments) Operator {
-					return NewServiceEnable(PacemakerEnableOperatorName, arguments, operationID, OperatorOptions[ServiceEnable]{
+					return NewServiceEnable(PacemakerEnableOperatorName, arguments, operationID, Options[ServiceEnable]{
 						BaseOperatorOptions: options,
 						OperatorOptions: []Option[ServiceEnable]{
 							Option[ServiceEnable](WithServiceToEnable(pacemakerServiceName)),
@@ -185,7 +185,7 @@ func StandardRegistry(options ...BaseOperatorOption) *Registry {
 			},
 			PacemakerDisableOperatorName: map[string]OperatorBuilder{
 				"v1": func(operationID string, arguments Arguments) Operator {
-					return NewServiceDisable(PacemakerDisableOperatorName, arguments, operationID, OperatorOptions[ServiceDisable]{
+					return NewServiceDisable(PacemakerDisableOperatorName, arguments, operationID, Options[ServiceDisable]{
 						BaseOperatorOptions: options,
 						OperatorOptions: []Option[ServiceDisable]{
 							Option[ServiceDisable](WithServiceToDisable(pacemakerServiceName)),

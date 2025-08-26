@@ -69,7 +69,7 @@ func WithCustomRetry(maxRetries int, initialDelay, maxDelay time.Duration, facto
 
 func NewCrmClusterStart(arguments Arguments,
 	operationID string,
-	options OperatorOptions[CrmClusterStart]) *Executor {
+	options Options[CrmClusterStart]) *Executor {
 	crmClusterStart := &CrmClusterStart{
 		baseOperator: newBaseOperator(
 			CrmClusterStartOperatorName, operationID, arguments, options.BaseOperatorOptions...,

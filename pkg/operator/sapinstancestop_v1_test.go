@@ -32,7 +32,7 @@ func (suite *SAPInstanceStopOperatorTestSuite) TestSAPInstanceStopInstanceNumber
 	sapInstanceStopOperator := operator.NewSAPInstanceStop(
 		operator.Arguments{},
 		"test-op",
-		operator.OperatorOptions[operator.SAPInstanceStop]{},
+		operator.Options[operator.SAPInstanceStop]{},
 	)
 
 	report := sapInstanceStopOperator.Run(ctx)
@@ -50,7 +50,7 @@ func (suite *SAPInstanceStopOperatorTestSuite) TestSAPInstanceStopInstanceNumber
 			"instance_number": 0,
 		},
 		"test-op",
-		operator.OperatorOptions[operator.SAPInstanceStop]{},
+		operator.Options[operator.SAPInstanceStop]{},
 	)
 
 	report := sapInstanceStopOperator.Run(ctx)
@@ -69,7 +69,7 @@ func (suite *SAPInstanceStopOperatorTestSuite) TestSAPInstanceStopTimeoutInvalid
 			"timeout":         "value",
 		},
 		"test-op",
-		operator.OperatorOptions[operator.SAPInstanceStop]{},
+		operator.Options[operator.SAPInstanceStop]{},
 	)
 
 	report := sapInstanceStopOperator.Run(ctx)
@@ -93,7 +93,7 @@ func (suite *SAPInstanceStopOperatorTestSuite) TestSAPInstanceStopPlanError() {
 			"timeout":         300.0,
 		},
 		"test-op",
-		operator.OperatorOptions[operator.SAPInstanceStop]{
+		operator.Options[operator.SAPInstanceStop]{
 			OperatorOptions: []operator.Option[operator.SAPInstanceStop]{
 				operator.Option[operator.SAPInstanceStop](operator.WithCustomStopSapcontrol(suite.mockSapcontrol)),
 			},
@@ -131,7 +131,7 @@ func (suite *SAPInstanceStopOperatorTestSuite) TestSAPInstanceStopCommitAlreadyS
 			"instance_number": "00",
 		},
 		"test-op",
-		operator.OperatorOptions[operator.SAPInstanceStop]{
+		operator.Options[operator.SAPInstanceStop]{
 			OperatorOptions: []operator.Option[operator.SAPInstanceStop]{
 				operator.Option[operator.SAPInstanceStop](operator.WithCustomStopSapcontrol(suite.mockSapcontrol)),
 			},
@@ -193,7 +193,7 @@ func (suite *SAPInstanceStopOperatorTestSuite) TestSAPInstanceStopCommitStopping
 			"instance_number": "00",
 		},
 		"test-op",
-		operator.OperatorOptions[operator.SAPInstanceStop]{
+		operator.Options[operator.SAPInstanceStop]{
 			OperatorOptions: []operator.Option[operator.SAPInstanceStop]{
 				operator.Option[operator.SAPInstanceStop](operator.WithCustomStopSapcontrol(suite.mockSapcontrol)),
 			},
@@ -256,7 +256,7 @@ func (suite *SAPInstanceStopOperatorTestSuite) TestSAPInstanceStopVerifyError() 
 			"instance_number": "00",
 		},
 		"test-op",
-		operator.OperatorOptions[operator.SAPInstanceStop]{
+		operator.Options[operator.SAPInstanceStop]{
 			OperatorOptions: []operator.Option[operator.SAPInstanceStop]{
 				operator.Option[operator.SAPInstanceStop](operator.WithCustomStopSapcontrol(suite.mockSapcontrol)),
 			},
@@ -298,7 +298,7 @@ func (suite *SAPInstanceStopOperatorTestSuite) TestSAPInstanceStopVerifyTimeout(
 			"timeout":         0.0,
 		},
 		"test-op",
-		operator.OperatorOptions[operator.SAPInstanceStop]{
+		operator.Options[operator.SAPInstanceStop]{
 			OperatorOptions: []operator.Option[operator.SAPInstanceStop]{
 				operator.Option[operator.SAPInstanceStop](operator.WithCustomStopSapcontrol(suite.mockSapcontrol)),
 				operator.Option[operator.SAPInstanceStop](operator.WithCustomStopInterval(0 * time.Second)),
@@ -343,7 +343,7 @@ func (suite *SAPInstanceStopOperatorTestSuite) TestSAPInstanceStopRollbackStarti
 			"instance_number": "00",
 		},
 		"test-op",
-		operator.OperatorOptions[operator.SAPInstanceStop]{
+		operator.Options[operator.SAPInstanceStop]{
 			OperatorOptions: []operator.Option[operator.SAPInstanceStop]{
 				operator.Option[operator.SAPInstanceStop](operator.WithCustomStopSapcontrol(suite.mockSapcontrol)),
 			},
@@ -394,7 +394,7 @@ func (suite *SAPInstanceStopOperatorTestSuite) TestSAPInstanceStopSuccess() {
 			"instance_number": "00",
 		},
 		"test-op",
-		operator.OperatorOptions[operator.SAPInstanceStop]{
+		operator.Options[operator.SAPInstanceStop]{
 			OperatorOptions: []operator.Option[operator.SAPInstanceStop]{
 				operator.Option[operator.SAPInstanceStop](operator.WithCustomStopSapcontrol(suite.mockSapcontrol)),
 			},
@@ -468,7 +468,7 @@ func (suite *SAPInstanceStartOperatorTestSuite) TestSAPInstanceStopSuccessMultip
 			"timeout":         5.0,
 		},
 		"test-op",
-		operator.OperatorOptions[operator.SAPInstanceStop]{
+		operator.Options[operator.SAPInstanceStop]{
 			OperatorOptions: []operator.Option[operator.SAPInstanceStop]{
 				operator.Option[operator.SAPInstanceStop](operator.WithCustomStopSapcontrol(suite.mockSapcontrol)),
 				operator.Option[operator.SAPInstanceStop](operator.WithCustomStopInterval(0 * time.Second)),

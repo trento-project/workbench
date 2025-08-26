@@ -69,7 +69,7 @@ func WithCustomStartInterval(interval time.Duration) SAPInstanceStartOption {
 func NewSAPInstanceStart(
 	arguments Arguments,
 	operationID string,
-	options OperatorOptions[SAPInstanceStart],
+	options Options[SAPInstanceStart],
 ) *Executor {
 	sapInstanceStart := &SAPInstanceStart{
 		baseOperator: newBaseOperator(

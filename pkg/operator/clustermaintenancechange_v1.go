@@ -103,7 +103,7 @@ func WithCustomClusterMaintenanceExecutor(executor support.CmdExecutor) ClusterM
 func NewClusterMaintenanceChange(
 	arguments Arguments,
 	operationID string,
-	options OperatorOptions[ClusterMaintenanceChange],
+	options Options[ClusterMaintenanceChange],
 ) *Executor {
 	clusterMaintenance := &ClusterMaintenanceChange{
 		baseOperator: newBaseOperator(

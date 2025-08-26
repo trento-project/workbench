@@ -59,7 +59,7 @@ func NewServiceEnable(
 	name string,
 	arguments Arguments,
 	operationID string,
-	options OperatorOptions[ServiceEnable],
+	options Options[ServiceEnable],
 ) *Executor {
 	serviceEnable := &ServiceEnable{
 		baseOperator: newBaseOperator(

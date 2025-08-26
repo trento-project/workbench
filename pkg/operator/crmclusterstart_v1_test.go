@@ -34,7 +34,7 @@ func (suite *CrmClusterStartOperatorTestSuite) TestCrmClusterStartClusterAlready
 			"cluster_id": "test-cluster-id",
 		},
 		"test-op",
-		operator.OperatorOptions[operator.CrmClusterStart]{
+		operator.Options[operator.CrmClusterStart]{
 			OperatorOptions: []operator.Option[operator.CrmClusterStart]{
 				operator.Option[operator.CrmClusterStart](operator.WithCustomClusterClient(mockCrmClient)),
 			},
@@ -65,7 +65,7 @@ func (suite *CrmClusterStartOperatorTestSuite) TestCrmClusterStartClusterRollbac
 			"cluster_id": "test-cluster-id",
 		},
 		"test-op",
-		operator.OperatorOptions[operator.CrmClusterStart]{
+		operator.Options[operator.CrmClusterStart]{
 			OperatorOptions: []operator.Option[operator.CrmClusterStart]{
 				operator.Option[operator.CrmClusterStart](operator.WithCustomClusterClient(mockCrmClient)),
 				operator.Option[operator.CrmClusterStart](operator.WithCustomRetry(2, 100*time.Millisecond, 1*time.Second, 1)),
@@ -93,7 +93,7 @@ func (suite *CrmClusterStartOperatorTestSuite) TestCrmClusterStartClusterRollbac
 			"cluster_id": "test-cluster-id",
 		},
 		"test-op",
-		operator.OperatorOptions[operator.CrmClusterStart]{
+		operator.Options[operator.CrmClusterStart]{
 			OperatorOptions: []operator.Option[operator.CrmClusterStart]{
 				operator.Option[operator.CrmClusterStart](operator.WithCustomClusterClient(mockCrmClient)),
 				operator.Option[operator.CrmClusterStart](operator.WithCustomRetry(2, 100*time.Millisecond, 1*time.Second, 2)),
@@ -122,7 +122,7 @@ func (suite *CrmClusterStartOperatorTestSuite) TestCrmClusterStartClusterRollbac
 			"cluster_id": "test-cluster-id",
 		},
 		"test-op",
-		operator.OperatorOptions[operator.CrmClusterStart]{
+		operator.Options[operator.CrmClusterStart]{
 			OperatorOptions: []operator.Option[operator.CrmClusterStart]{
 				operator.Option[operator.CrmClusterStart](operator.WithCustomClusterClient(mockCrmClient)),
 			},
@@ -151,7 +151,7 @@ func (suite *CrmClusterStartOperatorTestSuite) TestCrmClusterStartClusterStartVe
 			"cluster_id": "test-cluster-id",
 		},
 		"test-op",
-		operator.OperatorOptions[operator.CrmClusterStart]{
+		operator.Options[operator.CrmClusterStart]{
 			OperatorOptions: []operator.Option[operator.CrmClusterStart]{
 				operator.Option[operator.CrmClusterStart](operator.WithCustomClusterClient(mockCrmClient)),
 				operator.Option[operator.CrmClusterStart](operator.WithCustomRetry(2, 100*time.Millisecond, 1*time.Second, 2)),
@@ -179,7 +179,7 @@ func (suite *CrmClusterStartOperatorTestSuite) TestCrmClusterStartClusterStartVe
 			"cluster_id": "test-cluster-id",
 		},
 		"test-op",
-		operator.OperatorOptions[operator.CrmClusterStart]{
+		operator.Options[operator.CrmClusterStart]{
 			OperatorOptions: []operator.Option[operator.CrmClusterStart]{
 				operator.Option[operator.CrmClusterStart](operator.WithCustomClusterClient(mockCrmClient)),
 			},

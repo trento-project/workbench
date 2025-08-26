@@ -79,7 +79,7 @@ func WithCustomStartSystemInterval(interval time.Duration) SAPSystemStartOption 
 func NewSAPSystemStart(
 	arguments Arguments,
 	operationID string,
-	options OperatorOptions[SAPSystemStart],
+	options Options[SAPSystemStart],
 ) *Executor {
 	sapSystemStart := &SAPSystemStart{
 		baseOperator: newBaseOperator(

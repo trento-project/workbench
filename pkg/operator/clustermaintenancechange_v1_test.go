@@ -61,7 +61,7 @@ func TestClusterMaintenanceChangeSuccessOn(t *testing.T) {
 			"maintenance": true,
 		},
 		"test-op",
-		operator.OperatorOptions[operator.ClusterMaintenanceChange]{
+		operator.Options[operator.ClusterMaintenanceChange]{
 			OperatorOptions: []operator.Option[operator.ClusterMaintenanceChange]{
 				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(mockCmdExecutor)),
 			},
@@ -140,7 +140,7 @@ func TestClusterMaintenanceChangeSuccessOff(t *testing.T) {
 			"maintenance": false,
 		},
 		"test-op",
-		operator.OperatorOptions[operator.ClusterMaintenanceChange]{
+		operator.Options[operator.ClusterMaintenanceChange]{
 			OperatorOptions: []operator.Option[operator.ClusterMaintenanceChange]{
 				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(mockCmdExecutor)),
 			},
@@ -215,7 +215,7 @@ func TestClusterMaintenanceChangeResourceSuccess(t *testing.T) {
 			"resource_id": resourceID,
 		},
 		"test-op",
-		operator.OperatorOptions[operator.ClusterMaintenanceChange]{
+		operator.Options[operator.ClusterMaintenanceChange]{
 			OperatorOptions: []operator.Option[operator.ClusterMaintenanceChange]{
 				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(mockCmdExecutor)),
 			},
@@ -303,7 +303,7 @@ func TestClusterMaintenanceChangeResourceWithIsManagedSuccess(t *testing.T) {
 			"resource_id": resourceID,
 		},
 		"test-op",
-		operator.OperatorOptions[operator.ClusterMaintenanceChange]{
+		operator.Options[operator.ClusterMaintenanceChange]{
 			OperatorOptions: []operator.Option[operator.ClusterMaintenanceChange]{
 				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(mockCmdExecutor)),
 			},
@@ -389,7 +389,7 @@ func TestClusterMaintenanceChangeResourceDefaultSuccess(t *testing.T) {
 			"resource_id": resourceID,
 		},
 		"test-op",
-		operator.OperatorOptions[operator.ClusterMaintenanceChange]{
+		operator.Options[operator.ClusterMaintenanceChange]{
 			OperatorOptions: []operator.Option[operator.ClusterMaintenanceChange]{
 				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(mockCmdExecutor)),
 			},
@@ -465,7 +465,7 @@ func TestClusterMaintenanceChangeNodeSuccessOn(t *testing.T) {
 			"node_id":     nodeID,
 		},
 		"test-op",
-		operator.OperatorOptions[operator.ClusterMaintenanceChange]{
+		operator.Options[operator.ClusterMaintenanceChange]{
 			OperatorOptions: []operator.Option[operator.ClusterMaintenanceChange]{
 				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(mockCmdExecutor)),
 			},
@@ -544,7 +544,7 @@ func TestClusterMaintenanceChangeNodeSuccessOnWithoutPreviousState(t *testing.T)
 			"node_id":     nodeID,
 		},
 		"test-op",
-		operator.OperatorOptions[operator.ClusterMaintenanceChange]{
+		operator.Options[operator.ClusterMaintenanceChange]{
 			OperatorOptions: []operator.Option[operator.ClusterMaintenanceChange]{
 				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(mockCmdExecutor)),
 			},
@@ -629,7 +629,7 @@ func TestClusterMaintenanceChangeNodeSuccessOff(t *testing.T) {
 			"node_id":     nodeID,
 		},
 		"test-op",
-		operator.OperatorOptions[operator.ClusterMaintenanceChange]{
+		operator.Options[operator.ClusterMaintenanceChange]{
 			OperatorOptions: []operator.Option[operator.ClusterMaintenanceChange]{
 				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(mockCmdExecutor)),
 			},
@@ -655,7 +655,7 @@ func TestClusterMaintenanceChangeMissingArgument(t *testing.T) {
 	clusterMaintenanceChangeOperator := operator.NewClusterMaintenanceChange(
 		operator.Arguments{},
 		"test-op",
-		operator.OperatorOptions[operator.ClusterMaintenanceChange]{
+		operator.Options[operator.ClusterMaintenanceChange]{
 			OperatorOptions: []operator.Option[operator.ClusterMaintenanceChange]{
 				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(mockCmdExecutor)),
 			},
@@ -678,7 +678,7 @@ func TestClusterMaintenanceChangeInvalidArgument(t *testing.T) {
 			"maintenance": "on",
 		},
 		"test-op",
-		operator.OperatorOptions[operator.ClusterMaintenanceChange]{
+		operator.Options[operator.ClusterMaintenanceChange]{
 			OperatorOptions: []operator.Option[operator.ClusterMaintenanceChange]{
 				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(mockCmdExecutor)),
 			},
@@ -702,7 +702,7 @@ func TestClusterMaintenanceChangeInvalidResourceIDArgument(t *testing.T) {
 			"resource_id": 1,
 		},
 		"test-op",
-		operator.OperatorOptions[operator.ClusterMaintenanceChange]{
+		operator.Options[operator.ClusterMaintenanceChange]{
 			OperatorOptions: []operator.Option[operator.ClusterMaintenanceChange]{
 				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(mockCmdExecutor)),
 			},
@@ -726,7 +726,7 @@ func TestClusterMaintenanceChangeInvalidNodeIDArgument(t *testing.T) {
 			"node_id":     1,
 		},
 		"test-op",
-		operator.OperatorOptions[operator.ClusterMaintenanceChange]{
+		operator.Options[operator.ClusterMaintenanceChange]{
 			OperatorOptions: []operator.Option[operator.ClusterMaintenanceChange]{
 				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(mockCmdExecutor)),
 			},
@@ -751,7 +751,7 @@ func TestClusterMaintenanceChangeMutuallyExclusiveArgument(t *testing.T) {
 			"node_id":     "some-node",
 		},
 		"test-op",
-		operator.OperatorOptions[operator.ClusterMaintenanceChange]{
+		operator.Options[operator.ClusterMaintenanceChange]{
 			OperatorOptions: []operator.Option[operator.ClusterMaintenanceChange]{
 				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(mockCmdExecutor)),
 			},
@@ -781,7 +781,7 @@ func TestClusterMaintenanceChangePlanClusterNotFound(t *testing.T) {
 			"maintenance": true,
 		},
 		"test-op",
-		operator.OperatorOptions[operator.ClusterMaintenanceChange]{
+		operator.Options[operator.ClusterMaintenanceChange]{
 			OperatorOptions: []operator.Option[operator.ClusterMaintenanceChange]{
 				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(mockCmdExecutor)),
 			},
@@ -821,7 +821,7 @@ func TestClusterMaintenanceChangePlanGetMaintenanceError(t *testing.T) {
 			"maintenance": true,
 		},
 		"test-op",
-		operator.OperatorOptions[operator.ClusterMaintenanceChange]{
+		operator.Options[operator.ClusterMaintenanceChange]{
 			OperatorOptions: []operator.Option[operator.ClusterMaintenanceChange]{
 				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(mockCmdExecutor)),
 			},
@@ -861,7 +861,7 @@ func TestClusterMaintenanceChangePlanEmptyMaintenanceState(t *testing.T) {
 			"maintenance": true,
 		},
 		"test-op",
-		operator.OperatorOptions[operator.ClusterMaintenanceChange]{
+		operator.Options[operator.ClusterMaintenanceChange]{
 			OperatorOptions: []operator.Option[operator.ClusterMaintenanceChange]{
 				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(mockCmdExecutor)),
 			},
@@ -904,7 +904,7 @@ func TestClusterMaintenanceChangePlanNodeNotFound(t *testing.T) {
 			"node_id":     nodeID,
 		},
 		"test-op",
-		operator.OperatorOptions[operator.ClusterMaintenanceChange]{
+		operator.Options[operator.ClusterMaintenanceChange]{
 			OperatorOptions: []operator.Option[operator.ClusterMaintenanceChange]{
 				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(mockCmdExecutor)),
 			},
@@ -944,7 +944,7 @@ func TestClusterMaintenanceChangeCommitAlreadyApplied(t *testing.T) {
 			"maintenance": true,
 		},
 		"test-op",
-		operator.OperatorOptions[operator.ClusterMaintenanceChange]{
+		operator.Options[operator.ClusterMaintenanceChange]{
 			OperatorOptions: []operator.Option[operator.ClusterMaintenanceChange]{
 				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(mockCmdExecutor)),
 			},
@@ -1011,7 +1011,7 @@ func TestClusterMaintenanceChangeCommitNotIdle(t *testing.T) {
 			"maintenance": true,
 		},
 		"test-op",
-		operator.OperatorOptions[operator.ClusterMaintenanceChange]{
+		operator.Options[operator.ClusterMaintenanceChange]{
 			OperatorOptions: []operator.Option[operator.ClusterMaintenanceChange]{
 				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(mockCmdExecutor)),
 			},
@@ -1084,7 +1084,7 @@ func TestClusterMaintenanceChangeVerifyError(t *testing.T) {
 			"maintenance": true,
 		},
 		"test-op",
-		operator.OperatorOptions[operator.ClusterMaintenanceChange]{
+		operator.Options[operator.ClusterMaintenanceChange]{
 			OperatorOptions: []operator.Option[operator.ClusterMaintenanceChange]{
 				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(mockCmdExecutor)),
 			},
@@ -1146,7 +1146,7 @@ func TestClusterMaintenanceChangeRollbackNotIdle(t *testing.T) {
 			"maintenance": true,
 		},
 		"test-op",
-		operator.OperatorOptions[operator.ClusterMaintenanceChange]{
+		operator.Options[operator.ClusterMaintenanceChange]{
 			OperatorOptions: []operator.Option[operator.ClusterMaintenanceChange]{
 				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(mockCmdExecutor)),
 			},
@@ -1209,7 +1209,7 @@ func TestClusterMaintenanceChangeRollbackErrorReverting(t *testing.T) {
 			"maintenance": true,
 		},
 		"test-op",
-		operator.OperatorOptions[operator.ClusterMaintenanceChange]{
+		operator.Options[operator.ClusterMaintenanceChange]{
 			OperatorOptions: []operator.Option[operator.ClusterMaintenanceChange]{
 				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(mockCmdExecutor)),
 			},
