@@ -58,8 +58,6 @@ func (h *DefaultTextHandler) Handle(_ context.Context, r slog.Record) error {
 }
 
 func (h *DefaultTextHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
-	h2 := *h
-
 	// prepend to every attribute key the current group prefix
 	withPrefix := make([]slog.Attr, len(attrs))
 	for i, attr := range attrs {
@@ -70,16 +68,29 @@ func (h *DefaultTextHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
 	}
 
 	// Combine existing attributes with new ones
-	h2.attrs = make([]slog.Attr, len(h.attrs)+len(attrs))
-	h2.attrs = append(h.attrs, withPrefix...)
-	return &h2
+	newAttrs := make([]slog.Attr, len(h.attrs)+len(withPrefix))
+	copy(newAttrs, h.attrs)
+	copy(newAttrs[len(h.attrs):], withPrefix)
+
+	return &DefaultTextHandler{
+		w:      h.w,
+		level:  h.level,
+		attrs:  newAttrs,
+		groups: h.groups,
+	}
 }
 
 func (h *DefaultTextHandler) WithGroup(group string) slog.Handler {
-	h2 := *h
-	h2.groups = make([]string, len(h.groups)+1)
-	h2.groups = append(h.groups, group)
-	return &h2
+	newGroups := make([]string, len(h.groups)+1)
+	copy(newGroups, h.groups)
+	newGroups[len(h.groups)] = group
+
+	return &DefaultTextHandler{
+		w:      h.w,
+		level:  h.level,
+		attrs:  h.attrs,
+		groups: newGroups,
+	}
 }
 
 func formatAttr(attr slog.Attr, groups []string) string {
