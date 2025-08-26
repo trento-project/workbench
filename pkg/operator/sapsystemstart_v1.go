@@ -204,13 +204,19 @@ func (s *SAPSystemStart) operationDiff(_ context.Context) map[string]any {
 	beforeDiffOutput := sapSystemStartDiffOutput{
 		Started: beforeStarted,
 	}
-	before, _ := json.Marshal(beforeDiffOutput)
+	before, err := json.Marshal(beforeDiffOutput)
+	if err != nil {
+		panic(fmt.Sprintf("error marshalling before diff output: %v", err))
+	}
 	diff["before"] = string(before)
 
 	afterDiffOutput := sapSystemStartDiffOutput{
 		Started: afterStarted,
 	}
-	after, _ := json.Marshal(afterDiffOutput)
+	after, err := json.Marshal(afterDiffOutput)
+	if err != nil {
+		panic(fmt.Sprintf("error marshalling after diff output: %v", err))
+	}
 	diff["after"] = string(after)
 
 	return diff
