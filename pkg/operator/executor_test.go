@@ -34,11 +34,7 @@ func TestExecutorHappyFlow(t *testing.T) {
 		Once().
 		NotBefore(operationDiffCall)
 
-	executor := Executor{
-		phaser:      phaser,
-		operationID: "operation-id",
-		logger:      slog.Default(),
-	}
+	executor := NewExecutor(phaser, "operation-id", slog.Default())
 
 	report := executor.Run(executionContext)
 
@@ -58,11 +54,7 @@ func TestExecutorPlanError(t *testing.T) {
 
 	phaser.AssertNotCalled(t, "after", executionContext)
 
-	executor := Executor{
-		phaser:      phaser,
-		operationID: "operation-id",
-		logger:      slog.Default(),
-	}
+	executor := NewExecutor(phaser, "operation-id", slog.Default())
 
 	report := executor.Run(executionContext)
 
@@ -88,11 +80,7 @@ func TestExecutorPlanAlreadyApplied(t *testing.T) {
 		Once().
 		NotBefore(operationDiffCall)
 
-	executor := Executor{
-		phaser:      phaser,
-		operationID: "operation-id",
-		logger:      slog.Default(),
-	}
+	executor := NewExecutor(phaser, "operation-id", slog.Default())
 
 	report := executor.Run(executionContext)
 
@@ -123,11 +111,7 @@ func TestExecutorCommitErrorWithSuccessfulRollback(t *testing.T) {
 		Once().
 		NotBefore(rollbackCall)
 
-	executor := Executor{
-		phaser:      phaser,
-		operationID: "operation-id",
-		logger:      slog.Default(),
-	}
+	executor := NewExecutor(phaser, "operation-id", slog.Default())
 
 	report := executor.Run(executionContext)
 
@@ -158,11 +142,7 @@ func TestExecutorCommitErrorWithFailedRollback(t *testing.T) {
 		Once().
 		NotBefore(rollbackCall)
 
-	executor := Executor{
-		phaser:      phaser,
-		operationID: "operation-id",
-		logger:      slog.Default(),
-	}
+	executor := NewExecutor(phaser, "operation-id", slog.Default())
 
 	report := executor.Run(executionContext)
 
@@ -196,11 +176,7 @@ func TestExecutorVerifyErrorWithSuccessfulRollback(t *testing.T) {
 		Once().
 		NotBefore(rollbackCall)
 
-	executor := Executor{
-		phaser:      phaser,
-		operationID: "operation-id",
-		logger:      slog.Default(),
-	}
+	executor := NewExecutor(phaser, "operation-id", slog.Default())
 
 	report := executor.Run(executionContext)
 
@@ -235,11 +211,7 @@ func TestExecutorVerifyErrorWithFailedRollback(t *testing.T) {
 		Once().
 		NotBefore(rollbackCall)
 
-	executor := Executor{
-		phaser:      phaser,
-		operationID: "operation-id",
-		logger:      slog.Default(),
-	}
+	executor := NewExecutor(phaser, "operation-id", slog.Default())
 
 	report := executor.Run(executionContext)
 
