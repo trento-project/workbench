@@ -27,7 +27,7 @@ func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionPlan
 	ctx := context.Background()
 
 	saptuneSolutionApplyOperator := operator.NewSaptuneApplySolution(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"foo": "HANA",
 		},
 		"test-op",
@@ -45,7 +45,7 @@ func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionPlan
 	ctx := context.Background()
 
 	saptuneSolutionApplyOperator := operator.NewSaptuneApplySolution(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"solution": "",
 		},
 		"test-op",
@@ -69,7 +69,7 @@ func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionPlan
 		Once()
 
 	saptuneSolutionApplyOperator := operator.NewSaptuneApplySolution(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"solution": "HANA",
 		},
 		"test-op",
@@ -104,7 +104,7 @@ func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionPlan
 		Once()
 
 	saptuneSolutionApplyOperator := operator.NewSaptuneApplySolution(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"solution": "HANA",
 		},
 		"test-op",
@@ -139,7 +139,7 @@ func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionComm
 		Once()
 
 	saptuneSolutionApplyOperator := operator.NewSaptuneApplySolution(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"solution": "S4HANA-DBSERVER",
 		},
 		"test-op",
@@ -193,7 +193,7 @@ func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionComm
 		Once()
 
 	saptuneSolutionApplyOperator := operator.NewSaptuneApplySolution(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"solution": "HANA",
 		},
 		"test-op",
@@ -247,7 +247,7 @@ func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionComm
 		Once()
 
 	saptuneSolutionApplyOperator := operator.NewSaptuneApplySolution(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"solution": "HANA",
 		},
 		"test-op",
@@ -308,7 +308,7 @@ func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionVeri
 		Once()
 
 	saptuneSolutionApplyOperator := operator.NewSaptuneApplySolution(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"solution": "HANA",
 		},
 		"test-op",
@@ -368,7 +368,7 @@ func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionVeri
 		Once()
 
 	saptuneSolutionApplyOperator := operator.NewSaptuneApplySolution(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"solution": "HANA",
 		},
 		"test-op",
@@ -433,7 +433,7 @@ func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionVeri
 		Once()
 
 	saptuneSolutionApplyOperator := operator.NewSaptuneApplySolution(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"solution": "HANA",
 		},
 		"test-op",
@@ -497,7 +497,7 @@ func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionErro
 		Once()
 
 	saptuneSolutionApplyOperator := operator.NewSaptuneApplySolution(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"solution": "HANA",
 		},
 		"test-op",
@@ -548,7 +548,7 @@ func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionSucc
 		Once()
 
 	saptuneSolutionApplyOperator := operator.NewSaptuneApplySolution(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"solution": "HANA",
 		},
 		"test-op",
@@ -588,7 +588,7 @@ func (suite *SaptuneApplySolutionOperatorTestSuite) TestSaptuneApplySolutionSucc
 		Once()
 
 	saptuneSolutionApplyOperator := operator.NewSaptuneApplySolution(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"solution": "HANA",
 		},
 		"test-op",

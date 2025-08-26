@@ -101,7 +101,7 @@ func WithCustomClusterMaintenanceExecutor(executor support.CmdExecutor) ClusterM
 }
 
 func NewClusterMaintenanceChange(
-	arguments OperatorArguments,
+	arguments Arguments,
 	operationID string,
 	options OperatorOptions[ClusterMaintenanceChange],
 ) *Executor {
@@ -391,7 +391,7 @@ func parseStateOutput(output []byte) (bool, error) {
 	return boolValue, nil
 }
 
-func parseClusterMaintenanceArguments(rawArguments OperatorArguments) (*clusterMaintenanceChangeArguments, error) {
+func parseClusterMaintenanceArguments(rawArguments Arguments) (*clusterMaintenanceChangeArguments, error) {
 	var resourceID, nodeID string
 
 	maintenanceArgument, found := rawArguments["maintenance"]

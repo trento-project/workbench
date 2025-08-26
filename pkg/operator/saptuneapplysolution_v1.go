@@ -14,7 +14,7 @@ type saptuneSolutionArguments struct {
 	solution string
 }
 
-func parseSaptuneSolutionArguments(rawArguments OperatorArguments) (*saptuneSolutionArguments, error) {
+func parseSaptuneSolutionArguments(rawArguments Arguments) (*saptuneSolutionArguments, error) {
 	argument, found := rawArguments["solution"]
 	if !found {
 		return nil, errors.New("argument solution not provided, could not use the operator")
@@ -87,7 +87,7 @@ func WithSaptuneClientApply(saptuneClient saptune.Saptune) SaptuneApplySolutionO
 }
 
 func NewSaptuneApplySolution(
-	arguments OperatorArguments,
+	arguments Arguments,
 	operationID string,
 	options OperatorOptions[SaptuneApplySolution],
 ) *Executor {

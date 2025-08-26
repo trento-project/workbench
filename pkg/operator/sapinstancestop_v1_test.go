@@ -30,7 +30,7 @@ func (suite *SAPInstanceStopOperatorTestSuite) TestSAPInstanceStopInstanceNumber
 	ctx := context.Background()
 
 	sapInstanceStopOperator := operator.NewSAPInstanceStop(
-		operator.OperatorArguments{},
+		operator.Arguments{},
 		"test-op",
 		operator.OperatorOptions[operator.SAPInstanceStop]{},
 	)
@@ -46,7 +46,7 @@ func (suite *SAPInstanceStopOperatorTestSuite) TestSAPInstanceStopInstanceNumber
 	ctx := context.Background()
 
 	sapInstanceStopOperator := operator.NewSAPInstanceStop(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"instance_number": 0,
 		},
 		"test-op",
@@ -64,7 +64,7 @@ func (suite *SAPInstanceStopOperatorTestSuite) TestSAPInstanceStopTimeoutInvalid
 	ctx := context.Background()
 
 	sapInstanceStopOperator := operator.NewSAPInstanceStop(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"instance_number": "00",
 			"timeout":         "value",
 		},
@@ -88,7 +88,7 @@ func (suite *SAPInstanceStopOperatorTestSuite) TestSAPInstanceStopPlanError() {
 		Once()
 
 	sapInstanceStopOperator := operator.NewSAPInstanceStop(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"instance_number": "00",
 			"timeout":         300.0,
 		},
@@ -127,7 +127,7 @@ func (suite *SAPInstanceStopOperatorTestSuite) TestSAPInstanceStopCommitAlreadyS
 		Once()
 
 	sapInstanceStopOperator := operator.NewSAPInstanceStop(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"instance_number": "00",
 		},
 		"test-op",
@@ -189,7 +189,7 @@ func (suite *SAPInstanceStopOperatorTestSuite) TestSAPInstanceStopCommitStopping
 		Once()
 
 	sapInstanceStopOperator := operator.NewSAPInstanceStop(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"instance_number": "00",
 		},
 		"test-op",
@@ -252,7 +252,7 @@ func (suite *SAPInstanceStopOperatorTestSuite) TestSAPInstanceStopVerifyError() 
 		NotBefore(verifyGetProcess)
 
 	sapInstanceStopOperator := operator.NewSAPInstanceStop(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"instance_number": "00",
 		},
 		"test-op",
@@ -293,7 +293,7 @@ func (suite *SAPInstanceStopOperatorTestSuite) TestSAPInstanceStopVerifyTimeout(
 		Return(nil, nil)
 
 	sapInstanceStopOperator := operator.NewSAPInstanceStop(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"instance_number": "00",
 			"timeout":         0.0,
 		},
@@ -339,7 +339,7 @@ func (suite *SAPInstanceStopOperatorTestSuite) TestSAPInstanceStopRollbackStarti
 		Return(nil, errors.New("error starting"))
 
 	sapInstanceStopOperator := operator.NewSAPInstanceStop(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"instance_number": "00",
 		},
 		"test-op",
@@ -390,7 +390,7 @@ func (suite *SAPInstanceStopOperatorTestSuite) TestSAPInstanceStopSuccess() {
 		NotBefore(planGetProcesses)
 
 	sapInstanceStopOperator := operator.NewSAPInstanceStop(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"instance_number": "00",
 		},
 		"test-op",
@@ -463,7 +463,7 @@ func (suite *SAPInstanceStartOperatorTestSuite) TestSAPInstanceStopSuccessMultip
 		Once()
 
 	sapInstanceStartOperator := operator.NewSAPInstanceStop(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"instance_number": "00",
 			"timeout":         5.0,
 		},

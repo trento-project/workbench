@@ -23,7 +23,7 @@ type ServiceEnableOperatorTestSuite struct {
 func buildServiceEnableOperator(suite *ServiceEnableOperatorTestSuite) operator.Operator {
 	return operator.NewServiceEnable(
 		"serviceenableoperator",
-		operator.OperatorArguments{},
+		operator.Arguments{},
 		"test-op",
 		operator.OperatorOptions[operator.ServiceEnable]{
 			BaseOperatorOptions: []operator.BaseOperatorOption{

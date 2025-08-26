@@ -61,7 +61,7 @@ func WithCustomStopSystemInterval(interval time.Duration) SAPSystemStopOption {
 }
 
 func NewSAPSystemStop(
-	arguments OperatorArguments,
+	arguments Arguments,
 	operationID string,
 	options OperatorOptions[SAPSystemStop],
 ) *Executor {

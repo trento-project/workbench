@@ -57,7 +57,7 @@ func WithServiceToEnable(service string) ServiceEnableOption {
 
 func NewServiceEnable(
 	name string,
-	arguments OperatorArguments,
+	arguments Arguments,
 	operationID string,
 	options OperatorOptions[ServiceEnable],
 ) *Executor {

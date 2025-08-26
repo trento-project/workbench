@@ -67,7 +67,7 @@ func WithCustomStartInterval(interval time.Duration) SAPInstanceStartOption {
 }
 
 func NewSAPInstanceStart(
-	arguments OperatorArguments,
+	arguments Arguments,
 	operationID string,
 	options OperatorOptions[SAPInstanceStart],
 ) *Executor {
@@ -253,7 +253,7 @@ func sleepContext(ctx context.Context, interval time.Duration) error {
 	}
 }
 
-func parseSAPStateChangeArguments(rawArguments OperatorArguments) (*sapStateChangeArguments, error) {
+func parseSAPStateChangeArguments(rawArguments Arguments) (*sapStateChangeArguments, error) {
 	instNumberArgument, found := rawArguments["instance_number"]
 	if !found {
 		return nil, fmt.Errorf("argument instance_number not provided, could not use the operator")

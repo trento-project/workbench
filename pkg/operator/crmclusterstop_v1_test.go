@@ -30,7 +30,7 @@ func (suite *CrmClusterStopOperatorTestSuite) TestCrmClusterStopClusterAlreadyOf
 	mockCrmClient.On("IsHostOnline", ctx).Return(false).Once()
 
 	crmClusterStopOperator := operator.NewCrmClusterStop(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"cluster_id": "test-cluster-id",
 		},
 		"test-op",
@@ -60,7 +60,7 @@ func (suite *CrmClusterStopOperatorTestSuite) TestCrmClusterStopClusterRollbackF
 	mockCrmClient.On("StartCluster", ctx).Return(errors.New("failed to start cluster"))
 
 	crmClusterStopOperator := operator.NewCrmClusterStop(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"cluster_id": "test-cluster-id",
 		},
 		"test-op",
@@ -89,7 +89,7 @@ func (suite *CrmClusterStopOperatorTestSuite) TestCrmClusterStopClusterRollbackS
 	mockCrmClient.On("StartCluster", ctx).Return(nil).Once()
 
 	crmClusterStopOperator := operator.NewCrmClusterStop(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"cluster_id": "test-cluster-id",
 		},
 		"test-op",
@@ -118,7 +118,7 @@ func (suite *CrmClusterStopOperatorTestSuite) TestCrmClusterStopClusterStartVeri
 	mockCrmClient.On("StartCluster", ctx).Return(nil).Once()
 
 	crmClusterStopOperator := operator.NewCrmClusterStop(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"cluster_id": "test-cluster-id",
 		},
 		"test-op",
@@ -147,7 +147,7 @@ func (suite *CrmClusterStopOperatorTestSuite) TestCrmClusterStopVerifySuccess() 
 	mockCrmClient.On("IsHostOnline", ctx).Return(false)
 
 	crmClusterStopOperator := operator.NewCrmClusterStop(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"cluster_id": "test-cluster-id",
 		},
 		"test-op",

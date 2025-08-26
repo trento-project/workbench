@@ -76,7 +76,7 @@ func defaultDbusConstructor(ctx context.Context) (dbus.Connector, error) {
 	return connector, nil
 }
 
-func NewHostReboot(arguments OperatorArguments,
+func NewHostReboot(arguments Arguments,
 	operationID string,
 	options OperatorOptions[HostReboot]) *Executor {
 	hostReboot := &HostReboot{

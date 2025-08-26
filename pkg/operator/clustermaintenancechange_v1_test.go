@@ -57,7 +57,7 @@ func TestClusterMaintenanceChangeSuccessOn(t *testing.T) {
 	).Return([]byte("true"), nil)
 
 	clusterMaintenanceChangeOperator := operator.NewClusterMaintenanceChange(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"maintenance": true,
 		},
 		"test-op",
@@ -136,7 +136,7 @@ func TestClusterMaintenanceChangeSuccessOff(t *testing.T) {
 	).Return([]byte("false"), nil)
 
 	clusterMaintenanceChangeOperator := operator.NewClusterMaintenanceChange(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"maintenance": false,
 		},
 		"test-op",
@@ -210,7 +210,7 @@ func TestClusterMaintenanceChangeResourceSuccess(t *testing.T) {
 	).Return([]byte("true"), nil)
 
 	clusterMaintenanceChangeOperator := operator.NewClusterMaintenanceChange(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"maintenance": true,
 			"resource_id": resourceID,
 		},
@@ -298,7 +298,7 @@ func TestClusterMaintenanceChangeResourceWithIsManagedSuccess(t *testing.T) {
 	).Return([]byte("false"), nil)
 
 	clusterMaintenanceChangeOperator := operator.NewClusterMaintenanceChange(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"maintenance": true,
 			"resource_id": resourceID,
 		},
@@ -384,7 +384,7 @@ func TestClusterMaintenanceChangeResourceDefaultSuccess(t *testing.T) {
 	).Return([]byte("true"), nil)
 
 	clusterMaintenanceChangeOperator := operator.NewClusterMaintenanceChange(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"maintenance": true,
 			"resource_id": resourceID,
 		},
@@ -460,7 +460,7 @@ func TestClusterMaintenanceChangeNodeSuccessOn(t *testing.T) {
 	).Return([]byte("scope=nodes  name=maintenance value=true"), nil)
 
 	clusterMaintenanceChangeOperator := operator.NewClusterMaintenanceChange(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"maintenance": true,
 			"node_id":     nodeID,
 		},
@@ -539,7 +539,7 @@ func TestClusterMaintenanceChangeNodeSuccessOnWithoutPreviousState(t *testing.T)
 	).Return([]byte("scope=nodes  name=maintenance value=true"), nil)
 
 	clusterMaintenanceChangeOperator := operator.NewClusterMaintenanceChange(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"maintenance": true,
 			"node_id":     nodeID,
 		},
@@ -624,7 +624,7 @@ func TestClusterMaintenanceChangeNodeSuccessOff(t *testing.T) {
 	).Return([]byte("scope=nodes  name=maintenance value=off"), nil)
 
 	clusterMaintenanceChangeOperator := operator.NewClusterMaintenanceChange(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"maintenance": false,
 			"node_id":     nodeID,
 		},
@@ -653,7 +653,7 @@ func TestClusterMaintenanceChangeMissingArgument(t *testing.T) {
 	ctx := context.Background()
 
 	clusterMaintenanceChangeOperator := operator.NewClusterMaintenanceChange(
-		operator.OperatorArguments{},
+		operator.Arguments{},
 		"test-op",
 		operator.OperatorOptions[operator.ClusterMaintenanceChange]{
 			OperatorOptions: []operator.Option[operator.ClusterMaintenanceChange]{
@@ -674,7 +674,7 @@ func TestClusterMaintenanceChangeInvalidArgument(t *testing.T) {
 	ctx := context.Background()
 
 	clusterMaintenanceChangeOperator := operator.NewClusterMaintenanceChange(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"maintenance": "on",
 		},
 		"test-op",
@@ -697,7 +697,7 @@ func TestClusterMaintenanceChangeInvalidResourceIDArgument(t *testing.T) {
 	ctx := context.Background()
 
 	clusterMaintenanceChangeOperator := operator.NewClusterMaintenanceChange(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"maintenance": true,
 			"resource_id": 1,
 		},
@@ -721,7 +721,7 @@ func TestClusterMaintenanceChangeInvalidNodeIDArgument(t *testing.T) {
 	ctx := context.Background()
 
 	clusterMaintenanceChangeOperator := operator.NewClusterMaintenanceChange(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"maintenance": true,
 			"node_id":     1,
 		},
@@ -745,7 +745,7 @@ func TestClusterMaintenanceChangeMutuallyExclusiveArgument(t *testing.T) {
 	ctx := context.Background()
 
 	clusterMaintenanceChangeOperator := operator.NewClusterMaintenanceChange(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"maintenance": true,
 			"resource_id": "some-resource",
 			"node_id":     "some-node",
@@ -777,7 +777,7 @@ func TestClusterMaintenanceChangePlanClusterNotFound(t *testing.T) {
 	).Return([]byte("error"), errors.New("cluster not found"))
 
 	clusterMaintenanceChangeOperator := operator.NewClusterMaintenanceChange(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"maintenance": true,
 		},
 		"test-op",
@@ -817,7 +817,7 @@ func TestClusterMaintenanceChangePlanGetMaintenanceError(t *testing.T) {
 	).Return([]byte("error"), errors.New("cannot get state"))
 
 	clusterMaintenanceChangeOperator := operator.NewClusterMaintenanceChange(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"maintenance": true,
 		},
 		"test-op",
@@ -857,7 +857,7 @@ func TestClusterMaintenanceChangePlanEmptyMaintenanceState(t *testing.T) {
 	).Return([]byte(""), nil)
 
 	clusterMaintenanceChangeOperator := operator.NewClusterMaintenanceChange(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"maintenance": true,
 		},
 		"test-op",
@@ -899,7 +899,7 @@ func TestClusterMaintenanceChangePlanNodeNotFound(t *testing.T) {
 	).Return([]byte("Could not map name=some-id to a UUID"), errors.New("error getting node"))
 
 	clusterMaintenanceChangeOperator := operator.NewClusterMaintenanceChange(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"maintenance": true,
 			"node_id":     nodeID,
 		},
@@ -940,7 +940,7 @@ func TestClusterMaintenanceChangeCommitAlreadyApplied(t *testing.T) {
 	).Return([]byte("true"), nil)
 
 	clusterMaintenanceChangeOperator := operator.NewClusterMaintenanceChange(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"maintenance": true,
 		},
 		"test-op",
@@ -1007,7 +1007,7 @@ func TestClusterMaintenanceChangeCommitNotIdle(t *testing.T) {
 	).Return([]byte("ok"), nil)
 
 	clusterMaintenanceChangeOperator := operator.NewClusterMaintenanceChange(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"maintenance": true,
 		},
 		"test-op",
@@ -1080,7 +1080,7 @@ func TestClusterMaintenanceChangeVerifyError(t *testing.T) {
 	).Return([]byte("ok"), nil)
 
 	clusterMaintenanceChangeOperator := operator.NewClusterMaintenanceChange(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"maintenance": true,
 		},
 		"test-op",
@@ -1142,7 +1142,7 @@ func TestClusterMaintenanceChangeRollbackNotIdle(t *testing.T) {
 	).Return([]byte("S_TRANSITION"), nil)
 
 	clusterMaintenanceChangeOperator := operator.NewClusterMaintenanceChange(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"maintenance": true,
 		},
 		"test-op",
@@ -1205,7 +1205,7 @@ func TestClusterMaintenanceChangeRollbackErrorReverting(t *testing.T) {
 	).Return([]byte("error"), errors.New("error reverting"))
 
 	clusterMaintenanceChangeOperator := operator.NewClusterMaintenanceChange(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"maintenance": true,
 		},
 		"test-op",

@@ -60,7 +60,7 @@ func WithCustomStopInterval(interval time.Duration) SAPInstanceStopOption {
 //   If an error occurs during the COMMIT or VERIFY phase, the instance is started back again.
 
 func NewSAPInstanceStop(
-	arguments OperatorArguments,
+	arguments Arguments,
 	operationID string,
 	options OperatorOptions[SAPInstanceStop],
 ) *Executor {

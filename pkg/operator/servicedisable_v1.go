@@ -49,7 +49,7 @@ func WithServiceToDisable(service string) ServiceDisableOption {
 
 func NewServiceDisable(
 	name string,
-	arguments OperatorArguments,
+	arguments Arguments,
 	operationID string,
 	options OperatorOptions[ServiceDisable],
 ) *Executor {

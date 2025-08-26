@@ -26,7 +26,7 @@ func buildHostRebootOperator(suite *HostRebootOperatorTestSuite,
 	mockDbusConnector *dbusMocks.MockDbusConnector,
 ) *operator.Executor {
 	return operator.NewHostReboot(
-		operator.OperatorArguments{},
+		operator.Arguments{},
 		"test-op",
 		operator.OperatorOptions[operator.HostReboot]{
 			BaseOperatorOptions: []operator.BaseOperatorOption{
@@ -154,7 +154,7 @@ func (suite *HostRebootOperatorTestSuite) TestHostRebootOperatorDbusConnectionEr
 	}
 
 	report := operator.NewHostReboot(
-		operator.OperatorArguments{},
+		operator.Arguments{},
 		"test-op",
 		operator.OperatorOptions[operator.HostReboot]{
 			BaseOperatorOptions: []operator.BaseOperatorOption{

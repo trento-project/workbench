@@ -77,7 +77,7 @@ func WithCustomStartSystemInterval(interval time.Duration) SAPSystemStartOption 
 }
 
 func NewSAPSystemStart(
-	arguments OperatorArguments,
+	arguments Arguments,
 	operationID string,
 	options OperatorOptions[SAPSystemStart],
 ) *Executor {
@@ -270,7 +270,7 @@ func waitUntilSapSystemState(
 
 }
 
-func parseSAPSystemStateChangeArguments(rawArguments OperatorArguments) (*sapSystemStateChangeArguments, error) {
+func parseSAPSystemStateChangeArguments(rawArguments Arguments) (*sapSystemStateChangeArguments, error) {
 	instNumberArgument, found := rawArguments["instance_number"]
 	if !found {
 		return nil, fmt.Errorf("argument instance_number not provided, could not use the operator")

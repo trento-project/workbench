@@ -30,7 +30,7 @@ func (suite *SAPSystemStartOperatorTestSuite) TestSAPSystemStartInstanceNumberMi
 	ctx := context.Background()
 
 	sapSystemStartOperator := operator.NewSAPSystemStart(
-		operator.OperatorArguments{},
+		operator.Arguments{},
 		"test-op",
 		operator.OperatorOptions[operator.SAPSystemStart]{},
 	)
@@ -46,7 +46,7 @@ func (suite *SAPSystemStartOperatorTestSuite) TestSAPSystemStartInstanceNumberIn
 	ctx := context.Background()
 
 	sapSystemStartOperator := operator.NewSAPSystemStart(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"instance_number": 0,
 		},
 		"test-op",
@@ -64,7 +64,7 @@ func (suite *SAPSystemStartOperatorTestSuite) TestSAPSystemStartTimeoutInvalid()
 	ctx := context.Background()
 
 	sapSystemStartOperator := operator.NewSAPSystemStart(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"instance_number": "00",
 			"timeout":         "value",
 		},
@@ -83,7 +83,7 @@ func (suite *SAPSystemStartOperatorTestSuite) TestSAPSystemStartInstanceTypeInva
 	ctx := context.Background()
 
 	sapSystemStartOperator := operator.NewSAPSystemStart(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"instance_number": "00",
 			"instance_type":   0,
 		},
@@ -102,7 +102,7 @@ func (suite *SAPSystemStartOperatorTestSuite) TestSAPSystemStartInstanceTypeUnkn
 	ctx := context.Background()
 
 	sapSystemStartOperator := operator.NewSAPSystemStart(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"instance_number": "00",
 			"instance_type":   "unknown",
 		},
@@ -126,7 +126,7 @@ func (suite *SAPSystemStartOperatorTestSuite) TestSAPSystemStartPlanError() {
 		Once()
 
 	sapSystemStartOperator := operator.NewSAPSystemStart(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"instance_number": "00",
 			"timeout":         300.0,
 		},
@@ -165,7 +165,7 @@ func (suite *SAPSystemStartOperatorTestSuite) TestSAPSystemStartCommitAlreadySta
 		Once()
 
 	sapSystemStartOperator := operator.NewSAPSystemStart(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"instance_number": "00",
 		},
 		"test-op",
@@ -235,7 +235,7 @@ func (suite *SAPSystemStartOperatorTestSuite) TestSAPSystemStartCommitAlreadySta
 			Once()
 
 		sapSystemStartOperator := operator.NewSAPSystemStart(
-			operator.OperatorArguments{
+			operator.Arguments{
 				"instance_number": "00",
 				"instance_type":   tt.instanceType,
 			},
@@ -303,7 +303,7 @@ func (suite *SAPSystemStartOperatorTestSuite) TestSAPSystemStartCommitStartingEr
 		NotBefore(rollbackStopSystem)
 
 	sapSystemStartOperator := operator.NewSAPSystemStart(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"instance_number": "00",
 		},
 		"test-op",
@@ -370,7 +370,7 @@ func (suite *SAPSystemStartOperatorTestSuite) TestSAPSystemStartVerifyError() {
 		NotBefore(rollbackStopSystem)
 
 	sapSystemStartOperator := operator.NewSAPSystemStart(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"instance_number": "00",
 		},
 		"test-op",
@@ -411,7 +411,7 @@ func (suite *SAPSystemStartOperatorTestSuite) TestSAPSystemStartVerifyTimeout() 
 		Return(nil, nil)
 
 	sapSystemStartOperator := operator.NewSAPSystemStart(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"instance_number": "00",
 			"timeout":         0.0,
 		},
@@ -464,7 +464,7 @@ func (suite *SAPSystemStartOperatorTestSuite) TestSAPSystemStartRollbackStopping
 		Return(nil, errors.New("error stopping"))
 
 	sapSystemStartOperator := operator.NewSAPSystemStart(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"instance_number": "00",
 			"instance_type":   "abap",
 		},
@@ -558,7 +558,7 @@ func (suite *SAPSystemStartOperatorTestSuite) TestSAPSystemStartSuccess() {
 			NotBefore(planGetInstances)
 
 		sapSystemStartOperator := operator.NewSAPSystemStart(
-			operator.OperatorArguments{
+			operator.Arguments{
 				"instance_number": "00",
 				"instance_type":   tt.instanceType,
 			},
@@ -633,7 +633,7 @@ func (suite *SAPSystemStartOperatorTestSuite) TestSAPSystemStartSuccessMultipleQ
 		Once()
 
 	sapSystemStartOperator := operator.NewSAPSystemStart(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"instance_number": "00",
 			"timeout":         5.0,
 		},

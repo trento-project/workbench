@@ -49,7 +49,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	opArgs := make(operator.OperatorArguments)
+	opArgs := make(operator.Arguments)
 	err = json.Unmarshal([]byte(options.Arguments), &opArgs)
 	if err != nil {
 		logger.Error("could not unmarshal options arguments", "arguments", options.Arguments)

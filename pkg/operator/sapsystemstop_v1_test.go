@@ -30,7 +30,7 @@ func (suite *SAPSystemStopOperatorTestSuite) TestSAPSystemStopInstanceNumberMiss
 	ctx := context.Background()
 
 	sapSystemStopOperator := operator.NewSAPSystemStop(
-		operator.OperatorArguments{},
+		operator.Arguments{},
 		"test-op",
 		operator.OperatorOptions[operator.SAPSystemStop]{},
 	)
@@ -46,7 +46,7 @@ func (suite *SAPSystemStopOperatorTestSuite) TestSAPSystemStopInstanceNumberInva
 	ctx := context.Background()
 
 	sapSystemStopOperator := operator.NewSAPSystemStop(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"instance_number": 0,
 		},
 		"test-op",
@@ -64,7 +64,7 @@ func (suite *SAPSystemStopOperatorTestSuite) TestSAPSystemStopTimeoutInvalid() {
 	ctx := context.Background()
 
 	sapSystemStopOperator := operator.NewSAPSystemStop(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"instance_number": "00",
 			"timeout":         "value",
 		},
@@ -83,7 +83,7 @@ func (suite *SAPSystemStopOperatorTestSuite) TestSAPSystemStopInstanceTypeInvali
 	ctx := context.Background()
 
 	sapSystemStopOperator := operator.NewSAPSystemStop(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"instance_number": "00",
 			"instance_type":   0,
 		},
@@ -102,7 +102,7 @@ func (suite *SAPSystemStopOperatorTestSuite) TestSAPSystemStopInstanceTypeUnknow
 	ctx := context.Background()
 
 	sapSystemStopOperator := operator.NewSAPSystemStop(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"instance_number": "00",
 			"instance_type":   "unknown",
 		},
@@ -126,7 +126,7 @@ func (suite *SAPSystemStopOperatorTestSuite) TestSAPSystemStopPlanError() {
 		Once()
 
 	sapSystemStopOperator := operator.NewSAPSystemStop(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"instance_number": "00",
 			"timeout":         300.0,
 		},
@@ -165,7 +165,7 @@ func (suite *SAPSystemStopOperatorTestSuite) TestSAPSystemStopCommitAlreadyStopp
 		Once()
 
 	sapSystemStopOperator := operator.NewSAPSystemStop(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"instance_number": "00",
 		},
 		"test-op",
@@ -235,7 +235,7 @@ func (suite *SAPSystemStopOperatorTestSuite) TestSAPSystemStopCommitAlreadyStopp
 			Once()
 
 		sapSystemStopOperator := operator.NewSAPSystemStop(
-			operator.OperatorArguments{
+			operator.Arguments{
 				"instance_number": "00",
 				"instance_type":   tt.instanceType,
 			},
@@ -303,7 +303,7 @@ func (suite *SAPSystemStopOperatorTestSuite) TestSAPSystemStopCommitStoppingErro
 		NotBefore(rollbackStartSystem)
 
 	sapSystemStopOperator := operator.NewSAPSystemStop(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"instance_number": "00",
 		},
 		"test-op",
@@ -370,7 +370,7 @@ func (suite *SAPSystemStopOperatorTestSuite) TestSAPSystemStopVerifyError() {
 		NotBefore(rollbackStartSystem)
 
 	sapSystemStopOperator := operator.NewSAPSystemStop(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"instance_number": "00",
 		},
 		"test-op",
@@ -411,7 +411,7 @@ func (suite *SAPSystemStopOperatorTestSuite) TestSAPSystemStopVerifyTimeout() {
 		Return(nil, nil)
 
 	sapSystemStopOperator := operator.NewSAPSystemStop(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"instance_number": "00",
 			"timeout":         0.0,
 		},
@@ -464,7 +464,7 @@ func (suite *SAPSystemStopOperatorTestSuite) TestSAPSystemStopRollbackStoppingEr
 		Return(nil, errors.New("error starting"))
 
 	sapSystemStopOperator := operator.NewSAPSystemStop(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"instance_number": "00",
 			"instance_type":   "abap",
 		},
@@ -560,7 +560,7 @@ func (suite *SAPSystemStopOperatorTestSuite) TestSAPSystemStopSuccess() {
 			NotBefore(stopSystem)
 
 		sapSystemStopOperator := operator.NewSAPSystemStop(
-			operator.OperatorArguments{
+			operator.Arguments{
 				"instance_number": "00",
 				"instance_type":   tt.instanceType,
 			},
@@ -635,7 +635,7 @@ func (suite *SAPSystemStopOperatorTestSuite) TestSAPSystemStopSuccessMultipleQue
 		Once()
 
 	sapSystemStopOperator := operator.NewSAPSystemStop(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"instance_number": "00",
 			"timeout":         5.0,
 		},

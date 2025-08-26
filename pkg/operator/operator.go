@@ -6,7 +6,7 @@ import (
 
 type PhaseName string
 
-type OperatorArguments map[string]any
+type Arguments map[string]any
 type Option[T any] func(*T)
 
 const (

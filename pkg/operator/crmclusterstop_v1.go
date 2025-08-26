@@ -67,7 +67,7 @@ func WithCustomRetryStop(maxRetries int, initialDelay, maxDelay time.Duration, f
 	}
 }
 
-func NewCrmClusterStop(arguments OperatorArguments,
+func NewCrmClusterStop(arguments Arguments,
 	operationID string,
 	options OperatorOptions[CrmClusterStop]) *Executor {
 	crmClusterStop := &CrmClusterStop{
