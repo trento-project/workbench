@@ -10,6 +10,8 @@ import (
 	"github.com/trento-project/workbench/pkg/operator"
 )
 
+const fakeID = "some-id"
+
 func TestClusterMaintenanceChangeSuccessOn(t *testing.T) {
 	mockCmdExecutor := mocks.NewMockCmdExecutor(t)
 	ctx := context.Background()
@@ -162,7 +164,7 @@ func TestClusterMaintenanceChangeSuccessOff(t *testing.T) {
 func TestClusterMaintenanceChangeResourceSuccess(t *testing.T) {
 	mockCmdExecutor := mocks.NewMockCmdExecutor(t)
 	ctx := context.Background()
-	resourceID := "some-id"
+	resourceID := fakeID
 
 	mockCmdExecutor.On(
 		"Exec",
@@ -237,7 +239,7 @@ func TestClusterMaintenanceChangeResourceSuccess(t *testing.T) {
 func TestClusterMaintenanceChangeResourceWithIsManagedSuccess(t *testing.T) {
 	mockCmdExecutor := mocks.NewMockCmdExecutor(t)
 	ctx := context.Background()
-	resourceID := "some-id"
+	resourceID := fakeID
 
 	mockCmdExecutor.On(
 		"Exec",
@@ -325,7 +327,7 @@ func TestClusterMaintenanceChangeResourceWithIsManagedSuccess(t *testing.T) {
 func TestClusterMaintenanceChangeResourceDefaultSuccess(t *testing.T) {
 	mockCmdExecutor := mocks.NewMockCmdExecutor(t)
 	ctx := context.Background()
-	resourceID := "some-id"
+	resourceID := fakeID
 
 	mockCmdExecutor.On(
 		"Exec",
@@ -411,7 +413,7 @@ func TestClusterMaintenanceChangeResourceDefaultSuccess(t *testing.T) {
 func TestClusterMaintenanceChangeNodeSuccessOn(t *testing.T) {
 	mockCmdExecutor := mocks.NewMockCmdExecutor(t)
 	ctx := context.Background()
-	nodeID := "some-id"
+	nodeID := fakeID
 
 	mockCmdExecutor.On(
 		"Exec",
@@ -487,7 +489,7 @@ func TestClusterMaintenanceChangeNodeSuccessOn(t *testing.T) {
 func TestClusterMaintenanceChangeNodeSuccessOnWithoutPreviousState(t *testing.T) {
 	mockCmdExecutor := mocks.NewMockCmdExecutor(t)
 	ctx := context.Background()
-	nodeID := "some-id"
+	nodeID := fakeID
 
 	mockCmdExecutor.On(
 		"Exec",
@@ -566,7 +568,7 @@ func TestClusterMaintenanceChangeNodeSuccessOnWithoutPreviousState(t *testing.T)
 func TestClusterMaintenanceChangeNodeSuccessOff(t *testing.T) {
 	mockCmdExecutor := mocks.NewMockCmdExecutor(t)
 	ctx := context.Background()
-	nodeID := "some-id"
+	nodeID := fakeID
 
 	mockCmdExecutor.On(
 		"Exec",
@@ -878,7 +880,7 @@ func TestClusterMaintenanceChangePlanEmptyMaintenanceState(t *testing.T) {
 func TestClusterMaintenanceChangePlanNodeNotFound(t *testing.T) {
 	mockCmdExecutor := mocks.NewMockCmdExecutor(t)
 	ctx := context.Background()
-	nodeID := "some-id"
+	nodeID := fakeID
 
 	mockCmdExecutor.On(
 		"Exec",
