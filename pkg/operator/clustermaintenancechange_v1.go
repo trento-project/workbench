@@ -131,11 +131,12 @@ func (c *ClusterMaintenanceChange) plan(ctx context.Context) (bool, error) {
 	}
 	c.parsedArguments = opArguments
 
-	if c.parsedArguments.resourceID != "" {
+	switch {
+	case c.parsedArguments.resourceID != "":
 		c.scope = resourceScope
-	} else if c.parsedArguments.nodeID != "" {
+	case c.parsedArguments.nodeID != "":
 		c.scope = nodeScope
-	} else {
+	default:
 		c.scope = clusterScope
 	}
 
