@@ -50,8 +50,10 @@ linters:
         linters:
           - revive
         text: "exported:*"
-        path: internal/sapcontrol/webservice\.go
-        disable: true
+      # ignore dupl in tests, as we prefer copy-paste over abstraction there
+      - path: ".*_test\\.go"
+        linters:
+          - dupl
     paths:
       - third_party$
       - builtin$
