@@ -159,6 +159,9 @@ func (s *SAPInstanceStop) rollback(ctx context.Context) error {
 	return nil
 }
 
+//	operationDiff needs to be refactored, ignoring duplication issues for now
+//
+// nolint: dupl
 func (s *SAPInstanceStop) operationDiff(_ context.Context) map[string]any {
 	diff := make(map[string]any)
 
