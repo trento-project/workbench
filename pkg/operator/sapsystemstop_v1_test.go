@@ -458,7 +458,10 @@ func (suite *SAPSystemStopOperatorTestSuite) TestSAPSystemStopRollbackStoppingEr
 			"StartSystemContext",
 			ctx,
 			mock.MatchedBy(func(req *sapcontrol.StartSystem) bool {
-				return *req.Options == sapcontrol.StartStopOptionSAPControlABAPINSTANCES
+				if *req.Options == sapcontrol.StartStopOptionSAPControlABAPINSTANCES && req.Waittimeout == 300.0 {
+					return true
+				}
+				return false
 			}),
 		).
 		Return(nil, errors.New("error starting"))
