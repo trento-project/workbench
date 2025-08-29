@@ -18,7 +18,7 @@ type Cluster interface {
 	StopCluster(ctx context.Context) error
 }
 
-type ClusterClient struct {
+type Client struct {
 	executor support.CmdExecutor
 	logger   *slog.Logger
 }
@@ -31,13 +31,13 @@ func NewDefaultClusterClient() Cluster {
 }
 
 func NewClusterClient(executor support.CmdExecutor, logger *slog.Logger) Cluster {
-	return &ClusterClient{
+	return &Client{
 		executor: executor,
 		logger:   logger,
 	}
 }
 
-func (c *ClusterClient) IsHostOnline(ctx context.Context) bool {
+func (c *Client) IsHostOnline(ctx context.Context) bool {
 	output, err := c.executor.Exec(ctx, "crm", "status", "simple")
 	if err != nil {
 		return false
@@ -48,7 +48,7 @@ func (c *ClusterClient) IsHostOnline(ctx context.Context) bool {
 	return true
 }
 
-func (c *ClusterClient) StartCluster(ctx context.Context) error {
+func (c *Client) StartCluster(ctx context.Context) error {
 	c.logger.Info("Starting CRM cluster")
 	output, err := c.executor.Exec(ctx, "crm", "cluster", "start")
 	if err != nil {
@@ -59,7 +59,7 @@ func (c *ClusterClient) StartCluster(ctx context.Context) error {
 	return nil
 }
 
-func (c *ClusterClient) StopCluster(ctx context.Context) error {
+func (c *Client) StopCluster(ctx context.Context) error {
 	c.logger.Info("Stopping CRM cluster")
 	output, err := c.executor.Exec(ctx, "crm", "cluster", "stop")
 	if err != nil {
@@ -70,7 +70,7 @@ func (c *ClusterClient) StopCluster(ctx context.Context) error {
 	return nil
 }
 
-func (c *ClusterClient) IsIdle(ctx context.Context) (bool, error) {
+func (c *Client) IsIdle(ctx context.Context) (bool, error) {
 	idleOutput, err := c.executor.Exec(ctx, "cs_clusterstate", "-i")
 	if err != nil {
 		return false, fmt.Errorf("error running cs_clusterstate: %w", err)

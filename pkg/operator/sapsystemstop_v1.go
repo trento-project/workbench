@@ -24,7 +24,8 @@ type SAPSystemStopOption Option[SAPSystemStop]
 // Arguments:
 //  instance_number (required): String with the instance number of local instance to stop the whole system
 //  timeout: Timeout in seconds to wait until the system is stopped
-//  instance_type: Instance type to filter in the StopSystem process. Values: all|abap|j2ee|scs|enqrep. Default value: all
+//  instance_type: Instance type to filter in the StopSystem process. Values: all|abap|j2ee|scs|enqrep.
+//  Default value: all
 //
 // # Execution Phases
 //
@@ -61,9 +62,9 @@ func WithCustomStopSystemInterval(interval time.Duration) SAPSystemStopOption {
 }
 
 func NewSAPSystemStop(
-	arguments OperatorArguments,
+	arguments Arguments,
 	operationID string,
-	options OperatorOptions[SAPSystemStop],
+	options Options[SAPSystemStop],
 ) *Executor {
 	sapSystemStop := &SAPSystemStop{
 		baseOperator: newBaseOperator(
@@ -169,19 +170,40 @@ func (s *SAPSystemStop) rollback(ctx context.Context) error {
 	return nil
 }
 
-func (s *SAPSystemStop) operationDiff(ctx context.Context) map[string]any {
+//	operationDiff needs to be refactored, ignoring duplication issues for now
+//
+// nolint: dupl
+func (s *SAPSystemStop) operationDiff(_ context.Context) map[string]any {
 	diff := make(map[string]any)
 
-	beforeDiffOutput := sapSystemStopDiffOutput{
-		Stopped: s.resources[beforeDiffField].(bool),
+	beforeStopped, ok := s.resources[beforeDiffField].(bool)
+	if !ok {
+		panic(fmt.Sprintf("invalid beforeStopped value: cannot parse '%s' to bool",
+			s.resources[beforeDiffField]))
 	}
-	before, _ := json.Marshal(beforeDiffOutput)
+
+	afterStopped, ok := s.resources[afterDiffField].(bool)
+	if !ok {
+		panic(fmt.Sprintf("invalid afterStopped value: cannot parse '%s' to bool",
+			s.resources[afterDiffField]))
+	}
+
+	beforeDiffOutput := sapSystemStopDiffOutput{
+		Stopped: beforeStopped,
+	}
+	before, err := json.Marshal(beforeDiffOutput)
+	if err != nil {
+		panic(fmt.Sprintf("error marshalling before diff output: %v", err))
+	}
 	diff["before"] = string(before)
 
 	afterDiffOutput := sapSystemStopDiffOutput{
-		Stopped: s.resources[afterDiffField].(bool),
+		Stopped: afterStopped,
 	}
-	after, _ := json.Marshal(afterDiffOutput)
+	after, err := json.Marshal(afterDiffOutput)
+	if err != nil {
+		panic(fmt.Sprintf("error marshalling after diff output: %v", err))
+	}
 	diff["after"] = string(after)
 
 	return diff

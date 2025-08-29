@@ -16,7 +16,7 @@ type phaser interface {
 }
 
 type Executor struct {
-	currentPhase OPERATION_PHASES
+	currentPhase PhaseName
 	phaser       phaser
 	operationID  string
 	logger       *slog.Logger
@@ -28,6 +28,18 @@ const (
 	SUCCESS = "SUCCESS"
 	FAILURE = "FAILURE"
 )
+
+func NewExecutor(phaser phaser, operationID string, logger *slog.Logger) *Executor {
+	if logger == nil {
+		logger = slog.Default()
+	}
+	return &Executor{
+		currentPhase: PLAN,
+		phaser:       phaser,
+		operationID:  operationID,
+		logger:       logger,
+	}
+}
 
 func (e *Executor) Run(ctx context.Context) *ExecutionReport {
 	e.currentPhase = PLAN

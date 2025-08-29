@@ -21,7 +21,7 @@ func WithCustomLogger(logger *slog.Logger) BaseOperatorOption {
 }
 
 type baseOperator struct {
-	arguments OperatorArguments
+	arguments Arguments
 	resources map[string]any
 	logger    *slog.Logger
 }
@@ -29,7 +29,7 @@ type baseOperator struct {
 func newBaseOperator(
 	name string,
 	operationID string,
-	arguments OperatorArguments,
+	arguments Arguments,
 	options ...BaseOperatorOption,
 ) baseOperator {
 	base := &baseOperator{

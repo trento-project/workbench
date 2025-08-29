@@ -40,7 +40,8 @@ type SAPSystemStartOption Option[SAPSystemStart]
 // Arguments:
 //  instance_number (required): String with the instance number of local instance to start the whole system
 //  timeout: Timeout in seconds to wait until the system is started
-//  instance_type: Instance type to filter in the StartSystem process. Values: all|abap|j2ee|scs|enqrep. Default value: all
+//  instance_type: Instance type to filter in the StartSystem process. Values: all|abap|j2ee|scs|enqrep.
+//  Default value: all
 //
 // # Execution Phases
 //
@@ -77,9 +78,9 @@ func WithCustomStartSystemInterval(interval time.Duration) SAPSystemStartOption 
 }
 
 func NewSAPSystemStart(
-	arguments OperatorArguments,
+	arguments Arguments,
 	operationID string,
-	options OperatorOptions[SAPSystemStart],
+	options Options[SAPSystemStart],
 ) *Executor {
 	sapSystemStart := &SAPSystemStart{
 		baseOperator: newBaseOperator(
@@ -185,19 +186,40 @@ func (s *SAPSystemStart) rollback(ctx context.Context) error {
 	return nil
 }
 
-func (s *SAPSystemStart) operationDiff(ctx context.Context) map[string]any {
+//	operationDiff needs to be refactored, ignoring duplication issues for now
+//
+// nolint: dupl
+func (s *SAPSystemStart) operationDiff(_ context.Context) map[string]any {
 	diff := make(map[string]any)
 
-	beforeDiffOutput := sapSystemStartDiffOutput{
-		Started: s.resources[beforeDiffField].(bool),
+	beforeStarted, ok := s.resources[beforeDiffField].(bool)
+	if !ok {
+		panic(fmt.Sprintf("invalid beforeStarted value: cannot parse '%s' to bool",
+			s.resources[beforeDiffField]))
 	}
-	before, _ := json.Marshal(beforeDiffOutput)
+
+	afterStarted, ok := s.resources[afterDiffField].(bool)
+	if !ok {
+		panic(fmt.Sprintf("invalid afterStarted value: cannot parse '%s' to bool",
+			s.resources[afterDiffField]))
+	}
+
+	beforeDiffOutput := sapSystemStartDiffOutput{
+		Started: beforeStarted,
+	}
+	before, err := json.Marshal(beforeDiffOutput)
+	if err != nil {
+		panic(fmt.Sprintf("error marshalling before diff output: %v", err))
+	}
 	diff["before"] = string(before)
 
 	afterDiffOutput := sapSystemStartDiffOutput{
-		Started: s.resources[afterDiffField].(bool),
+		Started: afterStarted,
 	}
-	after, _ := json.Marshal(afterDiffOutput)
+	after, err := json.Marshal(afterDiffOutput)
+	if err != nil {
+		panic(fmt.Sprintf("error marshalling after diff output: %v", err))
+	}
 	diff["after"] = string(after)
 
 	return diff
@@ -270,7 +292,7 @@ func waitUntilSapSystemState(
 
 }
 
-func parseSAPSystemStateChangeArguments(rawArguments OperatorArguments) (*sapSystemStateChangeArguments, error) {
+func parseSAPSystemStateChangeArguments(rawArguments Arguments) (*sapSystemStateChangeArguments, error) {
 	instNumberArgument, found := rawArguments["instance_number"]
 	if !found {
 		return nil, fmt.Errorf("argument instance_number not provided, could not use the operator")

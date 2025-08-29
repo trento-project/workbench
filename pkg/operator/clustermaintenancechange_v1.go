@@ -54,6 +54,7 @@ type diffOutput struct {
 //
 // Find some helpful references about maintenance transitions and used commands:
 // - https://www.suse.com/c/sles-for-sap-hana-maintenance-procedures-part-1-pre-maintenance-checks/
+// nolint:lll
 // - https://www.suse.com/c/sles-for-sap-hana-maintenance-procedures-part-2-manual-administrative-tasks-os-reboots-and-updation-of-os-and-hana/
 // - https://crmsh.github.io/man-4.6/
 // - https://crmsh.github.io/man-4.6/#cmdhelp_root_status
@@ -101,9 +102,9 @@ func WithCustomClusterMaintenanceExecutor(executor support.CmdExecutor) ClusterM
 }
 
 func NewClusterMaintenanceChange(
-	arguments OperatorArguments,
+	arguments Arguments,
 	operationID string,
-	options OperatorOptions[ClusterMaintenanceChange],
+	options Options[ClusterMaintenanceChange],
 ) *Executor {
 	clusterMaintenance := &ClusterMaintenanceChange{
 		baseOperator: newBaseOperator(
@@ -130,11 +131,12 @@ func (c *ClusterMaintenanceChange) plan(ctx context.Context) (bool, error) {
 	}
 	c.parsedArguments = opArguments
 
-	if c.parsedArguments.resourceID != "" {
+	switch {
+	case c.parsedArguments.resourceID != "":
 		c.scope = resourceScope
-	} else if c.parsedArguments.nodeID != "" {
+	case c.parsedArguments.nodeID != "":
 		c.scope = nodeScope
-	} else {
+	default:
 		c.scope = clusterScope
 	}
 
@@ -213,23 +215,41 @@ func (c *ClusterMaintenanceChange) rollback(ctx context.Context) error {
 	return nil
 }
 
-func (c *ClusterMaintenanceChange) operationDiff(ctx context.Context) map[string]any {
+func (c *ClusterMaintenanceChange) operationDiff(_ context.Context) map[string]any {
 	diff := make(map[string]any)
 
+	beforeMaintenance, ok := c.resources[beforeDiffField].(bool)
+	if !ok {
+		panic(fmt.Sprintf("invalid beforeMaintenance value: cannot parse '%s' to bool",
+			c.resources[beforeDiffField]))
+	}
+
+	afterMaintenance, ok := c.resources[afterDiffField].(bool)
+	if !ok {
+		panic(fmt.Sprintf("invalid afterMaintenance value: cannot parse '%s' to bool",
+			c.resources[afterDiffField]))
+	}
+
 	beforeDiffOutput := diffOutput{
-		Maintenance: c.resources[beforeDiffField].(bool),
+		Maintenance: beforeMaintenance,
 		ResourceID:  c.parsedArguments.resourceID,
 		NodeID:      c.parsedArguments.nodeID,
 	}
-	before, _ := json.Marshal(beforeDiffOutput)
+	before, err := json.Marshal(beforeDiffOutput)
+	if err != nil {
+		panic(fmt.Sprintf("error marshalling before diff output: %v", err))
+	}
 	diff["before"] = string(before)
 
 	afterDiffOutput := diffOutput{
-		Maintenance: c.resources[afterDiffField].(bool),
+		Maintenance: afterMaintenance,
 		ResourceID:  c.parsedArguments.resourceID,
 		NodeID:      c.parsedArguments.nodeID,
 	}
-	after, _ := json.Marshal(afterDiffOutput)
+	after, err := json.Marshal(afterDiffOutput)
+	if err != nil {
+		panic(fmt.Sprintf("error marshalling after diff output: %v", err))
+	}
 	diff["after"] = string(after)
 
 	return diff
@@ -391,7 +411,7 @@ func parseStateOutput(output []byte) (bool, error) {
 	return boolValue, nil
 }
 
-func parseClusterMaintenanceArguments(rawArguments OperatorArguments) (*clusterMaintenanceChangeArguments, error) {
+func parseClusterMaintenanceArguments(rawArguments Arguments) (*clusterMaintenanceChangeArguments, error) {
 	var resourceID, nodeID string
 
 	maintenanceArgument, found := rawArguments["maintenance"]

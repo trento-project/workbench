@@ -60,9 +60,9 @@ func WithCustomStopInterval(interval time.Duration) SAPInstanceStopOption {
 //   If an error occurs during the COMMIT or VERIFY phase, the instance is started back again.
 
 func NewSAPInstanceStop(
-	arguments OperatorArguments,
+	arguments Arguments,
 	operationID string,
-	options OperatorOptions[SAPInstanceStop],
+	options Options[SAPInstanceStop],
 ) *Executor {
 	sapInstanceStop := &SAPInstanceStop{
 		baseOperator: newBaseOperator(
@@ -159,19 +159,40 @@ func (s *SAPInstanceStop) rollback(ctx context.Context) error {
 	return nil
 }
 
-func (s *SAPInstanceStop) operationDiff(ctx context.Context) map[string]any {
+//	operationDiff needs to be refactored, ignoring duplication issues for now
+//
+// nolint: dupl
+func (s *SAPInstanceStop) operationDiff(_ context.Context) map[string]any {
 	diff := make(map[string]any)
 
-	beforeDiffOutput := sapInstanceStopDiffOutput{
-		Stopped: s.resources[beforeDiffField].(bool),
+	beforeStopped, ok := s.resources[beforeDiffField].(bool)
+	if !ok {
+		panic(fmt.Sprintf("invalid beforeStopped value: cannot parse '%s' to bool",
+			s.resources[beforeDiffField]))
 	}
-	before, _ := json.Marshal(beforeDiffOutput)
+
+	afterStopped, ok := s.resources[afterDiffField].(bool)
+	if !ok {
+		panic(fmt.Sprintf("invalid afterStopped value: cannot parse '%s' to bool",
+			s.resources[afterDiffField]))
+	}
+
+	beforeDiffOutput := sapInstanceStopDiffOutput{
+		Stopped: beforeStopped,
+	}
+	before, err := json.Marshal(beforeDiffOutput)
+	if err != nil {
+		panic(fmt.Sprintf("error marshalling before diff output: %v", err))
+	}
 	diff["before"] = string(before)
 
 	afterDiffOutput := sapInstanceStopDiffOutput{
-		Stopped: s.resources[afterDiffField].(bool),
+		Stopped: afterStopped,
 	}
-	after, _ := json.Marshal(afterDiffOutput)
+	after, err := json.Marshal(afterDiffOutput)
+	if err != nil {
+		panic(fmt.Sprintf("error marshalling after diff output: %v", err))
+	}
 	diff["after"] = string(after)
 
 	return diff

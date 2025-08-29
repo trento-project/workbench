@@ -7,12 +7,12 @@ import (
 	"sync"
 )
 
-var (
-	fixturesFolder     string
-	fixturesFolderOnce sync.Once
-)
-
 func getFixturesFolder() string {
+	var (
+		fixturesFolder     string
+		fixturesFolderOnce sync.Once
+	)
+
 	fixturesFolderOnce.Do(func() {
 		_, filename, _, ok := runtime.Caller(0)
 		if !ok {

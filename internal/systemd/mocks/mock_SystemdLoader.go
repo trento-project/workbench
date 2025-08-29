@@ -25,7 +25,7 @@ func (_m *MockSystemdLoader) EXPECT() *MockSystemdLoader_Expecter {
 }
 
 // NewSystemd provides a mock function with given fields: ctx, logger, options
-func (_m *MockSystemdLoader) NewSystemd(ctx context.Context, logger *slog.Logger, options ...systemd.SystemdConnectorOption) (systemd.Systemd, error) {
+func (_m *MockSystemdLoader) NewSystemd(ctx context.Context, logger *slog.Logger, options ...systemd.ConnectorOption) (systemd.Systemd, error) {
 	_va := make([]interface{}, len(options))
 	for _i := range options {
 		_va[_i] = options[_i]
@@ -41,10 +41,10 @@ func (_m *MockSystemdLoader) NewSystemd(ctx context.Context, logger *slog.Logger
 
 	var r0 systemd.Systemd
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, *slog.Logger, ...systemd.SystemdConnectorOption) (systemd.Systemd, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, *slog.Logger, ...systemd.ConnectorOption) (systemd.Systemd, error)); ok {
 		return rf(ctx, logger, options...)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, *slog.Logger, ...systemd.SystemdConnectorOption) systemd.Systemd); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, *slog.Logger, ...systemd.ConnectorOption) systemd.Systemd); ok {
 		r0 = rf(ctx, logger, options...)
 	} else {
 		if ret.Get(0) != nil {
@@ -52,7 +52,7 @@ func (_m *MockSystemdLoader) NewSystemd(ctx context.Context, logger *slog.Logger
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, *slog.Logger, ...systemd.SystemdConnectorOption) error); ok {
+	if rf, ok := ret.Get(1).(func(context.Context, *slog.Logger, ...systemd.ConnectorOption) error); ok {
 		r1 = rf(ctx, logger, options...)
 	} else {
 		r1 = ret.Error(1)
@@ -75,12 +75,12 @@ func (_e *MockSystemdLoader_Expecter) NewSystemd(ctx interface{}, logger interfa
 		append([]interface{}{ctx, logger}, options...)...)}
 }
 
-func (_c *MockSystemdLoader_NewSystemd_Call) Run(run func(ctx context.Context, logger *slog.Logger, options ...systemd.SystemdConnectorOption)) *MockSystemdLoader_NewSystemd_Call {
+func (_c *MockSystemdLoader_NewSystemd_Call) Run(run func(ctx context.Context, logger *slog.Logger, options ...systemd.ConnectorOption)) *MockSystemdLoader_NewSystemd_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		variadicArgs := make([]systemd.SystemdConnectorOption, len(args)-2)
+		variadicArgs := make([]systemd.ConnectorOption, len(args)-2)
 		for i, a := range args[2:] {
 			if a != nil {
-				variadicArgs[i] = a.(systemd.SystemdConnectorOption)
+				variadicArgs[i] = a.(systemd.ConnectorOption)
 			}
 		}
 		run(args[0].(context.Context), args[1].(*slog.Logger), variadicArgs...)
@@ -93,7 +93,7 @@ func (_c *MockSystemdLoader_NewSystemd_Call) Return(_a0 systemd.Systemd, _a1 err
 	return _c
 }
 
-func (_c *MockSystemdLoader_NewSystemd_Call) RunAndReturn(run func(context.Context, *slog.Logger, ...systemd.SystemdConnectorOption) (systemd.Systemd, error)) *MockSystemdLoader_NewSystemd_Call {
+func (_c *MockSystemdLoader_NewSystemd_Call) RunAndReturn(run func(context.Context, *slog.Logger, ...systemd.ConnectorOption) (systemd.Systemd, error)) *MockSystemdLoader_NewSystemd_Call {
 	_c.Call.Return(run)
 	return _c
 }

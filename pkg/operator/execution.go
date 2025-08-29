@@ -5,7 +5,7 @@ import (
 )
 
 type ExecutionError struct {
-	ErrorPhase OPERATION_PHASES
+	ErrorPhase PhaseName
 	Message    string
 }
 
@@ -19,7 +19,7 @@ func (e ExecutionError) Error() string {
 
 type ExecutionSuccess struct {
 	Diff      map[string]any
-	LastPhase OPERATION_PHASES
+	LastPhase PhaseName
 }
 
 type ExecutionReport struct {
@@ -28,17 +28,17 @@ type ExecutionReport struct {
 	Error       *ExecutionError
 }
 
-func executionReportWithError(error error, phase OPERATION_PHASES, operationID string) *ExecutionReport {
+func executionReportWithError(err error, phase PhaseName, operationID string) *ExecutionReport {
 	return &ExecutionReport{
 		OperationID: operationID,
 		Error: &ExecutionError{
-			Message:    error.Error(),
+			Message:    err.Error(),
 			ErrorPhase: phase,
 		},
 	}
 }
 
-func executionReportWithSuccess(diff map[string]any, phase OPERATION_PHASES, operationID string) *ExecutionReport {
+func executionReportWithSuccess(diff map[string]any, phase PhaseName, operationID string) *ExecutionReport {
 	return &ExecutionReport{
 		OperationID: operationID,
 		Success: &ExecutionSuccess{

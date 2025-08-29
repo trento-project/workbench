@@ -30,9 +30,9 @@ func (suite *SAPSystemStopOperatorTestSuite) TestSAPSystemStopInstanceNumberMiss
 	ctx := context.Background()
 
 	sapSystemStopOperator := operator.NewSAPSystemStop(
-		operator.OperatorArguments{},
+		operator.Arguments{},
 		"test-op",
-		operator.OperatorOptions[operator.SAPSystemStop]{},
+		operator.Options[operator.SAPSystemStop]{},
 	)
 
 	report := sapSystemStopOperator.Run(ctx)
@@ -46,11 +46,11 @@ func (suite *SAPSystemStopOperatorTestSuite) TestSAPSystemStopInstanceNumberInva
 	ctx := context.Background()
 
 	sapSystemStopOperator := operator.NewSAPSystemStop(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"instance_number": 0,
 		},
 		"test-op",
-		operator.OperatorOptions[operator.SAPSystemStop]{},
+		operator.Options[operator.SAPSystemStop]{},
 	)
 
 	report := sapSystemStopOperator.Run(ctx)
@@ -64,12 +64,12 @@ func (suite *SAPSystemStopOperatorTestSuite) TestSAPSystemStopTimeoutInvalid() {
 	ctx := context.Background()
 
 	sapSystemStopOperator := operator.NewSAPSystemStop(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"instance_number": "00",
 			"timeout":         "value",
 		},
 		"test-op",
-		operator.OperatorOptions[operator.SAPSystemStop]{},
+		operator.Options[operator.SAPSystemStop]{},
 	)
 
 	report := sapSystemStopOperator.Run(ctx)
@@ -83,12 +83,12 @@ func (suite *SAPSystemStopOperatorTestSuite) TestSAPSystemStopInstanceTypeInvali
 	ctx := context.Background()
 
 	sapSystemStopOperator := operator.NewSAPSystemStop(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"instance_number": "00",
 			"instance_type":   0,
 		},
 		"test-op",
-		operator.OperatorOptions[operator.SAPSystemStop]{},
+		operator.Options[operator.SAPSystemStop]{},
 	)
 
 	report := sapSystemStopOperator.Run(ctx)
@@ -102,12 +102,12 @@ func (suite *SAPSystemStopOperatorTestSuite) TestSAPSystemStopInstanceTypeUnknow
 	ctx := context.Background()
 
 	sapSystemStopOperator := operator.NewSAPSystemStop(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"instance_number": "00",
 			"instance_type":   "unknown",
 		},
 		"test-op",
-		operator.OperatorOptions[operator.SAPSystemStop]{},
+		operator.Options[operator.SAPSystemStop]{},
 	)
 
 	report := sapSystemStopOperator.Run(ctx)
@@ -126,12 +126,12 @@ func (suite *SAPSystemStopOperatorTestSuite) TestSAPSystemStopPlanError() {
 		Once()
 
 	sapSystemStopOperator := operator.NewSAPSystemStop(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"instance_number": "00",
 			"timeout":         300.0,
 		},
 		"test-op",
-		operator.OperatorOptions[operator.SAPSystemStop]{
+		operator.Options[operator.SAPSystemStop]{
 			OperatorOptions: []operator.Option[operator.SAPSystemStop]{
 				operator.Option[operator.SAPSystemStop](operator.WithCustomStopSystemSapcontrol(suite.mockSapcontrol)),
 			},
@@ -165,11 +165,11 @@ func (suite *SAPSystemStopOperatorTestSuite) TestSAPSystemStopCommitAlreadyStopp
 		Once()
 
 	sapSystemStopOperator := operator.NewSAPSystemStop(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"instance_number": "00",
 		},
 		"test-op",
-		operator.OperatorOptions[operator.SAPSystemStop]{
+		operator.Options[operator.SAPSystemStop]{
 			OperatorOptions: []operator.Option[operator.SAPSystemStop]{
 				operator.Option[operator.SAPSystemStop](operator.WithCustomStopSystemSapcontrol(suite.mockSapcontrol)),
 			},
@@ -235,12 +235,12 @@ func (suite *SAPSystemStopOperatorTestSuite) TestSAPSystemStopCommitAlreadyStopp
 			Once()
 
 		sapSystemStopOperator := operator.NewSAPSystemStop(
-			operator.OperatorArguments{
+			operator.Arguments{
 				"instance_number": "00",
 				"instance_type":   tt.instanceType,
 			},
 			"test-op",
-			operator.OperatorOptions[operator.SAPSystemStop]{
+			operator.Options[operator.SAPSystemStop]{
 				OperatorOptions: []operator.Option[operator.SAPSystemStop]{
 					operator.Option[operator.SAPSystemStop](operator.WithCustomStopSystemSapcontrol(suite.mockSapcontrol)),
 				},
@@ -303,11 +303,11 @@ func (suite *SAPSystemStopOperatorTestSuite) TestSAPSystemStopCommitStoppingErro
 		NotBefore(rollbackStartSystem)
 
 	sapSystemStopOperator := operator.NewSAPSystemStop(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"instance_number": "00",
 		},
 		"test-op",
-		operator.OperatorOptions[operator.SAPSystemStop]{
+		operator.Options[operator.SAPSystemStop]{
 			OperatorOptions: []operator.Option[operator.SAPSystemStop]{
 				operator.Option[operator.SAPSystemStop](operator.WithCustomStopSystemSapcontrol(suite.mockSapcontrol)),
 			},
@@ -370,11 +370,11 @@ func (suite *SAPSystemStopOperatorTestSuite) TestSAPSystemStopVerifyError() {
 		NotBefore(rollbackStartSystem)
 
 	sapSystemStopOperator := operator.NewSAPSystemStop(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"instance_number": "00",
 		},
 		"test-op",
-		operator.OperatorOptions[operator.SAPSystemStop]{
+		operator.Options[operator.SAPSystemStop]{
 			OperatorOptions: []operator.Option[operator.SAPSystemStop]{
 				operator.Option[operator.SAPSystemStop](operator.WithCustomStopSystemSapcontrol(suite.mockSapcontrol)),
 			},
@@ -411,12 +411,12 @@ func (suite *SAPSystemStopOperatorTestSuite) TestSAPSystemStopVerifyTimeout() {
 		Return(nil, nil)
 
 	sapSystemStopOperator := operator.NewSAPSystemStop(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"instance_number": "00",
 			"timeout":         0.0,
 		},
 		"test-op",
-		operator.OperatorOptions[operator.SAPSystemStop]{
+		operator.Options[operator.SAPSystemStop]{
 			OperatorOptions: []operator.Option[operator.SAPSystemStop]{
 				operator.Option[operator.SAPSystemStop](operator.WithCustomStopSystemSapcontrol(suite.mockSapcontrol)),
 				operator.Option[operator.SAPSystemStop](operator.WithCustomStopSystemInterval(0 * time.Second)),
@@ -464,12 +464,12 @@ func (suite *SAPSystemStopOperatorTestSuite) TestSAPSystemStopRollbackStoppingEr
 		Return(nil, errors.New("error starting"))
 
 	sapSystemStopOperator := operator.NewSAPSystemStop(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"instance_number": "00",
 			"instance_type":   "abap",
 		},
 		"test-op",
-		operator.OperatorOptions[operator.SAPSystemStop]{
+		operator.Options[operator.SAPSystemStop]{
 			OperatorOptions: []operator.Option[operator.SAPSystemStop]{
 				operator.Option[operator.SAPSystemStop](operator.WithCustomStopSystemSapcontrol(suite.mockSapcontrol)),
 			},
@@ -560,12 +560,12 @@ func (suite *SAPSystemStopOperatorTestSuite) TestSAPSystemStopSuccess() {
 			NotBefore(stopSystem)
 
 		sapSystemStopOperator := operator.NewSAPSystemStop(
-			operator.OperatorArguments{
+			operator.Arguments{
 				"instance_number": "00",
 				"instance_type":   tt.instanceType,
 			},
 			"test-op",
-			operator.OperatorOptions[operator.SAPSystemStop]{
+			operator.Options[operator.SAPSystemStop]{
 				OperatorOptions: []operator.Option[operator.SAPSystemStop]{
 					operator.Option[operator.SAPSystemStop](operator.WithCustomStopSystemSapcontrol(suite.mockSapcontrol)),
 				},
@@ -635,12 +635,12 @@ func (suite *SAPSystemStopOperatorTestSuite) TestSAPSystemStopSuccessMultipleQue
 		Once()
 
 	sapSystemStopOperator := operator.NewSAPSystemStop(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"instance_number": "00",
 			"timeout":         5.0,
 		},
 		"test-op",
-		operator.OperatorOptions[operator.SAPSystemStop]{
+		operator.Options[operator.SAPSystemStop]{
 			OperatorOptions: []operator.Option[operator.SAPSystemStop]{
 				operator.Option[operator.SAPSystemStop](operator.WithCustomStopSystemSapcontrol(suite.mockSapcontrol)),
 				operator.Option[operator.SAPSystemStop](operator.WithCustomStopSystemInterval(0 * time.Second)),

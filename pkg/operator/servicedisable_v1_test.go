@@ -23,9 +23,9 @@ type ServiceDisableOperatorTestSuite struct {
 func buildServiceDisableOperator(suite *ServiceDisableOperatorTestSuite) operator.Operator {
 	return operator.NewServiceDisable(
 		"servicedisableoperator",
-		operator.OperatorArguments{},
+		operator.Arguments{},
 		"test-op",
-		operator.OperatorOptions[operator.ServiceDisable]{
+		operator.Options[operator.ServiceDisable]{
 			BaseOperatorOptions: []operator.BaseOperatorOption{
 				operator.WithCustomLogger(suite.logger),
 			},
