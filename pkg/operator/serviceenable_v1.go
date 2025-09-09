@@ -38,12 +38,12 @@ type ServiceEnableOption Option[ServiceEnable]
 
 type ServiceEnable struct {
 	baseOperator
-	systemdLoader    systemd.SystemdLoader
+	systemdLoader    systemd.Loader
 	systemdConnector systemd.Systemd
 	service          string
 }
 
-func WithCustomServiceEnableSystemdLoader(systemdLoader systemd.SystemdLoader) ServiceEnableOption {
+func WithCustomServiceEnableSystemdLoader(systemdLoader systemd.Loader) ServiceEnableOption {
 	return func(se *ServiceEnable) {
 		se.systemdLoader = systemdLoader
 	}
@@ -57,9 +57,9 @@ func WithServiceToEnable(service string) ServiceEnableOption {
 
 func NewServiceEnable(
 	name string,
-	arguments OperatorArguments,
+	arguments Arguments,
 	operationID string,
-	options OperatorOptions[ServiceEnable],
+	options Options[ServiceEnable],
 ) *Executor {
 	serviceEnable := &ServiceEnable{
 		baseOperator: newBaseOperator(
@@ -133,7 +133,7 @@ func (se *ServiceEnable) rollback(ctx context.Context) error {
 	return se.systemdConnector.Disable(ctx, se.service)
 }
 
-func (se *ServiceEnable) operationDiff(ctx context.Context) map[string]any {
+func (se *ServiceEnable) operationDiff(_ context.Context) map[string]any {
 	return computeOperationDiff(se.resources)
 }
 
@@ -144,16 +144,34 @@ func (se *ServiceEnable) after(_ context.Context) {
 func computeOperationDiff(resources map[string]any) map[string]any {
 	diff := make(map[string]any)
 
-	beforeDiffOutput := serviceEnablementDiffOutput{
-		Enabled: resources[beforeDiffField].(bool),
+	beforeEnabled, ok := resources[beforeDiffField].(bool)
+	if !ok {
+		panic(fmt.Sprintf("invalid beforeEnabled value: cannot parse '%s' to bool",
+			resources[beforeDiffField]))
 	}
-	before, _ := json.Marshal(beforeDiffOutput)
+
+	afterEnabled, ok := resources[afterDiffField].(bool)
+	if !ok {
+		panic(fmt.Sprintf("invalid afterEnabled value: cannot parse '%s' to bool",
+			resources[afterDiffField]))
+	}
+
+	beforeDiffOutput := serviceEnablementDiffOutput{
+		Enabled: beforeEnabled,
+	}
+	before, err := json.Marshal(beforeDiffOutput)
+	if err != nil {
+		panic(fmt.Sprintf("error marshalling before diff output: %v", err))
+	}
 	diff[beforeDiffField] = string(before)
 
 	afterDiffOutput := serviceEnablementDiffOutput{
-		Enabled: resources[afterDiffField].(bool),
+		Enabled: afterEnabled,
 	}
-	after, _ := json.Marshal(afterDiffOutput)
+	after, err := json.Marshal(afterDiffOutput)
+	if err != nil {
+		panic(fmt.Sprintf("error marshalling after diff output: %v", err))
+	}
 	diff[afterDiffField] = string(after)
 
 	return diff

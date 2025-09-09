@@ -126,7 +126,10 @@ type SAPControlConnector interface {
 	/* Returns a list of all processes directly started by the webservice according to the SAP start profile. */
 	GetProcessListContext(ctx context.Context, request *GetProcessList) (*GetProcessListResponse, error)
 	/* Returns a list of SAP instances of the SAP system. */
-	GetSystemInstanceListContext(ctx context.Context, request *GetSystemInstanceList) (*GetSystemInstanceListResponse, error)
+	GetSystemInstanceListContext(
+		ctx context.Context,
+		request *GetSystemInstanceList,
+	) (*GetSystemInstanceListResponse, error)
 }
 
 type sapControlConnector struct {
@@ -175,7 +178,10 @@ func (service *sapControlConnector) StopContext(ctx context.Context, request *St
 	return response, nil
 }
 
-func (service *sapControlConnector) StartSystemContext(ctx context.Context, request *StartSystem) (*StartSystemResponse, error) {
+func (service *sapControlConnector) StartSystemContext(
+	ctx context.Context,
+	request *StartSystem,
+) (*StartSystemResponse, error) {
 	response := new(StartSystemResponse)
 	err := service.client.CallContext(ctx, "''", request, response)
 	if err != nil {
@@ -185,7 +191,10 @@ func (service *sapControlConnector) StartSystemContext(ctx context.Context, requ
 	return response, nil
 }
 
-func (service *sapControlConnector) StopSystemContext(ctx context.Context, request *StopSystem) (*StopSystemResponse, error) {
+func (service *sapControlConnector) StopSystemContext(
+	ctx context.Context,
+	request *StopSystem,
+) (*StopSystemResponse, error) {
 	response := new(StopSystemResponse)
 	err := service.client.CallContext(ctx, "''", request, response)
 	if err != nil {
@@ -195,7 +204,10 @@ func (service *sapControlConnector) StopSystemContext(ctx context.Context, reque
 	return response, nil
 }
 
-func (service *sapControlConnector) GetProcessListContext(ctx context.Context, request *GetProcessList) (*GetProcessListResponse, error) {
+func (service *sapControlConnector) GetProcessListContext(
+	ctx context.Context,
+	request *GetProcessList,
+) (*GetProcessListResponse, error) {
 	response := new(GetProcessListResponse)
 	err := service.client.CallContext(ctx, "''", request, response)
 	if err != nil {
@@ -205,7 +217,10 @@ func (service *sapControlConnector) GetProcessListContext(ctx context.Context, r
 	return response, nil
 }
 
-func (service *sapControlConnector) GetSystemInstanceListContext(ctx context.Context, request *GetSystemInstanceList) (*GetSystemInstanceListResponse, error) {
+func (service *sapControlConnector) GetSystemInstanceListContext(
+	ctx context.Context,
+	request *GetSystemInstanceList,
+) (*GetSystemInstanceListResponse, error) {
 	response := new(GetSystemInstanceListResponse)
 	err := service.client.CallContext(ctx, "''", request, response)
 	if err != nil {

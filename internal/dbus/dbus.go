@@ -6,11 +6,19 @@ import (
 	"github.com/coreos/go-systemd/v22/dbus"
 )
 
-// DbusConnector acts as an abstract interface for the dbus functionalities exposed by the package "github.com/coreos/go-systemd/v22/dbus"
-type DbusConnector interface {
+// Connector acts as an abstract interface for the dbus functionalities exposed
+// by the package "github.com/coreos/go-systemd/v22/dbus"
+type Connector interface {
 	GetUnitPropertyContext(ctx context.Context, unit string, propertyName string) (*dbus.Property, error)
-	EnableUnitFilesContext(ctx context.Context, files []string, runtime bool, force bool) (bool, []dbus.EnableUnitFileChange, error)
-	DisableUnitFilesContext(ctx context.Context, files []string, runtime bool) ([]dbus.DisableUnitFileChange, error)
+	EnableUnitFilesContext(ctx context.Context, files []string, runtime bool, force bool) (
+		bool,
+		[]dbus.EnableUnitFileChange,
+		error,
+	)
+	DisableUnitFilesContext(ctx context.Context, files []string, runtime bool) (
+		[]dbus.DisableUnitFileChange,
+		error,
+	)
 	ReloadContext(ctx context.Context) error
 	ListJobsContext(ctx context.Context) ([]dbus.JobStatus, error)
 	ListUnitsContext(ctx context.Context) ([]dbus.UnitStatus, error)
@@ -20,7 +28,7 @@ type DbusConnector interface {
 	Close()
 }
 
-func NewDbusConnector(ctx context.Context) (DbusConnector, error) {
+func NewConnector(ctx context.Context) (Connector, error) {
 	// the created connection does implement the DbusConnector interface, hence it can be returned as such
 	dbusConnection, err := dbus.NewWithContext(ctx)
 	if err != nil {

@@ -30,9 +30,9 @@ func (suite *SAPInstanceStartOperatorTestSuite) TestSAPInstanceStartInstanceNumb
 	ctx := context.Background()
 
 	sapInstanceStartOperator := operator.NewSAPInstanceStart(
-		operator.OperatorArguments{},
+		operator.Arguments{},
 		"test-op",
-		operator.OperatorOptions[operator.SAPInstanceStart]{},
+		operator.Options[operator.SAPInstanceStart]{},
 	)
 
 	report := sapInstanceStartOperator.Run(ctx)
@@ -46,11 +46,11 @@ func (suite *SAPInstanceStartOperatorTestSuite) TestSAPInstanceStartInstanceNumb
 	ctx := context.Background()
 
 	sapInstanceStartOperator := operator.NewSAPInstanceStart(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"instance_number": 0,
 		},
 		"test-op",
-		operator.OperatorOptions[operator.SAPInstanceStart]{},
+		operator.Options[operator.SAPInstanceStart]{},
 	)
 
 	report := sapInstanceStartOperator.Run(ctx)
@@ -64,12 +64,12 @@ func (suite *SAPInstanceStartOperatorTestSuite) TestSAPInstanceStartTimeoutInval
 	ctx := context.Background()
 
 	sapInstanceStartOperator := operator.NewSAPInstanceStart(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"instance_number": "00",
 			"timeout":         "value",
 		},
 		"test-op",
-		operator.OperatorOptions[operator.SAPInstanceStart]{},
+		operator.Options[operator.SAPInstanceStart]{},
 	)
 
 	report := sapInstanceStartOperator.Run(ctx)
@@ -88,12 +88,12 @@ func (suite *SAPInstanceStartOperatorTestSuite) TestSAPInstanceStartPlanError() 
 		Once()
 
 	sapInstanceStartOperator := operator.NewSAPInstanceStart(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"instance_number": "00",
 			"timeout":         300.0,
 		},
 		"test-op",
-		operator.OperatorOptions[operator.SAPInstanceStart]{
+		operator.Options[operator.SAPInstanceStart]{
 			OperatorOptions: []operator.Option[operator.SAPInstanceStart]{
 				operator.Option[operator.SAPInstanceStart](operator.WithCustomStartSapcontrol(suite.mockSapcontrol)),
 			},
@@ -127,11 +127,11 @@ func (suite *SAPInstanceStartOperatorTestSuite) TestSAPInstanceStartCommitAlread
 		Once()
 
 	sapInstanceStartOperator := operator.NewSAPInstanceStart(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"instance_number": "00",
 		},
 		"test-op",
-		operator.OperatorOptions[operator.SAPInstanceStart]{
+		operator.Options[operator.SAPInstanceStart]{
 			OperatorOptions: []operator.Option[operator.SAPInstanceStart]{
 				operator.Option[operator.SAPInstanceStart](operator.WithCustomStartSapcontrol(suite.mockSapcontrol)),
 			},
@@ -189,11 +189,11 @@ func (suite *SAPInstanceStartOperatorTestSuite) TestSAPInstanceStartCommitStarti
 		NotBefore(planGetProcesses)
 
 	sapInstanceStartOperator := operator.NewSAPInstanceStart(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"instance_number": "00",
 		},
 		"test-op",
-		operator.OperatorOptions[operator.SAPInstanceStart]{
+		operator.Options[operator.SAPInstanceStart]{
 			OperatorOptions: []operator.Option[operator.SAPInstanceStart]{
 				operator.Option[operator.SAPInstanceStart](operator.WithCustomStartSapcontrol(suite.mockSapcontrol)),
 			},
@@ -251,11 +251,11 @@ func (suite *SAPInstanceStartOperatorTestSuite) TestSAPInstanceStartVerifyError(
 		NotBefore(verifyGetProcesses)
 
 	sapInstanceStartOperator := operator.NewSAPInstanceStart(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"instance_number": "00",
 		},
 		"test-op",
-		operator.OperatorOptions[operator.SAPInstanceStart]{
+		operator.Options[operator.SAPInstanceStart]{
 			OperatorOptions: []operator.Option[operator.SAPInstanceStart]{
 				operator.Option[operator.SAPInstanceStart](operator.WithCustomStartSapcontrol(suite.mockSapcontrol)),
 			},
@@ -292,12 +292,12 @@ func (suite *SAPInstanceStartOperatorTestSuite) TestSAPInstanceStartVerifyTimeou
 		Return(nil, nil)
 
 	sapInstanceStartOperator := operator.NewSAPInstanceStart(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"instance_number": "00",
 			"timeout":         0.0,
 		},
 		"test-op",
-		operator.OperatorOptions[operator.SAPInstanceStart]{
+		operator.Options[operator.SAPInstanceStart]{
 			OperatorOptions: []operator.Option[operator.SAPInstanceStart]{
 				operator.Option[operator.SAPInstanceStart](operator.WithCustomStartSapcontrol(suite.mockSapcontrol)),
 				operator.Option[operator.SAPInstanceStart](operator.WithCustomStartInterval(0 * time.Second)),
@@ -338,11 +338,11 @@ func (suite *SAPInstanceStartOperatorTestSuite) TestSAPInstanceStartRollbackStop
 		Return(nil, errors.New("error stopping"))
 
 	sapInstanceStartOperator := operator.NewSAPInstanceStart(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"instance_number": "00",
 		},
 		"test-op",
-		operator.OperatorOptions[operator.SAPInstanceStart]{
+		operator.Options[operator.SAPInstanceStart]{
 			OperatorOptions: []operator.Option[operator.SAPInstanceStart]{
 				operator.Option[operator.SAPInstanceStart](operator.WithCustomStartSapcontrol(suite.mockSapcontrol)),
 			},
@@ -389,11 +389,11 @@ func (suite *SAPInstanceStartOperatorTestSuite) TestSAPInstanceStartSuccess() {
 		NotBefore(planGetProcesses)
 
 	sapInstanceStartOperator := operator.NewSAPInstanceStart(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"instance_number": "00",
 		},
 		"test-op",
-		operator.OperatorOptions[operator.SAPInstanceStart]{
+		operator.Options[operator.SAPInstanceStart]{
 			OperatorOptions: []operator.Option[operator.SAPInstanceStart]{
 				operator.Option[operator.SAPInstanceStart](operator.WithCustomStartSapcontrol(suite.mockSapcontrol)),
 			},
@@ -468,12 +468,12 @@ func (suite *SAPInstanceStartOperatorTestSuite) TestSAPInstanceStartSuccessMulti
 		Once()
 
 	sapInstanceStartOperator := operator.NewSAPInstanceStart(
-		operator.OperatorArguments{
+		operator.Arguments{
 			"instance_number": "00",
 			"timeout":         5.0,
 		},
 		"test-op",
-		operator.OperatorOptions[operator.SAPInstanceStart]{
+		operator.Options[operator.SAPInstanceStart]{
 			OperatorOptions: []operator.Option[operator.SAPInstanceStart]{
 				operator.Option[operator.SAPInstanceStart](operator.WithCustomStartSapcontrol(suite.mockSapcontrol)),
 				operator.Option[operator.SAPInstanceStart](operator.WithCustomStartInterval(0 * time.Second)),

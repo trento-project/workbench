@@ -39,7 +39,7 @@ const (
 type HostReboot struct {
 	baseOperator
 	executor        support.CmdExecutor
-	dbusConstructor func(ctx context.Context) (dbus.DbusConnector, error)
+	dbusConstructor func(ctx context.Context) (dbus.Connector, error)
 }
 
 type HostRebootOption Option[HostReboot]
@@ -54,31 +54,31 @@ func WithCustomHostRebootExecutor(executor support.CmdExecutor) HostRebootOption
 	}
 }
 
-func WithCustomDbusConstructor(constructor func(ctx context.Context) (dbus.DbusConnector, error)) HostRebootOption {
+func WithCustomDbusConstructor(constructor func(ctx context.Context) (dbus.Connector, error)) HostRebootOption {
 	return func(o *HostReboot) {
 		o.dbusConstructor = constructor
 	}
 }
 
-func WithStaticDbusConnector(connector dbus.DbusConnector) HostRebootOption {
+func WithStaticDbusConnector(connector dbus.Connector) HostRebootOption {
 	return func(o *HostReboot) {
-		o.dbusConstructor = func(ctx context.Context) (dbus.DbusConnector, error) {
+		o.dbusConstructor = func(_ context.Context) (dbus.Connector, error) {
 			return connector, nil
 		}
 	}
 }
 
-func defaultDbusConstructor(ctx context.Context) (dbus.DbusConnector, error) {
-	connector, err := dbus.NewDbusConnector(ctx)
+func defaultDbusConstructor(ctx context.Context) (dbus.Connector, error) {
+	connector, err := dbus.NewConnector(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create D-Bus connector: %w", err)
 	}
 	return connector, nil
 }
 
-func NewHostReboot(arguments OperatorArguments,
+func NewHostReboot(arguments Arguments,
 	operationID string,
-	options OperatorOptions[HostReboot]) *Executor {
+	options Options[HostReboot]) *Executor {
 	hostReboot := &HostReboot{
 		baseOperator: newBaseOperator(
 			HostRebootOperatorName, operationID, arguments, options.BaseOperatorOptions...,
@@ -141,24 +141,40 @@ func (h *HostReboot) verify(ctx context.Context) error {
 	return nil
 }
 
-func (h *HostReboot) operationDiff(ctx context.Context) map[string]any {
+func (h *HostReboot) operationDiff(_ context.Context) map[string]any {
 	diff := make(map[string]any)
 
-	beforeDiffOutput := hostRebootDiffOutput{
-		Scheduled: h.resources[beforeDiffField].(bool),
+	beforeScheduled, ok := h.resources[beforeDiffField].(bool)
+	if !ok {
+		panic(fmt.Sprintf("invalid beforeScheduled value: cannot parse '%s' to bool",
+			h.resources[beforeDiffField]))
 	}
-	before, _ := json.Marshal(beforeDiffOutput)
+
+	beforeDiffOutput := hostRebootDiffOutput{
+		Scheduled: beforeScheduled,
+	}
+	before, err := json.Marshal(beforeDiffOutput)
+	if err != nil {
+		panic(fmt.Sprintf("error marshalling before diff output: %v", err))
+	}
 	diff["before"] = string(before)
 
 	afterScheduled := false
 	if after, exists := h.resources[afterDiffField]; exists {
-		afterScheduled = after.(bool)
+		afterScheduled, ok = after.(bool)
+		if !ok {
+			panic(fmt.Sprintf("invalid afterScheduled value: cannot parse '%s' to bool",
+				h.resources[afterDiffField]))
+		}
 	}
 
 	afterDiffOutput := hostRebootDiffOutput{
 		Scheduled: afterScheduled,
 	}
-	after, _ := json.Marshal(afterDiffOutput)
+	after, err := json.Marshal(afterDiffOutput)
+	if err != nil {
+		panic(fmt.Sprintf("error marshalling after diff output: %v", err))
+	}
 	diff["after"] = string(after)
 
 	return diff
@@ -207,32 +223,32 @@ func (h *HostReboot) isRebootScheduled(ctx context.Context) (bool, error) {
 	}
 
 	// Check for systemd-shutdown processes
-	return h.hasActiveShutdownProcess(ctx)
+	return h.hasActiveShutdownProcess(ctx), nil
 }
 
 // hasActiveShutdownProcess checks if there are any active shutdown processes
 // This is a fallback method to detect scheduled shutdowns
-func (h *HostReboot) hasActiveShutdownProcess(ctx context.Context) (bool, error) {
+func (h *HostReboot) hasActiveShutdownProcess(ctx context.Context) bool {
 	// Check if shutdown command is running or if there's a scheduled shutdown
 	_, err := h.executor.Exec(ctx, "pgrep", "-f", "shutdown")
 	if err == nil {
 		h.logger.Debug("Found active shutdown process")
-		return true, nil
+		return true
 	}
 
 	// Check for systemd-shutdown
 	_, err = h.executor.Exec(ctx, "pgrep", "-f", "systemd-shutdown")
 	if err == nil {
 		h.logger.Debug("Found systemd-shutdown process")
-		return true, nil
+		return true
 	}
 
 	// Check if there's a /run/systemd/shutdown/scheduled file
 	_, err = h.executor.Exec(ctx, "test", "-f", "/run/systemd/shutdown/scheduled")
 	if err == nil {
 		h.logger.Debug("Found systemd shutdown scheduled file")
-		return true, nil
+		return true
 	}
 
-	return false, nil
+	return false
 }

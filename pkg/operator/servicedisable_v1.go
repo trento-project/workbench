@@ -30,12 +30,12 @@ type ServiceDisableOption Option[ServiceDisable]
 
 type ServiceDisable struct {
 	baseOperator
-	systemdLoader    systemd.SystemdLoader
+	systemdLoader    systemd.Loader
 	systemdConnector systemd.Systemd
 	service          string
 }
 
-func WithCustomServiceDisableSystemdLoader(systemdLoader systemd.SystemdLoader) ServiceDisableOption {
+func WithCustomServiceDisableSystemdLoader(systemdLoader systemd.Loader) ServiceDisableOption {
 	return func(sd *ServiceDisable) {
 		sd.systemdLoader = systemdLoader
 	}
@@ -49,9 +49,9 @@ func WithServiceToDisable(service string) ServiceDisableOption {
 
 func NewServiceDisable(
 	name string,
-	arguments OperatorArguments,
+	arguments Arguments,
 	operationID string,
-	options OperatorOptions[ServiceDisable],
+	options Options[ServiceDisable],
 ) *Executor {
 	serviceDisable := &ServiceDisable{
 		baseOperator: newBaseOperator(
@@ -125,10 +125,10 @@ func (sd *ServiceDisable) rollback(ctx context.Context) error {
 	return sd.systemdConnector.Enable(ctx, sd.service)
 }
 
-func (sd *ServiceDisable) operationDiff(ctx context.Context) map[string]any {
+func (sd *ServiceDisable) operationDiff(_ context.Context) map[string]any {
 	return computeOperationDiff(sd.resources)
 }
 
-func (sd *ServiceDisable) after(ctx context.Context) {
+func (sd *ServiceDisable) after(_ context.Context) {
 	sd.systemdConnector.Close()
 }

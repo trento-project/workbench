@@ -25,14 +25,18 @@ type SaptuneChangeSolutionOption Option[SaptuneChangeSolution]
 // - COMMIT:
 //   If there is no other solution already applied, an error is raised,
 //   effectively allowing a transition from a solution to another but not from no solution to some solution.
-// 	 If otherwise there is a solution applied that is not the currently applied one the saptune command to change the solution will be executed.
+// 	 If otherwise there is a solution applied that is not the currently applied one the saptune command to change the
+//   solution will be executed.
 //
 // - VERIFY:
-//   The operator verifies whether the solution has been correctly changed to the requested one. If not, an error is raised.
+//   The operator verifies whether the solution has been correctly changed to the requested one.
+//   If not, an error is raised.
+//
 //   On success, the current state of the applied solution is collected as the "after" diff.
 //
 // - ROLLBACK:
-//   If an error occurs during the COMMIT or VERIFY phase, the saptune solution is changed back to the initially applied one.
+//   If an error occurs during the COMMIT or VERIFY phase, the saptune solution is changed back to the initially
+//   applied one.
 
 type SaptuneChangeSolution struct {
 	baseOperator
@@ -47,13 +51,16 @@ func WithSaptuneClientChange(saptuneClient saptune.Saptune) SaptuneChangeSolutio
 }
 
 func NewSaptuneChangeSolution(
-	arguments OperatorArguments,
+	arguments Arguments,
 	operationID string,
-	options OperatorOptions[SaptuneChangeSolution],
+	options Options[SaptuneChangeSolution],
 ) *Executor {
 	saptuneChange := &SaptuneChangeSolution{
 		baseOperator: newBaseOperator(
-			SaptuneChangeSolutionOperatorName, operationID, arguments, options.BaseOperatorOptions...,
+			SaptuneChangeSolutionOperatorName,
+			operationID,
+			arguments,
+			options.BaseOperatorOptions...,
 		),
 	}
 
@@ -144,23 +151,45 @@ func (sc *SaptuneChangeSolution) rollback(ctx context.Context) error {
 		return nil
 	}
 
-	sc.logger.Info("Changing solution to the initially applied one", "appliedSolution", initiallyAppliedSolution)
+	sc.logger.Info("Changing solution to the initially applied one",
+		"appliedSolution", initiallyAppliedSolution)
 	return sc.saptune.ChangeSolution(ctx, initiallyAppliedSolution)
 }
 
-func (sa *SaptuneChangeSolution) operationDiff(_ context.Context) map[string]any {
+//	operationDiff needs to be refactored, ignoring duplication issues for now
+//
+// nolint: dupl
+func (sc *SaptuneChangeSolution) operationDiff(_ context.Context) map[string]any {
 	diff := make(map[string]any)
 
-	beforeDiffOutput := saptuneOperationDiffOutput{
-		Solution: sa.resources[beforeDiffField].(string),
+	beforeSolution, ok := sc.resources[beforeDiffField].(string)
+	if !ok {
+		panic(fmt.Sprintf("invalid beforeSolution value: cannot parse '%s' to string",
+			sc.resources[beforeDiffField]))
 	}
-	before, _ := json.Marshal(beforeDiffOutput)
+
+	afterSolution, ok := sc.resources[afterDiffField].(string)
+	if !ok {
+		panic(fmt.Sprintf("invalid afterSolution value: cannot parse '%s' to string",
+			sc.resources[afterDiffField]))
+	}
+
+	beforeDiffOutput := saptuneOperationDiffOutput{
+		Solution: beforeSolution,
+	}
+	before, err := json.Marshal(beforeDiffOutput)
+	if err != nil {
+		panic(fmt.Sprintf("error marshalling before diff output: %v", err))
+	}
 	diff[beforeDiffField] = string(before)
 
 	afterDiffOutput := saptuneOperationDiffOutput{
-		Solution: sa.resources[afterDiffField].(string),
+		Solution: afterSolution,
 	}
-	after, _ := json.Marshal(afterDiffOutput)
+	after, err := json.Marshal(afterDiffOutput)
+	if err != nil {
+		panic(fmt.Sprintf("error marshalling after diff output: %v", err))
+	}
 	diff[afterDiffField] = string(after)
 
 	return diff

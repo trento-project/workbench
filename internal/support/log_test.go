@@ -85,6 +85,41 @@ func TestDefaultTextHandlerInfoLogWithGroupAndDefaultAttr(t *testing.T) {
 
 }
 
+func TestParentLoggerIsNotChangedWhenUsingChildLogger(t *testing.T) {
+	var buf bytes.Buffer
+
+	parentLogger := NewDefaultLoggerMock(&buf).
+		With("attr_a", "value_a").
+		WithGroup("group_x")
+
+	childLogger := parentLogger.
+		With("attr_b", "value_b").
+		WithGroup("group_y")
+
+	childLogger.Info("This is an info message", "my_attr", "my_value")
+
+	expected := "INFO This is an info message group_x.group_y.my_attr=my_value attr_a=value_a group_x.attr_b=value_b\n"
+
+	actual := stripTimestamp(buf.String())
+
+	if actual != expected {
+		t.Errorf("expected log line %q, got %q", expected, actual)
+	}
+
+	// Now check that the parent logger is not changed
+	buf.Reset()
+	parentLogger.Info("This is a parent info message", "parent_attr", "parent_value")
+
+	expected = "INFO This is a parent info message group_x.parent_attr=parent_value attr_a=value_a\n"
+
+	actual = stripTimestamp(buf.String())
+
+	if actual != expected {
+		t.Errorf("expected log line %q, got %q", expected, actual)
+	}
+
+}
+
 // Helper to strip the timestamp from the log line
 func stripTimestamp(line string) string {
 	// Timestamp is always 19 chars: "YYYY-MM-DD hh:mm:ss"

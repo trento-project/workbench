@@ -14,7 +14,7 @@ type saptuneSolutionArguments struct {
 	solution string
 }
 
-func parseSaptuneSolutionArguments(rawArguments OperatorArguments) (*saptuneSolutionArguments, error) {
+func parseSaptuneSolutionArguments(rawArguments Arguments) (*saptuneSolutionArguments, error) {
 	argument, found := rawArguments["solution"]
 	if !found {
 		return nil, errors.New("argument solution not provided, could not use the operator")
@@ -52,19 +52,22 @@ type SaptuneApplySolutionOption Option[SaptuneApplySolution]
 //
 // - PLAN:
 //   The operator checks for the presence of the saptune binary and verifies its version.
-//   The minimum required version is 3.1.0. If saptune is not installed or the version does not meet the minimum requirement,
-//   the operation will fail.
+//   The minimum required version is 3.1.0. If saptune is not installed or the version does not meet the minimum
+//   requirement, the operation will fail.
+//
 //   The initially applied solution, if any, is collected as the "before" diff.
 //   The operator checks if the requested solution is already applied. If it is, no action is taken,
 //   ensuring idempotency without returning an error.
 //
 // - COMMIT:
-//   If there is any other solution already applied, an error is raised, because only one solution can be applied at a time.
+//   If there is any other solution already applied, an error is raised, because only one solution can be
+//   applied at a time.
 // 	 If otherwise there is no solution applied the saptune command to apply the solution will be executed.
 //
 // - VERIFY:
 //   The operator verifies whether the solution has been correctly applied to the system.
-//   If not, an error is raised. If successful, the current state of the applied solution is collected as the "after" diff.
+//   If not, an error is raised. If successful, the current state of the applied solution is collected as
+//   the "after" diff.
 //
 // - ROLLBACK:
 //   If an error occurs during the COMMIT or VERIFY phase, the saptune revert command is executed
@@ -87,9 +90,9 @@ func WithSaptuneClientApply(saptuneClient saptune.Saptune) SaptuneApplySolutionO
 }
 
 func NewSaptuneApplySolution(
-	arguments OperatorArguments,
+	arguments Arguments,
 	operationID string,
-	options OperatorOptions[SaptuneApplySolution],
+	options Options[SaptuneApplySolution],
 ) *Executor {
 	saptuneApply := &SaptuneApplySolution{
 		baseOperator: newBaseOperator(
@@ -180,19 +183,40 @@ func (sa *SaptuneApplySolution) rollback(ctx context.Context) error {
 	return sa.saptune.RevertSolution(ctx, sa.parsedArguments.solution)
 }
 
+//	operationDiff needs to be refactored, ignoring duplication issues for now
+//
+// nolint: dupl
 func (sa *SaptuneApplySolution) operationDiff(_ context.Context) map[string]any {
 	diff := make(map[string]any)
 
-	beforeDiffOutput := saptuneOperationDiffOutput{
-		Solution: sa.resources[beforeDiffField].(string),
+	beforeSolution, ok := sa.resources[beforeDiffField].(string)
+	if !ok {
+		panic(fmt.Sprintf("invalid beforeSolution value: cannot parse '%s' to string",
+			sa.resources[beforeDiffField]))
 	}
-	before, _ := json.Marshal(beforeDiffOutput)
+
+	afterSolution, ok := sa.resources[afterDiffField].(string)
+	if !ok {
+		panic(fmt.Sprintf("invalid afterSolution value: cannot parse '%s' to string",
+			sa.resources[afterDiffField]))
+	}
+
+	beforeDiffOutput := saptuneOperationDiffOutput{
+		Solution: beforeSolution,
+	}
+	before, err := json.Marshal(beforeDiffOutput)
+	if err != nil {
+		panic(fmt.Sprintf("error marshalling before diff output: %v", err))
+	}
 	diff[beforeDiffField] = string(before)
 
 	afterDiffOutput := saptuneOperationDiffOutput{
-		Solution: sa.resources[afterDiffField].(string),
+		Solution: afterSolution,
 	}
-	after, _ := json.Marshal(afterDiffOutput)
+	after, err := json.Marshal(afterDiffOutput)
+	if err != nil {
+		panic(fmt.Sprintf("error marshalling after diff output: %v", err))
+	}
 	diff[afterDiffField] = string(after)
 
 	return diff

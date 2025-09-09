@@ -11,17 +11,16 @@ import (
 	"github.com/trento-project/workbench/pkg/operator"
 )
 
-var Version string
-
 type cliOptions struct {
 	Arguments string `long:"arguments" short:"a" description:"Json arguments of an operator" required:"true"`
 	Verbose   bool   `long:"verbose" short:"v" description:"Log verbosity"`
 }
 
-var options cliOptions
-var flagParser = flags.NewParser(&options, flags.Default) //nolint
-
 func main() {
+	var version string
+	var options cliOptions
+	var flagParser = flags.NewParser(&options, flags.Default)
+
 	ctx := context.Background()
 
 	args, err := flagParser.Parse()
@@ -38,7 +37,7 @@ func main() {
 
 	logger := support.NewDefaultLogger(logLevel)
 
-	logger.Info("starting workbench CLI", "version", Version)
+	logger.Info("starting workbench CLI", "version", version)
 
 	operatorName := args[0]
 	registry := operator.StandardRegistry(operator.WithCustomLogger(logger))
@@ -49,7 +48,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	opArgs := make(operator.OperatorArguments)
+	opArgs := make(operator.Arguments)
 	err = json.Unmarshal([]byte(options.Arguments), &opArgs)
 	if err != nil {
 		logger.Error("could not unmarshal options arguments", "arguments", options.Arguments)

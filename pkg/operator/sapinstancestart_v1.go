@@ -67,9 +67,9 @@ func WithCustomStartInterval(interval time.Duration) SAPInstanceStartOption {
 }
 
 func NewSAPInstanceStart(
-	arguments OperatorArguments,
+	arguments Arguments,
 	operationID string,
-	options OperatorOptions[SAPInstanceStart],
+	options Options[SAPInstanceStart],
 ) *Executor {
 	sapInstanceStart := &SAPInstanceStart{
 		baseOperator: newBaseOperator(
@@ -166,19 +166,40 @@ func (s *SAPInstanceStart) rollback(ctx context.Context) error {
 	return nil
 }
 
-func (s *SAPInstanceStart) operationDiff(ctx context.Context) map[string]any {
+//	operationDiff needs to be refactored, ignoring duplication issues for now
+//
+// nolint: dupl
+func (s *SAPInstanceStart) operationDiff(_ context.Context) map[string]any {
 	diff := make(map[string]any)
 
-	beforeDiffOutput := sapInstanceStartDiffOutput{
-		Started: s.resources[beforeDiffField].(bool),
+	beforeStarted, ok := s.resources[beforeDiffField].(bool)
+	if !ok {
+		panic(fmt.Sprintf("invalid beforeStarted value: cannot parse '%s' to bool",
+			s.resources[beforeDiffField]))
 	}
-	before, _ := json.Marshal(beforeDiffOutput)
+
+	afterStarted, ok := s.resources[afterDiffField].(bool)
+	if !ok {
+		panic(fmt.Sprintf("invalid afterStarted value: cannot parse '%s' to bool",
+			s.resources[afterDiffField]))
+	}
+
+	beforeDiffOutput := sapInstanceStartDiffOutput{
+		Started: beforeStarted,
+	}
+	before, err := json.Marshal(beforeDiffOutput)
+	if err != nil {
+		panic(fmt.Sprintf("error marshalling before diff output: %v", err))
+	}
 	diff["before"] = string(before)
 
 	afterDiffOutput := sapInstanceStartDiffOutput{
-		Started: s.resources[afterDiffField].(bool),
+		Started: afterStarted,
 	}
-	after, _ := json.Marshal(afterDiffOutput)
+	after, err := json.Marshal(afterDiffOutput)
+	if err != nil {
+		panic(fmt.Sprintf("error marshalling after diff output: %v", err))
+	}
 	diff["after"] = string(after)
 
 	return diff
@@ -253,7 +274,7 @@ func sleepContext(ctx context.Context, interval time.Duration) error {
 	}
 }
 
-func parseSAPStateChangeArguments(rawArguments OperatorArguments) (*sapStateChangeArguments, error) {
+func parseSAPStateChangeArguments(rawArguments Arguments) (*sapStateChangeArguments, error) {
 	instNumberArgument, found := rawArguments["instance_number"]
 	if !found {
 		return nil, fmt.Errorf("argument instance_number not provided, could not use the operator")

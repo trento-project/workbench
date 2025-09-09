@@ -4,23 +4,23 @@ import (
 	"context"
 )
 
-type OPERATION_PHASES string
+type PhaseName string
 
-type OperatorArguments map[string]any
+type Arguments map[string]any
 type Option[T any] func(*T)
 
 const (
-	PLAN     OPERATION_PHASES = "PLAN"
-	COMMIT   OPERATION_PHASES = "COMMIT"
-	VERIFY   OPERATION_PHASES = "VERIFY"
-	ROLLBACK OPERATION_PHASES = "ROLLBACK"
+	PLAN     PhaseName = "PLAN"
+	COMMIT   PhaseName = "COMMIT"
+	VERIFY   PhaseName = "VERIFY"
+	ROLLBACK PhaseName = "ROLLBACK"
 )
 
 type Operator interface {
 	Run(ctx context.Context) *ExecutionReport
 }
 
-type OperatorOptions[T any] struct {
+type Options[T any] struct {
 	BaseOperatorOptions []BaseOperatorOption
 	OperatorOptions     []Option[T]
 }

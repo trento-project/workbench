@@ -26,9 +26,9 @@ func buildHostRebootOperator(suite *HostRebootOperatorTestSuite,
 	mockDbusConnector *dbusMocks.MockDbusConnector,
 ) *operator.Executor {
 	return operator.NewHostReboot(
-		operator.OperatorArguments{},
+		operator.Arguments{},
 		"test-op",
-		operator.OperatorOptions[operator.HostReboot]{
+		operator.Options[operator.HostReboot]{
 			BaseOperatorOptions: []operator.BaseOperatorOption{
 				operator.WithCustomLogger(suite.logger),
 			},
@@ -149,14 +149,14 @@ func (suite *HostRebootOperatorTestSuite) TestHostRebootOperatorAlreadyScheduled
 func (suite *HostRebootOperatorTestSuite) TestHostRebootOperatorDbusConnectionError() {
 	ctx := context.Background()
 
-	failingConstructor := func(_ context.Context) (dbus.DbusConnector, error) {
+	failingConstructor := func(_ context.Context) (dbus.Connector, error) {
 		return nil, errors.New("dbus constructor failure")
 	}
 
 	report := operator.NewHostReboot(
-		operator.OperatorArguments{},
+		operator.Arguments{},
 		"test-op",
-		operator.OperatorOptions[operator.HostReboot]{
+		operator.Options[operator.HostReboot]{
 			BaseOperatorOptions: []operator.BaseOperatorOption{
 				operator.WithCustomLogger(suite.logger),
 			},

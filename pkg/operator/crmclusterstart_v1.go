@@ -67,9 +67,9 @@ func WithCustomRetry(maxRetries int, initialDelay, maxDelay time.Duration, facto
 	}
 }
 
-func NewCrmClusterStart(arguments OperatorArguments,
+func NewCrmClusterStart(arguments Arguments,
 	operationID string,
-	options OperatorOptions[CrmClusterStart]) *Executor {
+	options Options[CrmClusterStart]) *Executor {
 	crmClusterStart := &CrmClusterStart{
 		baseOperator: newBaseOperator(
 			CrmClusterStartOperatorName, operationID, arguments, options.BaseOperatorOptions...,
@@ -161,19 +161,39 @@ func (c *CrmClusterStart) verify(ctx context.Context) error {
 	return nil
 }
 
-func (c *CrmClusterStart) operationDiff(ctx context.Context) map[string]any {
+//	operationDiff needs to be refactored, ignoring duplication issues for now
+//
+// nolint: dupl
+func (c *CrmClusterStart) operationDiff(_ context.Context) map[string]any {
 	diff := make(map[string]any)
 
-	beforeDiffOutput := crmClusterStartDiffOutput{
-		Started: c.resources[beforeDiffField].(bool),
+	beforeStarted, ok := c.resources[beforeDiffField].(bool)
+	if !ok {
+		panic(fmt.Sprintf("invalid beforeStarted value: cannot parse '%s' to bool",
+			c.resources[beforeDiffField]))
 	}
-	before, _ := json.Marshal(beforeDiffOutput)
+	afterStarted, ok := c.resources[afterDiffField].(bool)
+	if !ok {
+		panic(fmt.Sprintf("invalid afterStarted value: cannot parse '%s' to bool",
+			c.resources[afterDiffField]))
+	}
+
+	beforeDiffOutput := crmClusterStartDiffOutput{
+		Started: beforeStarted,
+	}
+	before, err := json.Marshal(beforeDiffOutput)
+	if err != nil {
+		panic(fmt.Sprintf("error marshalling before diff output: %v", err))
+	}
 	diff["before"] = string(before)
 
 	afterDiffOutput := crmClusterStartDiffOutput{
-		Started: c.resources[afterDiffField].(bool),
+		Started: afterStarted,
 	}
-	after, _ := json.Marshal(afterDiffOutput)
+	after, err := json.Marshal(afterDiffOutput)
+	if err != nil {
+		panic(fmt.Sprintf("error marshalling after diff output: %v", err))
+	}
 	diff["after"] = string(after)
 
 	return diff
