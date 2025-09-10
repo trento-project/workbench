@@ -136,6 +136,10 @@ func (s *SAPSystemStart) plan(ctx context.Context) (bool, error) {
 func (s *SAPSystemStart) commit(ctx context.Context) error {
 	request := new(sapcontrol.StartSystem)
 	request.Options = &s.parsedArguments.instanceType
+	// Even though the timeout is optional, the action doesn't work if a value is not set
+	// and `all` instance_type is used. It is sent as 0, which means that it
+	// would hit the timeout and stop the operation
+	request.Waittimeout = int32(s.parsedArguments.timeout.Seconds())
 	_, err := s.sapControlConnector.StartSystemContext(ctx, request)
 	if err != nil {
 		return fmt.Errorf("error starting system: %w", err)

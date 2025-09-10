@@ -149,6 +149,7 @@ func (s *SAPSystemStop) verify(ctx context.Context) error {
 func (s *SAPSystemStop) rollback(ctx context.Context) error {
 	request := new(sapcontrol.StartSystem)
 	request.Options = &s.parsedArguments.instanceType
+	request.Waittimeout = int32(s.parsedArguments.timeout.Seconds())
 	_, err := s.sapControlConnector.StartSystemContext(ctx, request)
 	if err != nil {
 		return fmt.Errorf("error starting system: %w", err)
