@@ -19,6 +19,30 @@ func TestCrm(t *testing.T) {
 	suite.Run(t, new(CrmTestSuite))
 }
 
+func (suite *CrmTestSuite) TestIsHostOnlineTrue() {
+	ctx := context.Background()
+
+	mockExecutor := mocks.NewMockCmdExecutor(suite.T())
+	mockExecutor.On("Exec", ctx, "crm", "status").Return([]byte("Online"), nil)
+
+	crmClient := cluster.NewClusterClient(mockExecutor, slog.Default())
+
+	status := crmClient.IsHostOnline(ctx)
+	suite.True(status, "Cluster should be online")
+}
+
+func (suite *CrmTestSuite) TestIsHostOnlineFalse() {
+	ctx := context.Background()
+
+	mockExecutor := mocks.NewMockCmdExecutor(suite.T())
+	mockExecutor.On("Exec", ctx, "crm", "status").Return([]byte("Offline"), errors.New("cluster is not running"))
+
+	crmClient := cluster.NewClusterClient(mockExecutor, slog.Default())
+
+	status := crmClient.IsHostOnline(ctx)
+	suite.False(status, "Cluster should be offline")
+}
+
 func (suite *CrmTestSuite) TestIsIdle() {
 	ctx := context.Background()
 

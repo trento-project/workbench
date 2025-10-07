@@ -38,7 +38,7 @@ func NewClusterClient(executor support.CmdExecutor, logger *slog.Logger) Cluster
 }
 
 func (c *Client) IsHostOnline(ctx context.Context) bool {
-	output, err := c.executor.Exec(ctx, "crm", "status", "simple")
+	output, err := c.executor.Exec(ctx, "crm", "status")
 	if err != nil {
 		return false
 	}
