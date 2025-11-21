@@ -25,7 +25,7 @@ jobs:
   static-analysis:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: endorama/asdf-parse-tool-versions@v1.3.4
         id: tool-versions
       - uses: actions/setup-go@v6
@@ -50,7 +50,7 @@ jobs:
   test:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: endorama/asdf-parse-tool-versions@v1.3.4
         id: tool-versions
       - uses: actions/setup-go@v6
@@ -74,7 +74,7 @@ jobs:
     runs-on: ubuntu-24.04
     needs: [static-analysis, test]
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: endorama/asdf-parse-tool-versions@v1.3.4
         id: tool-versions
       - uses: actions/setup-go@v6
