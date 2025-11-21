@@ -103,7 +103,7 @@ jobs:
     if: (github.event_name == 'push' && github.ref == 'refs/heads/main')
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
         with:
           name: workbench-binaries
       - uses: "marvinpinto/action-automatic-releases@v1.2.1"
@@ -123,7 +123,7 @@ jobs:
     if: github.event.release
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
         with:
           name: workbench-binaries
       - uses: AButler/upload-release-assets@v3.0
