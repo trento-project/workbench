@@ -23,7 +23,7 @@ type HostRebootOperatorTestSuite struct {
 
 func buildHostRebootOperator(suite *HostRebootOperatorTestSuite,
 	mockCmdExecutor *supportMocks.MockCmdExecutor,
-	mockDbusConnector *dbusMocks.MockDbusConnector,
+	mockDbusConnector *dbusMocks.MockConnector,
 ) *operator.Executor {
 	return operator.NewHostReboot(
 		operator.Arguments{},
@@ -51,7 +51,7 @@ func (suite *HostRebootOperatorTestSuite) SetupTest() {
 func (suite *HostRebootOperatorTestSuite) TestHostRebootOperatorSuccess() {
 	ctx := context.Background()
 	mockCmdExecutor := supportMocks.NewMockCmdExecutor(suite.T())
-	mockDbusConnector := dbusMocks.NewMockDbusConnector(suite.T())
+	mockDbusConnector := dbusMocks.NewMockConnector(suite.T())
 
 	// Plan phase - check if reboot is already scheduled (it's not)
 	mockDbusConnector.On("ListJobsContext", ctx).
@@ -117,7 +117,7 @@ func (suite *HostRebootOperatorTestSuite) TestHostRebootOperatorAlreadyScheduled
 	ctx := context.Background()
 
 	mockCmdExecutor := supportMocks.NewMockCmdExecutor(suite.T())
-	mockDbusConnector := dbusMocks.NewMockDbusConnector(suite.T())
+	mockDbusConnector := dbusMocks.NewMockConnector(suite.T())
 
 	// Plan phase - reboot is already scheduled
 	shutdownJob := baseDbus.JobStatus{
@@ -176,7 +176,7 @@ func (suite *HostRebootOperatorTestSuite) TestHostRebootOperatorListJobsError() 
 	ctx := context.Background()
 
 	mockCmdExecutor := supportMocks.NewMockCmdExecutor(suite.T())
-	mockDbusConnector := dbusMocks.NewMockDbusConnector(suite.T())
+	mockDbusConnector := dbusMocks.NewMockConnector(suite.T())
 
 	// Plan phase - ListJobs returns error
 	mockDbusConnector.On("ListJobsContext", ctx).
@@ -198,7 +198,7 @@ func (suite *HostRebootOperatorTestSuite) TestHostRebootOperatorListUnitsError()
 	ctx := context.Background()
 
 	mockCmdExecutor := supportMocks.NewMockCmdExecutor(suite.T())
-	mockDbusConnector := dbusMocks.NewMockDbusConnector(suite.T())
+	mockDbusConnector := dbusMocks.NewMockConnector(suite.T())
 
 	// Plan phase - ListJobs succeeds but ListUnits returns error
 	mockDbusConnector.On("ListJobsContext", ctx).
@@ -223,7 +223,7 @@ func (suite *HostRebootOperatorTestSuite) TestHostRebootOperatorCommitError() {
 	ctx := context.Background()
 
 	mockCmdExecutor := supportMocks.NewMockCmdExecutor(suite.T())
-	mockDbusConnector := dbusMocks.NewMockDbusConnector(suite.T())
+	mockDbusConnector := dbusMocks.NewMockConnector(suite.T())
 
 	// Plan phase - no reboot scheduled
 	mockDbusConnector.On("ListJobsContext", ctx).
@@ -272,7 +272,7 @@ func (suite *HostRebootOperatorTestSuite) TestHostRebootOperatorVerifyError() {
 	ctx := context.Background()
 
 	mockCmdExecutor := supportMocks.NewMockCmdExecutor(suite.T())
-	mockDbusConnector := dbusMocks.NewMockDbusConnector(suite.T())
+	mockDbusConnector := dbusMocks.NewMockConnector(suite.T())
 
 	// Plan phase - no reboot scheduled
 	mockDbusConnector.On("ListJobsContext", ctx).
@@ -345,7 +345,7 @@ func (suite *HostRebootOperatorTestSuite) TestHostRebootOperatorRollbackError() 
 	ctx := context.Background()
 
 	mockCmdExecutor := supportMocks.NewMockCmdExecutor(suite.T())
-	mockDbusConnector := dbusMocks.NewMockDbusConnector(suite.T())
+	mockDbusConnector := dbusMocks.NewMockConnector(suite.T())
 
 	// Plan phase - no reboot scheduled
 	mockDbusConnector.On("ListJobsContext", ctx).
@@ -386,7 +386,7 @@ func (suite *HostRebootOperatorTestSuite) TestHostRebootOperatorShutdownTimerDet
 	ctx := context.Background()
 
 	mockCmdExecutor := supportMocks.NewMockCmdExecutor(suite.T())
-	mockDbusConnector := dbusMocks.NewMockDbusConnector(suite.T())
+	mockDbusConnector := dbusMocks.NewMockConnector(suite.T())
 
 	// Plan phase - no jobs but active shutdown timer
 	mockDbusConnector.On("ListJobsContext", ctx).
@@ -423,7 +423,7 @@ func (suite *HostRebootOperatorTestSuite) TestHostRebootOperatorRebootTimerDetec
 	ctx := context.Background()
 
 	mockCmdExecutor := supportMocks.NewMockCmdExecutor(suite.T())
-	mockDbusConnector := dbusMocks.NewMockDbusConnector(suite.T())
+	mockDbusConnector := dbusMocks.NewMockConnector(suite.T())
 
 	// Plan phase - no jobs but active reboot timer
 	mockDbusConnector.On("ListJobsContext", ctx).
@@ -460,7 +460,7 @@ func (suite *HostRebootOperatorTestSuite) TestHostRebootOperatorActiveShutdownPr
 	ctx := context.Background()
 
 	mockCmdExecutor := supportMocks.NewMockCmdExecutor(suite.T())
-	mockDbusConnector := dbusMocks.NewMockDbusConnector(suite.T())
+	mockDbusConnector := dbusMocks.NewMockConnector(suite.T())
 
 	// Plan phase - no jobs or timers but active shutdown process
 	mockDbusConnector.On("ListJobsContext", ctx).
@@ -494,7 +494,7 @@ func (suite *HostRebootOperatorTestSuite) TestHostRebootOperatorActiveSystemdShu
 	ctx := context.Background()
 
 	mockCmdExecutor := supportMocks.NewMockCmdExecutor(suite.T())
-	mockDbusConnector := dbusMocks.NewMockDbusConnector(suite.T())
+	mockDbusConnector := dbusMocks.NewMockConnector(suite.T())
 
 	// Plan phase - no jobs or timers, no shutdown process, but systemd-shutdown process
 	mockDbusConnector.On("ListJobsContext", ctx).
@@ -532,7 +532,7 @@ func (suite *HostRebootOperatorTestSuite) TestHostRebootOperatorScheduledFileDet
 	ctx := context.Background()
 
 	mockCmdExecutor := supportMocks.NewMockCmdExecutor(suite.T())
-	mockDbusConnector := dbusMocks.NewMockDbusConnector(suite.T())
+	mockDbusConnector := dbusMocks.NewMockConnector(suite.T())
 
 	// Plan phase - no jobs, timers, or processes, but scheduled file exists
 	mockDbusConnector.On("ListJobsContext", ctx).

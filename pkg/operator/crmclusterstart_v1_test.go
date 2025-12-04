@@ -26,7 +26,7 @@ func (suite *CrmClusterStartOperatorTestSuite) SetupTest() {
 func (suite *CrmClusterStartOperatorTestSuite) TestCrmClusterStartClusterAlreadyOnline() {
 	ctx := context.Background()
 
-	mockCrmClient := mocks.NewMockCrm(suite.T())
+	mockCrmClient := mocks.NewMockCluster(suite.T())
 	mockCrmClient.On("IsHostOnline", ctx).Return(true).Once()
 
 	crmClusterStartOperator := operator.NewCrmClusterStart(
@@ -54,7 +54,7 @@ func (suite *CrmClusterStartOperatorTestSuite) TestCrmClusterStartClusterAlready
 func (suite *CrmClusterStartOperatorTestSuite) TestCrmClusterStartClusterRollbackFailure() {
 	ctx := context.Background()
 
-	mockCrmClient := mocks.NewMockCrm(suite.T())
+	mockCrmClient := mocks.NewMockCluster(suite.T())
 	mockCrmClient.On("IsHostOnline", ctx).Return(false).Once()
 	mockCrmClient.On("StartCluster", ctx).Return(errors.New("failed to start cluster")).Once()
 	mockCrmClient.On("IsIdle", ctx).Return(true, nil)
@@ -83,7 +83,7 @@ func (suite *CrmClusterStartOperatorTestSuite) TestCrmClusterStartClusterRollbac
 func (suite *CrmClusterStartOperatorTestSuite) TestCrmClusterStartClusterRollbackFailureNotIdle() {
 	ctx := context.Background()
 
-	mockCrmClient := mocks.NewMockCrm(suite.T())
+	mockCrmClient := mocks.NewMockCluster(suite.T())
 	mockCrmClient.On("IsHostOnline", ctx).Return(false).Once()
 	mockCrmClient.On("StartCluster", ctx).Return(errors.New("failed to start cluster")).Once()
 	mockCrmClient.On("IsIdle", ctx).Return(false, nil)
@@ -111,7 +111,7 @@ func (suite *CrmClusterStartOperatorTestSuite) TestCrmClusterStartClusterRollbac
 func (suite *CrmClusterStartOperatorTestSuite) TestCrmClusterStartClusterRollbackSuccess() {
 	ctx := context.Background()
 
-	mockCrmClient := mocks.NewMockCrm(suite.T())
+	mockCrmClient := mocks.NewMockCluster(suite.T())
 	mockCrmClient.On("IsIdle", ctx).Return(true, nil)
 	mockCrmClient.On("IsHostOnline", ctx).Return(false).Once()
 	mockCrmClient.On("StartCluster", ctx).Return(errors.New("failed to start cluster")).Once()
@@ -139,7 +139,7 @@ func (suite *CrmClusterStartOperatorTestSuite) TestCrmClusterStartClusterRollbac
 func (suite *CrmClusterStartOperatorTestSuite) TestCrmClusterStartClusterStartVerifyFailure() {
 	ctx := context.Background()
 
-	mockCrmClient := mocks.NewMockCrm(suite.T())
+	mockCrmClient := mocks.NewMockCluster(suite.T())
 	mockCrmClient.On("IsIdle", ctx).Return(true, nil)
 	mockCrmClient.On("IsHostOnline", ctx).Return(false).Once()
 	mockCrmClient.On("StartCluster", ctx).Return(nil).Once()
@@ -169,7 +169,7 @@ func (suite *CrmClusterStartOperatorTestSuite) TestCrmClusterStartClusterStartVe
 func (suite *CrmClusterStartOperatorTestSuite) TestCrmClusterStartClusterStartVerifySuccess() {
 	ctx := context.Background()
 
-	mockCrmClient := mocks.NewMockCrm(suite.T())
+	mockCrmClient := mocks.NewMockCluster(suite.T())
 	mockCrmClient.On("IsHostOnline", ctx).Return(false).Once()
 	mockCrmClient.On("StartCluster", ctx).Return(nil).Once()
 	mockCrmClient.On("IsHostOnline", ctx).Return(true)

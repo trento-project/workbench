@@ -26,7 +26,7 @@ func (suite *CrmClusterStopOperatorTestSuite) SetupTest() {
 func (suite *CrmClusterStopOperatorTestSuite) TestCrmClusterStopClusterAlreadyOffline() {
 	ctx := context.Background()
 
-	mockCrmClient := mocks.NewMockCrm(suite.T())
+	mockCrmClient := mocks.NewMockCluster(suite.T())
 	mockCrmClient.On("IsHostOnline", ctx).Return(false).Once()
 
 	crmClusterStopOperator := operator.NewCrmClusterStop(
@@ -54,7 +54,7 @@ func (suite *CrmClusterStopOperatorTestSuite) TestCrmClusterStopClusterAlreadyOf
 func (suite *CrmClusterStopOperatorTestSuite) TestCrmClusterStopClusterRollbackFailure() {
 	ctx := context.Background()
 
-	mockCrmClient := mocks.NewMockCrm(suite.T())
+	mockCrmClient := mocks.NewMockCluster(suite.T())
 	mockCrmClient.On("IsHostOnline", ctx).Return(true).Once()
 	mockCrmClient.On("IsIdle", ctx).Return(false, nil)
 	mockCrmClient.On("StartCluster", ctx).Return(errors.New("failed to start cluster"))
@@ -82,7 +82,7 @@ func (suite *CrmClusterStopOperatorTestSuite) TestCrmClusterStopClusterRollbackF
 func (suite *CrmClusterStopOperatorTestSuite) TestCrmClusterStopClusterRollbackSuccess() {
 	ctx := context.Background()
 
-	mockCrmClient := mocks.NewMockCrm(suite.T())
+	mockCrmClient := mocks.NewMockCluster(suite.T())
 	mockCrmClient.On("IsHostOnline", ctx).Return(true).Once()
 	mockCrmClient.On("IsIdle", ctx).Return(true, nil)
 	mockCrmClient.On("StopCluster", ctx).Return(errors.New("failed to stop cluster"))
@@ -110,7 +110,7 @@ func (suite *CrmClusterStopOperatorTestSuite) TestCrmClusterStopClusterRollbackS
 func (suite *CrmClusterStopOperatorTestSuite) TestCrmClusterStopClusterStartVerifyFailure() {
 	ctx := context.Background()
 
-	mockCrmClient := mocks.NewMockCrm(suite.T())
+	mockCrmClient := mocks.NewMockCluster(suite.T())
 	mockCrmClient.On("IsHostOnline", ctx).Return(true).Once()
 	mockCrmClient.On("IsIdle", ctx).Return(true, nil)
 	mockCrmClient.On("StopCluster", ctx).Return(nil)
@@ -140,7 +140,7 @@ func (suite *CrmClusterStopOperatorTestSuite) TestCrmClusterStopClusterStartVeri
 func (suite *CrmClusterStopOperatorTestSuite) TestCrmClusterStopVerifySuccess() {
 	ctx := context.Background()
 
-	mockCrmClient := mocks.NewMockCrm(suite.T())
+	mockCrmClient := mocks.NewMockCluster(suite.T())
 	mockCrmClient.On("IsHostOnline", ctx).Return(true).Once()
 	mockCrmClient.On("IsIdle", ctx).Return(true, nil).Once()
 	mockCrmClient.On("StopCluster", ctx).Return(nil).Once()

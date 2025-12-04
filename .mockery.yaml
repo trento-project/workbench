@@ -7,12 +7,12 @@ packages:
       dir: "internal/support/mocks"
     interfaces:
       CmdExecutor:
-  github.com/trento-project/workbench/internal/crm:
+  github.com/trento-project/workbench/internal/cluster:
     config:
       outpkg: "mocks"
-      dir: "internal/crm/mocks"
+      dir: "internal/cluster/mocks"
     interfaces:
-      Crm:
+      Cluster:
   github.com/trento-project/workbench/internal/sapcontrol:
     config:
       outpkg: "mocks"
@@ -41,10 +41,10 @@ packages:
       dir: "internal/systemd/mocks"
     interfaces:
       Systemd:
-      SystemdLoader:
+      Loader:
   github.com/trento-project/workbench/internal/dbus:
     config:
       outpkg: "mocks"
       dir: "internal/dbus/mocks"
     interfaces:
-      DbusConnector:
+      Connector:
