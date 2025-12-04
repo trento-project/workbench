@@ -17,7 +17,7 @@ type ServiceDisableOperatorTestSuite struct {
 	suite.Suite
 	logger            *slog.Logger
 	mockSystemd       *mocks.MockSystemd
-	mockSystemdLoader *mocks.MockSystemdLoader
+	mockSystemdLoader *mocks.MockLoader
 }
 
 func buildServiceDisableOperator(suite *ServiceDisableOperatorTestSuite) operator.Operator {
@@ -44,7 +44,7 @@ func TestServiceDisableOperator(t *testing.T) {
 func (suite *ServiceDisableOperatorTestSuite) SetupTest() {
 	suite.logger = support.NewDefaultLogger(slog.LevelInfo)
 	suite.mockSystemd = mocks.NewMockSystemd(suite.T())
-	suite.mockSystemdLoader = mocks.NewMockSystemdLoader(suite.T())
+	suite.mockSystemdLoader = mocks.NewMockLoader(suite.T())
 }
 
 func (suite *ServiceDisableOperatorTestSuite) TestServiceDisableOperatorPlanErrorDbusConnection() {

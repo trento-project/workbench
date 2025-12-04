@@ -16,7 +16,7 @@ import (
 
 type SystemdTestSuite struct {
 	suite.Suite
-	dbusMock *mocks.MockDbusConnector
+	dbusMock *mocks.MockConnector
 	logger   *slog.Logger
 }
 
@@ -25,7 +25,7 @@ func TestSystemdClient(t *testing.T) {
 }
 
 func (suite *SystemdTestSuite) SetupTest() {
-	suite.dbusMock = mocks.NewMockDbusConnector(suite.T())
+	suite.dbusMock = mocks.NewMockConnector(suite.T())
 	suite.logger = support.NewDefaultLogger(slog.LevelInfo).With("test", "systemd_test_suite")
 }
 
