@@ -18,12 +18,7 @@ func TestClusterMaintenanceChangeSuccessOn(t *testing.T) {
 	mockClusterClient := clusterMocks.NewMockCrm(t)
 	ctx := context.Background()
 
-	mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"crm",
-		"status",
-	).Return([]byte("ok"), nil)
+	mockClusterClient.On("IsHostOnline", ctx).Return(true)
 
 	mockCmdExecutor.On(
 		"Exec",
@@ -85,12 +80,7 @@ func TestClusterMaintenanceChangeSuccessOff(t *testing.T) {
 	mockClusterClient := clusterMocks.NewMockCrm(t)
 	ctx := context.Background()
 
-	mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"crm",
-		"status",
-	).Return([]byte("ok"), nil)
+	mockClusterClient.On("IsHostOnline", ctx).Return(true)
 
 	mockCmdExecutor.On(
 		"Exec",
@@ -162,12 +152,7 @@ func TestClusterMaintenanceChangeResourceSuccess(t *testing.T) {
 	ctx := context.Background()
 	resourceID := fakeID
 
-	mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"crm",
-		"status",
-	).Return([]byte("ok"), nil)
+	mockClusterClient.On("IsHostOnline", ctx).Return(true)
 
 	mockCmdExecutor.On(
 		"Exec",
@@ -234,12 +219,7 @@ func TestClusterMaintenanceChangeResourceWithIsManagedSuccess(t *testing.T) {
 	ctx := context.Background()
 	resourceID := fakeID
 
-	mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"crm",
-		"status",
-	).Return([]byte("ok"), nil)
+	mockClusterClient.On("IsHostOnline", ctx).Return(true)
 
 	mockCmdExecutor.On(
 		"Exec",
@@ -319,12 +299,7 @@ func TestClusterMaintenanceChangeResourceDefaultSuccess(t *testing.T) {
 	ctx := context.Background()
 	resourceID := fakeID
 
-	mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"crm",
-		"status",
-	).Return([]byte("ok"), nil)
+	mockClusterClient.On("IsHostOnline", ctx).Return(true)
 
 	mockCmdExecutor.On(
 		"Exec",
@@ -402,12 +377,7 @@ func TestClusterMaintenanceChangeNodeSuccessOn(t *testing.T) {
 	ctx := context.Background()
 	nodeID := fakeID
 
-	mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"crm",
-		"status",
-	).Return([]byte("ok"), nil)
+	mockClusterClient.On("IsHostOnline", ctx).Return(true)
 
 	mockCmdExecutor.On(
 		"Exec",
@@ -475,12 +445,7 @@ func TestClusterMaintenanceChangeNodeSuccessOnWithoutPreviousState(t *testing.T)
 	ctx := context.Background()
 	nodeID := fakeID
 
-	mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"crm",
-		"status",
-	).Return([]byte("ok"), nil)
+	mockClusterClient.On("IsHostOnline", ctx).Return(true)
 
 	mockCmdExecutor.On(
 		"Exec",
@@ -551,12 +516,7 @@ func TestClusterMaintenanceChangeNodeSuccessOff(t *testing.T) {
 	ctx := context.Background()
 	nodeID := fakeID
 
-	mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"crm",
-		"status",
-	).Return([]byte("ok"), nil)
+	mockClusterClient.On("IsHostOnline", ctx).Return(true)
 
 	mockCmdExecutor.On(
 		"Exec",
@@ -746,14 +706,10 @@ func TestClusterMaintenanceChangeMutuallyExclusiveArgument(t *testing.T) {
 
 func TestClusterMaintenanceChangePlanClusterNotFound(t *testing.T) {
 	mockCmdExecutor := mocks.NewMockCmdExecutor(t)
+	mockClusterClient := clusterMocks.NewMockCrm(t)
 	ctx := context.Background()
 
-	mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"crm",
-		"status",
-	).Return([]byte("error"), errors.New("cluster not found"))
+	mockClusterClient.On("IsHostOnline", ctx).Return(false)
 
 	clusterMaintenanceChangeOperator := operator.NewClusterMaintenanceChange(
 		operator.Arguments{
@@ -763,6 +719,7 @@ func TestClusterMaintenanceChangePlanClusterNotFound(t *testing.T) {
 		operator.Options[operator.ClusterMaintenanceChange]{
 			OperatorOptions: []operator.Option[operator.ClusterMaintenanceChange]{
 				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(mockCmdExecutor)),
+				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceClient(mockClusterClient)),
 			},
 		},
 	)
@@ -771,19 +728,15 @@ func TestClusterMaintenanceChangePlanClusterNotFound(t *testing.T) {
 
 	assert.Nil(t, report.Success)
 	assert.Equal(t, report.Error.ErrorPhase, operator.PLAN)
-	assert.EqualValues(t, "error getting cluster status: cluster not found", report.Error.Message)
+	assert.EqualValues(t, "cluster is not runnint on host", report.Error.Message)
 }
 
 func TestClusterMaintenanceChangePlanGetMaintenanceError(t *testing.T) {
 	mockCmdExecutor := mocks.NewMockCmdExecutor(t)
+	mockClusterClient := clusterMocks.NewMockCrm(t)
 	ctx := context.Background()
 
-	mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"crm",
-		"status",
-	).Return([]byte("ok"), nil)
+	mockClusterClient.On("IsHostOnline", ctx).Return(true)
 
 	mockCmdExecutor.On(
 		"Exec",
@@ -803,6 +756,7 @@ func TestClusterMaintenanceChangePlanGetMaintenanceError(t *testing.T) {
 		operator.Options[operator.ClusterMaintenanceChange]{
 			OperatorOptions: []operator.Option[operator.ClusterMaintenanceChange]{
 				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(mockCmdExecutor)),
+				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceClient(mockClusterClient)),
 			},
 		},
 	)
@@ -816,14 +770,10 @@ func TestClusterMaintenanceChangePlanGetMaintenanceError(t *testing.T) {
 
 func TestClusterMaintenanceChangePlanEmptyMaintenanceState(t *testing.T) {
 	mockCmdExecutor := mocks.NewMockCmdExecutor(t)
+	mockClusterClient := clusterMocks.NewMockCrm(t)
 	ctx := context.Background()
 
-	mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"crm",
-		"status",
-	).Return([]byte("ok"), nil)
+	mockClusterClient.On("IsHostOnline", ctx).Return(true)
 
 	mockCmdExecutor.On(
 		"Exec",
@@ -843,6 +793,7 @@ func TestClusterMaintenanceChangePlanEmptyMaintenanceState(t *testing.T) {
 		operator.Options[operator.ClusterMaintenanceChange]{
 			OperatorOptions: []operator.Option[operator.ClusterMaintenanceChange]{
 				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(mockCmdExecutor)),
+				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceClient(mockClusterClient)),
 			},
 		},
 	)
@@ -856,15 +807,11 @@ func TestClusterMaintenanceChangePlanEmptyMaintenanceState(t *testing.T) {
 
 func TestClusterMaintenanceChangePlanNodeNotFound(t *testing.T) {
 	mockCmdExecutor := mocks.NewMockCmdExecutor(t)
+	mockClusterClient := clusterMocks.NewMockCrm(t)
 	ctx := context.Background()
 	nodeID := fakeID
 
-	mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"crm",
-		"status",
-	).Return([]byte("ok"), nil)
+	mockClusterClient.On("IsHostOnline", ctx).Return(true)
 
 	mockCmdExecutor.On(
 		"Exec",
@@ -886,6 +833,7 @@ func TestClusterMaintenanceChangePlanNodeNotFound(t *testing.T) {
 		operator.Options[operator.ClusterMaintenanceChange]{
 			OperatorOptions: []operator.Option[operator.ClusterMaintenanceChange]{
 				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(mockCmdExecutor)),
+				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceClient(mockClusterClient)),
 			},
 		},
 	)
@@ -899,14 +847,10 @@ func TestClusterMaintenanceChangePlanNodeNotFound(t *testing.T) {
 
 func TestClusterMaintenanceChangeCommitAlreadyApplied(t *testing.T) {
 	mockCmdExecutor := mocks.NewMockCmdExecutor(t)
+	mockClusterClient := clusterMocks.NewMockCrm(t)
 	ctx := context.Background()
 
-	mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"crm",
-		"status",
-	).Return([]byte("ok"), nil)
+	mockClusterClient.On("IsHostOnline", ctx).Return(true)
 
 	mockCmdExecutor.On(
 		"Exec",
@@ -926,6 +870,7 @@ func TestClusterMaintenanceChangeCommitAlreadyApplied(t *testing.T) {
 		operator.Options[operator.ClusterMaintenanceChange]{
 			OperatorOptions: []operator.Option[operator.ClusterMaintenanceChange]{
 				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(mockCmdExecutor)),
+				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceClient(mockClusterClient)),
 			},
 		},
 	)
@@ -947,12 +892,7 @@ func TestClusterMaintenanceChangeCommitNotIdle(t *testing.T) {
 	mockClusterClient := clusterMocks.NewMockCrm(t)
 	ctx := context.Background()
 
-	mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"crm",
-		"status",
-	).Return([]byte("ok"), nil)
+	mockClusterClient.On("IsHostOnline", ctx).Return(true)
 
 	mockCmdExecutor.On(
 		"Exec",
@@ -1000,12 +940,7 @@ func TestClusterMaintenanceChangeVerifyError(t *testing.T) {
 	mockClusterClient := clusterMocks.NewMockCrm(t)
 	ctx := context.Background()
 
-	mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"crm",
-		"status",
-	).Return([]byte("ok"), nil)
+	mockClusterClient.On("IsHostOnline", ctx).Return(true)
 
 	mockCmdExecutor.On(
 		"Exec",
@@ -1070,12 +1005,7 @@ func TestClusterMaintenanceChangeRollbackNotIdle(t *testing.T) {
 	mockClusterClient := clusterMocks.NewMockCrm(t)
 	ctx := context.Background()
 
-	mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"crm",
-		"status",
-	).Return([]byte("ok"), nil)
+	mockClusterClient.On("IsHostOnline", ctx).Return(true)
 
 	mockCmdExecutor.On(
 		"Exec",
@@ -1124,12 +1054,7 @@ func TestClusterMaintenanceChangeRollbackErrorReverting(t *testing.T) {
 	mockClusterClient := clusterMocks.NewMockCrm(t)
 	ctx := context.Background()
 
-	mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"crm",
-		"status",
-	).Return([]byte("ok"), nil)
+	mockClusterClient.On("IsHostOnline", ctx).Return(true)
 
 	mockCmdExecutor.On(
 		"Exec",

@@ -146,9 +146,8 @@ func (c *ClusterMaintenanceChange) plan(ctx context.Context) (bool, error) {
 	}
 
 	// check if a cluster is available and running
-	_, err = c.executor.Exec(ctx, "crm", "status")
-	if err != nil {
-		return false, fmt.Errorf("error getting cluster status: %w", err)
+	if !c.clusterClient.IsHostOnline(ctx) {
+		return false, errors.New("cluster is not runnint on host")
 	}
 
 	currentState, err := getMaintenanceState(ctx, c.executor, c.scope, c.parsedArguments)
