@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	clusterMocks "github.com/trento-project/workbench/internal/cluster/mocks"
 	"github.com/trento-project/workbench/internal/support/mocks"
 	"github.com/trento-project/workbench/pkg/operator"
 )
@@ -14,6 +15,7 @@ const fakeID = "some-id"
 
 func TestClusterMaintenanceChangeSuccessOn(t *testing.T) {
 	mockCmdExecutor := mocks.NewMockCmdExecutor(t)
+	mockClusterClient := clusterMocks.NewMockCrm(t)
 	ctx := context.Background()
 
 	mockCmdExecutor.On(
@@ -33,12 +35,7 @@ func TestClusterMaintenanceChangeSuccessOn(t *testing.T) {
 		"maintenance-mode",
 	).Return([]byte("false"), nil).Once()
 
-	mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"cs_clusterstate",
-		"-i",
-	).Return([]byte("S_IDLE"), nil)
+	mockClusterClient.On("IsIdle", ctx).Return(true, nil)
 
 	mockCmdExecutor.On(
 		"Exec",
@@ -66,6 +63,7 @@ func TestClusterMaintenanceChangeSuccessOn(t *testing.T) {
 		operator.Options[operator.ClusterMaintenanceChange]{
 			OperatorOptions: []operator.Option[operator.ClusterMaintenanceChange]{
 				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(mockCmdExecutor)),
+				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceClient(mockClusterClient)),
 			},
 		},
 	)
@@ -84,6 +82,7 @@ func TestClusterMaintenanceChangeSuccessOn(t *testing.T) {
 
 func TestClusterMaintenanceChangeSuccessOff(t *testing.T) {
 	mockCmdExecutor := mocks.NewMockCmdExecutor(t)
+	mockClusterClient := clusterMocks.NewMockCrm(t)
 	ctx := context.Background()
 
 	mockCmdExecutor.On(
@@ -103,12 +102,7 @@ func TestClusterMaintenanceChangeSuccessOff(t *testing.T) {
 		"maintenance-mode",
 	).Return([]byte("true"), nil).Once()
 
-	mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"cs_clusterstate",
-		"-i",
-	).Return([]byte("S_IDLE"), nil)
+	mockClusterClient.On("IsIdle", ctx).Return(true, nil)
 
 	mockCmdExecutor.On(
 		"Exec",
@@ -145,6 +139,7 @@ func TestClusterMaintenanceChangeSuccessOff(t *testing.T) {
 		operator.Options[operator.ClusterMaintenanceChange]{
 			OperatorOptions: []operator.Option[operator.ClusterMaintenanceChange]{
 				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(mockCmdExecutor)),
+				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceClient(mockClusterClient)),
 			},
 		},
 	)
@@ -163,6 +158,7 @@ func TestClusterMaintenanceChangeSuccessOff(t *testing.T) {
 
 func TestClusterMaintenanceChangeResourceSuccess(t *testing.T) {
 	mockCmdExecutor := mocks.NewMockCmdExecutor(t)
+	mockClusterClient := clusterMocks.NewMockCrm(t)
 	ctx := context.Background()
 	resourceID := fakeID
 
@@ -184,12 +180,7 @@ func TestClusterMaintenanceChangeResourceSuccess(t *testing.T) {
 		"maintenance",
 	).Return([]byte("false"), nil).Once()
 
-	mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"cs_clusterstate",
-		"-i",
-	).Return([]byte("S_IDLE"), nil)
+	mockClusterClient.On("IsIdle", ctx).Return(true, nil)
 
 	mockCmdExecutor.On(
 		"Exec",
@@ -220,6 +211,7 @@ func TestClusterMaintenanceChangeResourceSuccess(t *testing.T) {
 		operator.Options[operator.ClusterMaintenanceChange]{
 			OperatorOptions: []operator.Option[operator.ClusterMaintenanceChange]{
 				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(mockCmdExecutor)),
+				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceClient(mockClusterClient)),
 			},
 		},
 	)
@@ -238,6 +230,7 @@ func TestClusterMaintenanceChangeResourceSuccess(t *testing.T) {
 
 func TestClusterMaintenanceChangeResourceWithIsManagedSuccess(t *testing.T) {
 	mockCmdExecutor := mocks.NewMockCmdExecutor(t)
+	mockClusterClient := clusterMocks.NewMockCrm(t)
 	ctx := context.Background()
 	resourceID := fakeID
 
@@ -272,12 +265,7 @@ func TestClusterMaintenanceChangeResourceWithIsManagedSuccess(t *testing.T) {
 		"is-managed",
 	).Return([]byte("true"), nil).Once()
 
-	mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"cs_clusterstate",
-		"-i",
-	).Return([]byte("S_IDLE"), nil)
+	mockClusterClient.On("IsIdle", ctx).Return(true, nil)
 
 	mockCmdExecutor.On(
 		"Exec",
@@ -308,6 +296,7 @@ func TestClusterMaintenanceChangeResourceWithIsManagedSuccess(t *testing.T) {
 		operator.Options[operator.ClusterMaintenanceChange]{
 			OperatorOptions: []operator.Option[operator.ClusterMaintenanceChange]{
 				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(mockCmdExecutor)),
+				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceClient(mockClusterClient)),
 			},
 		},
 	)
@@ -326,6 +315,7 @@ func TestClusterMaintenanceChangeResourceWithIsManagedSuccess(t *testing.T) {
 
 func TestClusterMaintenanceChangeResourceDefaultSuccess(t *testing.T) {
 	mockCmdExecutor := mocks.NewMockCmdExecutor(t)
+	mockClusterClient := clusterMocks.NewMockCrm(t)
 	ctx := context.Background()
 	resourceID := fakeID
 
@@ -358,12 +348,7 @@ func TestClusterMaintenanceChangeResourceDefaultSuccess(t *testing.T) {
 		"is-managed",
 	).Return([]byte("not found"), nil)
 
-	mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"cs_clusterstate",
-		"-i",
-	).Return([]byte("S_IDLE"), nil)
+	mockClusterClient.On("IsIdle", ctx).Return(true, nil)
 
 	mockCmdExecutor.On(
 		"Exec",
@@ -394,6 +379,7 @@ func TestClusterMaintenanceChangeResourceDefaultSuccess(t *testing.T) {
 		operator.Options[operator.ClusterMaintenanceChange]{
 			OperatorOptions: []operator.Option[operator.ClusterMaintenanceChange]{
 				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(mockCmdExecutor)),
+				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceClient(mockClusterClient)),
 			},
 		},
 	)
@@ -412,6 +398,7 @@ func TestClusterMaintenanceChangeResourceDefaultSuccess(t *testing.T) {
 
 func TestClusterMaintenanceChangeNodeSuccessOn(t *testing.T) {
 	mockCmdExecutor := mocks.NewMockCmdExecutor(t)
+	mockClusterClient := clusterMocks.NewMockCrm(t)
 	ctx := context.Background()
 	nodeID := fakeID
 
@@ -433,12 +420,7 @@ func TestClusterMaintenanceChangeNodeSuccessOn(t *testing.T) {
 		"maintenance",
 	).Return([]byte("scope=nodes  name=maintenance value=off"), nil).Once()
 
-	mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"cs_clusterstate",
-		"-i",
-	).Return([]byte("S_IDLE"), nil)
+	mockClusterClient.On("IsIdle", ctx).Return(true, nil)
 
 	mockCmdExecutor.On(
 		"Exec",
@@ -470,6 +452,7 @@ func TestClusterMaintenanceChangeNodeSuccessOn(t *testing.T) {
 		operator.Options[operator.ClusterMaintenanceChange]{
 			OperatorOptions: []operator.Option[operator.ClusterMaintenanceChange]{
 				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(mockCmdExecutor)),
+				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceClient(mockClusterClient)),
 			},
 		},
 	)
@@ -488,6 +471,7 @@ func TestClusterMaintenanceChangeNodeSuccessOn(t *testing.T) {
 
 func TestClusterMaintenanceChangeNodeSuccessOnWithoutPreviousState(t *testing.T) {
 	mockCmdExecutor := mocks.NewMockCmdExecutor(t)
+	mockClusterClient := clusterMocks.NewMockCrm(t)
 	ctx := context.Background()
 	nodeID := fakeID
 
@@ -512,12 +496,7 @@ func TestClusterMaintenanceChangeNodeSuccessOnWithoutPreviousState(t *testing.T)
 		errors.New("error getting node state"),
 	).Once()
 
-	mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"cs_clusterstate",
-		"-i",
-	).Return([]byte("S_IDLE"), nil)
+	mockClusterClient.On("IsIdle", ctx).Return(true, nil)
 
 	mockCmdExecutor.On(
 		"Exec",
@@ -549,6 +528,7 @@ func TestClusterMaintenanceChangeNodeSuccessOnWithoutPreviousState(t *testing.T)
 		operator.Options[operator.ClusterMaintenanceChange]{
 			OperatorOptions: []operator.Option[operator.ClusterMaintenanceChange]{
 				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(mockCmdExecutor)),
+				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceClient(mockClusterClient)),
 			},
 		},
 	)
@@ -567,6 +547,7 @@ func TestClusterMaintenanceChangeNodeSuccessOnWithoutPreviousState(t *testing.T)
 
 func TestClusterMaintenanceChangeNodeSuccessOff(t *testing.T) {
 	mockCmdExecutor := mocks.NewMockCmdExecutor(t)
+	mockClusterClient := clusterMocks.NewMockCrm(t)
 	ctx := context.Background()
 	nodeID := fakeID
 
@@ -588,12 +569,7 @@ func TestClusterMaintenanceChangeNodeSuccessOff(t *testing.T) {
 		"maintenance",
 	).Return([]byte("scope=nodes  name=maintenance value=true"), nil).Once()
 
-	mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"cs_clusterstate",
-		"-i",
-	).Return([]byte("S_IDLE"), nil)
+	mockClusterClient.On("IsIdle", ctx).Return(true, nil)
 
 	mockCmdExecutor.On(
 		"Exec",
@@ -634,6 +610,7 @@ func TestClusterMaintenanceChangeNodeSuccessOff(t *testing.T) {
 		operator.Options[operator.ClusterMaintenanceChange]{
 			OperatorOptions: []operator.Option[operator.ClusterMaintenanceChange]{
 				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(mockCmdExecutor)),
+				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceClient(mockClusterClient)),
 			},
 		},
 	)
@@ -967,6 +944,7 @@ func TestClusterMaintenanceChangeCommitAlreadyApplied(t *testing.T) {
 
 func TestClusterMaintenanceChangeCommitNotIdle(t *testing.T) {
 	mockCmdExecutor := mocks.NewMockCmdExecutor(t)
+	mockClusterClient := clusterMocks.NewMockCrm(t)
 	ctx := context.Background()
 
 	mockCmdExecutor.On(
@@ -986,19 +964,8 @@ func TestClusterMaintenanceChangeCommitNotIdle(t *testing.T) {
 		"maintenance-mode",
 	).Return([]byte("false"), nil)
 
-	mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"cs_clusterstate",
-		"-i",
-	).Return([]byte("S_TRANSITION"), nil).Once()
-
-	mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"cs_clusterstate",
-		"-i",
-	).Return([]byte("S_IDLE"), nil)
+	mockClusterClient.On("IsIdle", ctx).Return(false, nil).Once()
+	mockClusterClient.On("IsIdle", ctx).Return(true, nil)
 
 	mockCmdExecutor.On(
 		"Exec",
@@ -1016,6 +983,7 @@ func TestClusterMaintenanceChangeCommitNotIdle(t *testing.T) {
 		operator.Options[operator.ClusterMaintenanceChange]{
 			OperatorOptions: []operator.Option[operator.ClusterMaintenanceChange]{
 				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(mockCmdExecutor)),
+				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceClient(mockClusterClient)),
 			},
 		},
 	)
@@ -1029,6 +997,7 @@ func TestClusterMaintenanceChangeCommitNotIdle(t *testing.T) {
 
 func TestClusterMaintenanceChangeVerifyError(t *testing.T) {
 	mockCmdExecutor := mocks.NewMockCmdExecutor(t)
+	mockClusterClient := clusterMocks.NewMockCrm(t)
 	ctx := context.Background()
 
 	mockCmdExecutor.On(
@@ -1048,12 +1017,7 @@ func TestClusterMaintenanceChangeVerifyError(t *testing.T) {
 		"maintenance-mode",
 	).Return([]byte("false"), nil).Once()
 
-	mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"cs_clusterstate",
-		"-i",
-	).Return([]byte("S_IDLE"), nil)
+	mockClusterClient.On("IsIdle", ctx).Return(true, nil)
 
 	mockCmdExecutor.On(
 		"Exec",
@@ -1089,6 +1053,7 @@ func TestClusterMaintenanceChangeVerifyError(t *testing.T) {
 		operator.Options[operator.ClusterMaintenanceChange]{
 			OperatorOptions: []operator.Option[operator.ClusterMaintenanceChange]{
 				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(mockCmdExecutor)),
+				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceClient(mockClusterClient)),
 			},
 		},
 	)
@@ -1102,6 +1067,7 @@ func TestClusterMaintenanceChangeVerifyError(t *testing.T) {
 
 func TestClusterMaintenanceChangeRollbackNotIdle(t *testing.T) {
 	mockCmdExecutor := mocks.NewMockCmdExecutor(t)
+	mockClusterClient := clusterMocks.NewMockCrm(t)
 	ctx := context.Background()
 
 	mockCmdExecutor.On(
@@ -1121,12 +1087,7 @@ func TestClusterMaintenanceChangeRollbackNotIdle(t *testing.T) {
 		"maintenance-mode",
 	).Return([]byte("false"), nil)
 
-	mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"cs_clusterstate",
-		"-i",
-	).Return([]byte("S_IDLE"), nil).Once()
+	mockClusterClient.On("IsIdle", ctx).Return(true, nil).Once()
 
 	mockCmdExecutor.On(
 		"Exec",
@@ -1136,12 +1097,7 @@ func TestClusterMaintenanceChangeRollbackNotIdle(t *testing.T) {
 		"on",
 	).Return([]byte("error"), errors.New("error changing"))
 
-	mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"cs_clusterstate",
-		"-i",
-	).Return([]byte("S_TRANSITION"), nil)
+	mockClusterClient.On("IsIdle", ctx).Return(false, nil)
 
 	clusterMaintenanceChangeOperator := operator.NewClusterMaintenanceChange(
 		operator.Arguments{
@@ -1151,6 +1107,7 @@ func TestClusterMaintenanceChangeRollbackNotIdle(t *testing.T) {
 		operator.Options[operator.ClusterMaintenanceChange]{
 			OperatorOptions: []operator.Option[operator.ClusterMaintenanceChange]{
 				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(mockCmdExecutor)),
+				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceClient(mockClusterClient)),
 			},
 		},
 	)
@@ -1164,6 +1121,7 @@ func TestClusterMaintenanceChangeRollbackNotIdle(t *testing.T) {
 
 func TestClusterMaintenanceChangeRollbackErrorReverting(t *testing.T) {
 	mockCmdExecutor := mocks.NewMockCmdExecutor(t)
+	mockClusterClient := clusterMocks.NewMockCrm(t)
 	ctx := context.Background()
 
 	mockCmdExecutor.On(
@@ -1183,12 +1141,7 @@ func TestClusterMaintenanceChangeRollbackErrorReverting(t *testing.T) {
 		"maintenance-mode",
 	).Return([]byte("false"), nil)
 
-	mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"cs_clusterstate",
-		"-i",
-	).Return([]byte("S_IDLE"), nil)
+	mockClusterClient.On("IsIdle", ctx).Return(true, nil)
 
 	mockCmdExecutor.On(
 		"Exec",
@@ -1214,6 +1167,7 @@ func TestClusterMaintenanceChangeRollbackErrorReverting(t *testing.T) {
 		operator.Options[operator.ClusterMaintenanceChange]{
 			OperatorOptions: []operator.Option[operator.ClusterMaintenanceChange]{
 				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(mockCmdExecutor)),
+				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceClient(mockClusterClient)),
 			},
 		},
 	)

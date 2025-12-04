@@ -9,12 +9,12 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/trento-project/workbench/internal/cluster"
 	"github.com/trento-project/workbench/internal/support"
 )
 
 const (
 	ClusterMaintenanceChangeOperatorName = "clustermaintenancechange"
-	clusterIdlePattern                   = "S_IDLE"
 	nodeStatePattern                     = "value=(.*)"
 	maintenanceOn                        = "on"
 	maintenanceOff                       = "off"
@@ -28,10 +28,7 @@ const (
 	nodeScope
 )
 
-var (
-	clusterIdlePatternCompiled = regexp.MustCompile(clusterIdlePattern)
-	nodeStatePatternCompiled   = regexp.MustCompile(nodeStatePattern)
-)
+var nodeStatePatternCompiled = regexp.MustCompile(nodeStatePattern)
 
 type ClusterMaintenanceChangeOption Option[ClusterMaintenanceChange]
 
@@ -91,6 +88,7 @@ type diffOutput struct {
 type ClusterMaintenanceChange struct {
 	baseOperator
 	executor        support.CmdExecutor
+	clusterClient   cluster.Cluster
 	scope           clusterMaintenanceScope
 	parsedArguments *clusterMaintenanceChangeArguments
 }
@@ -98,6 +96,12 @@ type ClusterMaintenanceChange struct {
 func WithCustomClusterMaintenanceExecutor(executor support.CmdExecutor) ClusterMaintenanceChangeOption {
 	return func(o *ClusterMaintenanceChange) {
 		o.executor = executor
+	}
+}
+
+func WithCustomClusterMaintenanceClient(clusterClient cluster.Cluster) ClusterMaintenanceChangeOption {
+	return func(o *ClusterMaintenanceChange) {
+		o.clusterClient = clusterClient
 	}
 }
 
@@ -110,7 +114,8 @@ func NewClusterMaintenanceChange(
 		baseOperator: newBaseOperator(
 			ClusterMaintenanceChangeOperatorName, operationID, arguments, options.BaseOperatorOptions...,
 		),
-		executor: support.CliExecutor{},
+		executor:      support.CliExecutor{},
+		clusterClient: cluster.NewDefaultClusterClient(),
 	}
 
 	for _, opt := range options.OperatorOptions {
@@ -163,9 +168,13 @@ func (c *ClusterMaintenanceChange) plan(ctx context.Context) (bool, error) {
 }
 
 func (c *ClusterMaintenanceChange) commit(ctx context.Context) error {
-	err := isIdle(ctx, c.executor)
+	isIdle, err := c.clusterClient.IsIdle(ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf("error checking if cluster is idle: %w", err)
+	}
+
+	if !isIdle {
+		return errors.New("cluster is not in S_IDLE state")
 	}
 
 	// refresh cluster or resource before removing maintenance state
@@ -202,9 +211,13 @@ func (c *ClusterMaintenanceChange) verify(ctx context.Context) error {
 }
 
 func (c *ClusterMaintenanceChange) rollback(ctx context.Context) error {
-	err := isIdle(ctx, c.executor)
+	isIdle, err := c.clusterClient.IsIdle(ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf("error checking if cluster is idle: %w", err)
+	}
+
+	if !isIdle {
+		return errors.New("cluster is not in S_IDLE state")
 	}
 
 	initialState, _ := c.resources[beforeDiffField].(bool)
@@ -372,19 +385,6 @@ func setMaintenanceState(
 			return err
 		}
 	}
-}
-
-func isIdle(ctx context.Context, executor support.CmdExecutor) error {
-	idleOutput, err := executor.Exec(ctx, "cs_clusterstate", "-i")
-	if err != nil {
-		return fmt.Errorf("error running cs_clusterstate: %w", err)
-	}
-
-	if !clusterIdlePatternCompiled.Match(idleOutput) {
-		return fmt.Errorf("cluster is not in S_IDLE state")
-	}
-
-	return nil
 }
 
 // Depending on the queried resource, the crm command might print some "debug" lines
