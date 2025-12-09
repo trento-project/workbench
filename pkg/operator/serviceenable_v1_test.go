@@ -17,7 +17,7 @@ type ServiceEnableOperatorTestSuite struct {
 	suite.Suite
 	logger            *slog.Logger
 	mockSystemd       *mocks.MockSystemd
-	mockSystemdLoader *mocks.MockSystemdLoader
+	mockSystemdLoader *mocks.MockLoader
 }
 
 func buildServiceEnableOperator(suite *ServiceEnableOperatorTestSuite) operator.Operator {
@@ -44,7 +44,7 @@ func TestServiceEnableOperator(t *testing.T) {
 func (suite *ServiceEnableOperatorTestSuite) SetupTest() {
 	suite.logger = support.NewDefaultLogger(slog.LevelInfo)
 	suite.mockSystemd = mocks.NewMockSystemd(suite.T())
-	suite.mockSystemdLoader = mocks.NewMockSystemdLoader(suite.T())
+	suite.mockSystemdLoader = mocks.NewMockLoader(suite.T())
 }
 
 func (suite *ServiceEnableOperatorTestSuite) TestServiceEnableOperatorPlanErrorDbusConnection() {
