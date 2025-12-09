@@ -15,7 +15,7 @@ const fakeID = "some-id"
 
 func TestClusterMaintenanceChangeSuccessOn(t *testing.T) {
 	mockCmdExecutor := mocks.NewMockCmdExecutor(t)
-	mockClusterClient := clusterMocks.NewMockCrm(t)
+	mockClusterClient := clusterMocks.NewMockCluster(t)
 	ctx := context.Background()
 
 	mockClusterClient.On("IsHostOnline", ctx).Return(true)
@@ -77,7 +77,7 @@ func TestClusterMaintenanceChangeSuccessOn(t *testing.T) {
 
 func TestClusterMaintenanceChangeSuccessOff(t *testing.T) {
 	mockCmdExecutor := mocks.NewMockCmdExecutor(t)
-	mockClusterClient := clusterMocks.NewMockCrm(t)
+	mockClusterClient := clusterMocks.NewMockCluster(t)
 	ctx := context.Background()
 
 	mockClusterClient.On("IsHostOnline", ctx).Return(true)
@@ -148,7 +148,7 @@ func TestClusterMaintenanceChangeSuccessOff(t *testing.T) {
 
 func TestClusterMaintenanceChangeResourceSuccess(t *testing.T) {
 	mockCmdExecutor := mocks.NewMockCmdExecutor(t)
-	mockClusterClient := clusterMocks.NewMockCrm(t)
+	mockClusterClient := clusterMocks.NewMockCluster(t)
 	ctx := context.Background()
 	resourceID := fakeID
 
@@ -215,7 +215,7 @@ func TestClusterMaintenanceChangeResourceSuccess(t *testing.T) {
 
 func TestClusterMaintenanceChangeResourceWithIsManagedSuccess(t *testing.T) {
 	mockCmdExecutor := mocks.NewMockCmdExecutor(t)
-	mockClusterClient := clusterMocks.NewMockCrm(t)
+	mockClusterClient := clusterMocks.NewMockCluster(t)
 	ctx := context.Background()
 	resourceID := fakeID
 
@@ -295,7 +295,7 @@ func TestClusterMaintenanceChangeResourceWithIsManagedSuccess(t *testing.T) {
 
 func TestClusterMaintenanceChangeResourceDefaultSuccess(t *testing.T) {
 	mockCmdExecutor := mocks.NewMockCmdExecutor(t)
-	mockClusterClient := clusterMocks.NewMockCrm(t)
+	mockClusterClient := clusterMocks.NewMockCluster(t)
 	ctx := context.Background()
 	resourceID := fakeID
 
@@ -373,7 +373,7 @@ func TestClusterMaintenanceChangeResourceDefaultSuccess(t *testing.T) {
 
 func TestClusterMaintenanceChangeNodeSuccessOn(t *testing.T) {
 	mockCmdExecutor := mocks.NewMockCmdExecutor(t)
-	mockClusterClient := clusterMocks.NewMockCrm(t)
+	mockClusterClient := clusterMocks.NewMockCluster(t)
 	ctx := context.Background()
 	nodeID := fakeID
 
@@ -441,7 +441,7 @@ func TestClusterMaintenanceChangeNodeSuccessOn(t *testing.T) {
 
 func TestClusterMaintenanceChangeNodeSuccessOnWithoutPreviousState(t *testing.T) {
 	mockCmdExecutor := mocks.NewMockCmdExecutor(t)
-	mockClusterClient := clusterMocks.NewMockCrm(t)
+	mockClusterClient := clusterMocks.NewMockCluster(t)
 	ctx := context.Background()
 	nodeID := fakeID
 
@@ -512,7 +512,7 @@ func TestClusterMaintenanceChangeNodeSuccessOnWithoutPreviousState(t *testing.T)
 
 func TestClusterMaintenanceChangeNodeSuccessOff(t *testing.T) {
 	mockCmdExecutor := mocks.NewMockCmdExecutor(t)
-	mockClusterClient := clusterMocks.NewMockCrm(t)
+	mockClusterClient := clusterMocks.NewMockCluster(t)
 	ctx := context.Background()
 	nodeID := fakeID
 
@@ -706,7 +706,7 @@ func TestClusterMaintenanceChangeMutuallyExclusiveArgument(t *testing.T) {
 
 func TestClusterMaintenanceChangePlanClusterNotFound(t *testing.T) {
 	mockCmdExecutor := mocks.NewMockCmdExecutor(t)
-	mockClusterClient := clusterMocks.NewMockCrm(t)
+	mockClusterClient := clusterMocks.NewMockCluster(t)
 	ctx := context.Background()
 
 	mockClusterClient.On("IsHostOnline", ctx).Return(false)
@@ -733,7 +733,7 @@ func TestClusterMaintenanceChangePlanClusterNotFound(t *testing.T) {
 
 func TestClusterMaintenanceChangePlanGetMaintenanceError(t *testing.T) {
 	mockCmdExecutor := mocks.NewMockCmdExecutor(t)
-	mockClusterClient := clusterMocks.NewMockCrm(t)
+	mockClusterClient := clusterMocks.NewMockCluster(t)
 	ctx := context.Background()
 
 	mockClusterClient.On("IsHostOnline", ctx).Return(true)
@@ -770,7 +770,7 @@ func TestClusterMaintenanceChangePlanGetMaintenanceError(t *testing.T) {
 
 func TestClusterMaintenanceChangePlanEmptyMaintenanceState(t *testing.T) {
 	mockCmdExecutor := mocks.NewMockCmdExecutor(t)
-	mockClusterClient := clusterMocks.NewMockCrm(t)
+	mockClusterClient := clusterMocks.NewMockCluster(t)
 	ctx := context.Background()
 
 	mockClusterClient.On("IsHostOnline", ctx).Return(true)
@@ -807,7 +807,7 @@ func TestClusterMaintenanceChangePlanEmptyMaintenanceState(t *testing.T) {
 
 func TestClusterMaintenanceChangePlanNodeNotFound(t *testing.T) {
 	mockCmdExecutor := mocks.NewMockCmdExecutor(t)
-	mockClusterClient := clusterMocks.NewMockCrm(t)
+	mockClusterClient := clusterMocks.NewMockCluster(t)
 	ctx := context.Background()
 	nodeID := fakeID
 
@@ -847,7 +847,7 @@ func TestClusterMaintenanceChangePlanNodeNotFound(t *testing.T) {
 
 func TestClusterMaintenanceChangeCommitAlreadyApplied(t *testing.T) {
 	mockCmdExecutor := mocks.NewMockCmdExecutor(t)
-	mockClusterClient := clusterMocks.NewMockCrm(t)
+	mockClusterClient := clusterMocks.NewMockCluster(t)
 	ctx := context.Background()
 
 	mockClusterClient.On("IsHostOnline", ctx).Return(true)
@@ -889,7 +889,7 @@ func TestClusterMaintenanceChangeCommitAlreadyApplied(t *testing.T) {
 
 func TestClusterMaintenanceChangeCommitNotIdle(t *testing.T) {
 	mockCmdExecutor := mocks.NewMockCmdExecutor(t)
-	mockClusterClient := clusterMocks.NewMockCrm(t)
+	mockClusterClient := clusterMocks.NewMockCluster(t)
 	ctx := context.Background()
 
 	mockClusterClient.On("IsHostOnline", ctx).Return(true)
@@ -937,7 +937,7 @@ func TestClusterMaintenanceChangeCommitNotIdle(t *testing.T) {
 
 func TestClusterMaintenanceChangeVerifyError(t *testing.T) {
 	mockCmdExecutor := mocks.NewMockCmdExecutor(t)
-	mockClusterClient := clusterMocks.NewMockCrm(t)
+	mockClusterClient := clusterMocks.NewMockCluster(t)
 	ctx := context.Background()
 
 	mockClusterClient.On("IsHostOnline", ctx).Return(true)
@@ -1002,7 +1002,7 @@ func TestClusterMaintenanceChangeVerifyError(t *testing.T) {
 
 func TestClusterMaintenanceChangeRollbackNotIdle(t *testing.T) {
 	mockCmdExecutor := mocks.NewMockCmdExecutor(t)
-	mockClusterClient := clusterMocks.NewMockCrm(t)
+	mockClusterClient := clusterMocks.NewMockCluster(t)
 	ctx := context.Background()
 
 	mockClusterClient.On("IsHostOnline", ctx).Return(true)
@@ -1051,7 +1051,7 @@ func TestClusterMaintenanceChangeRollbackNotIdle(t *testing.T) {
 
 func TestClusterMaintenanceChangeRollbackErrorReverting(t *testing.T) {
 	mockCmdExecutor := mocks.NewMockCmdExecutor(t)
-	mockClusterClient := clusterMocks.NewMockCrm(t)
+	mockClusterClient := clusterMocks.NewMockCluster(t)
 	ctx := context.Background()
 
 	mockClusterClient.On("IsHostOnline", ctx).Return(true)
