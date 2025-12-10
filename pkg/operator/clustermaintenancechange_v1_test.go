@@ -103,16 +103,9 @@ func (suite *ClusterMaintenanceChangeOperatorTestSuite) TestClusterMaintenanceCh
 		"maintenance-mode",
 	).Return([]byte("true"), nil).Once()
 
-	suite.mockClusterClient.On("IsIdle", ctx).Return(true, nil)
-
-	suite.mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"crm",
-		"resource",
-		"refresh",
-		"",
-	).Return([]byte("ok"), nil)
+	suite.mockClusterClient.
+		On("IsIdle", ctx).Return(true, nil).
+		On("ResourceRefresh", ctx, "", "").Return(nil)
 
 	suite.mockCmdExecutor.On(
 		"Exec",
@@ -528,16 +521,9 @@ func (suite *ClusterMaintenanceChangeOperatorTestSuite) TestClusterMaintenanceCh
 		"maintenance",
 	).Return([]byte("scope=nodes  name=maintenance value=true"), nil).Once()
 
-	suite.mockClusterClient.On("IsIdle", ctx).Return(true, nil)
-
-	suite.mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"crm",
-		"resource",
-		"refresh",
-		"",
-	).Return([]byte("ok"), nil)
+	suite.mockClusterClient.
+		On("IsIdle", ctx).Return(true, nil).
+		On("ResourceRefresh", ctx, "", "").Return(nil)
 
 	suite.mockCmdExecutor.On(
 		"Exec",

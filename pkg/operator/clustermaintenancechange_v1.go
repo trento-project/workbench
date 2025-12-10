@@ -179,7 +179,7 @@ func (c *ClusterMaintenanceChange) commit(ctx context.Context) error {
 	// refresh cluster or resource before removing maintenance state
 	// in case of node state change, using the command with empty resourceID is OK
 	if !c.parsedArguments.maintenance {
-		_, err = c.executor.Exec(ctx, "crm", "resource", "refresh", c.parsedArguments.resourceID)
+		err = c.clusterClient.ResourceRefresh(ctx, c.parsedArguments.resourceID, "")
 		if err != nil {
 			return fmt.Errorf("error refreshing maintenance state: %w", err)
 		}
@@ -227,6 +227,7 @@ func (c *ClusterMaintenanceChange) rollback(ctx context.Context) error {
 	return nil
 }
 
+// nolint: dupl
 func (c *ClusterMaintenanceChange) operationDiff(_ context.Context) map[string]any {
 	diff := make(map[string]any)
 

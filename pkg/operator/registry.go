@@ -106,7 +106,13 @@ func StandardRegistry(options ...BaseOperatorOption) *Registry {
 					})
 				},
 			},
-
+			ClusterResourceRefreshOperatorName: map[string]Builder{
+				"v1": func(operationID string, arguments Arguments) Operator {
+					return NewClusterResourceRefresh(arguments, operationID, Options[ClusterResourceRefresh]{
+						BaseOperatorOptions: options,
+					})
+				},
+			},
 			CrmClusterStartOperatorName: map[string]Builder{
 				"v1": func(operationID string, arguments Arguments) Operator {
 					return NewCrmClusterStart(arguments, operationID, Options[CrmClusterStart]{
@@ -114,7 +120,6 @@ func StandardRegistry(options ...BaseOperatorOption) *Registry {
 					})
 				},
 			},
-
 			CrmClusterStopOperatorName: map[string]Builder{
 				"v1": func(operationID string, arguments Arguments) Operator {
 					return NewCrmClusterStop(arguments, operationID, Options[CrmClusterStop]{
@@ -122,7 +127,6 @@ func StandardRegistry(options ...BaseOperatorOption) *Registry {
 					})
 				},
 			},
-
 			HostRebootOperatorName: map[string]Builder{
 				"v1": func(operationID string, arguments Arguments) Operator {
 					return NewHostReboot(arguments, operationID, Options[HostReboot]{
@@ -130,7 +134,6 @@ func StandardRegistry(options ...BaseOperatorOption) *Registry {
 					})
 				},
 			},
-
 			SapInstanceStartOperatorName: map[string]Builder{
 				"v1": func(operationID string, arguments Arguments) Operator {
 					return NewSAPInstanceStart(arguments, operationID, Options[SAPInstanceStart]{
