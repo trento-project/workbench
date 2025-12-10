@@ -38,7 +38,6 @@ import (
 	"fmt"
 
 	"github.com/trento-project/workbench/internal/cluster"
-	"github.com/trento-project/workbench/internal/support"
 )
 
 const (
@@ -52,7 +51,6 @@ type clusterResourceRefreshArguments struct {
 
 type ClusterResourceRefresh struct {
 	baseOperator
-	executor        support.CmdExecutor
 	clusterClient   cluster.Cluster
 	parsedArguments *clusterResourceRefreshArguments
 }
@@ -63,12 +61,6 @@ type clusterRefreshDiffOutput struct {
 	Refreshed  bool   `json:"refreshed"`
 	ResourceID string `json:"resource_id,omitempty"`
 	NodeID     string `json:"node_id,omitempty"`
-}
-
-func WithCustomClusterResourceRefreshExecutor(executor support.CmdExecutor) ClusterResourceRefreshOption {
-	return func(o *ClusterResourceRefresh) {
-		o.executor = executor
-	}
 }
 
 func WithCustomClusterResourceRefreshClient(clusterClient cluster.Cluster) ClusterResourceRefreshOption {
@@ -87,7 +79,6 @@ func NewClusterResourceRefresh(
 			ClusterResourceRefreshOperatorName, operationID, arguments, options.BaseOperatorOptions...,
 		),
 		clusterClient: cluster.NewDefaultClusterClient(),
-		executor:      support.CliExecutor{},
 	}
 
 	for _, opt := range options.OperatorOptions {
@@ -129,14 +120,14 @@ func (c *ClusterResourceRefresh) commit(ctx context.Context) error {
 	return c.clusterClient.ResourceRefresh(ctx, c.parsedArguments.resourceID, c.parsedArguments.nodeID)
 }
 
-func (c *ClusterResourceRefresh) verify(ctx context.Context) error {
+func (c *ClusterResourceRefresh) verify(_ context.Context) error {
 	// A refresh operation is an action that doesn't change a verifiable state.
 	// If commit was successful, we consider it done.
 	c.resources[afterDiffField] = true
 	return nil
 }
 
-func (c *ClusterResourceRefresh) rollback(ctx context.Context) error {
+func (c *ClusterResourceRefresh) rollback(_ context.Context) error {
 	// There is no rollback for a refresh operation.
 	c.logger.Info("Rollback is not applicable for cluster refresh operation.")
 	return nil
@@ -151,13 +142,10 @@ func (c *ClusterResourceRefresh) operationDiff(_ context.Context) map[string]any
 			c.resources[beforeDiffField]))
 	}
 
-	afterRefreshed := false
-	if after, exists := c.resources[afterDiffField]; exists {
-		afterRefreshed, ok = after.(bool)
-		if !ok {
-			panic(fmt.Sprintf("invalid afterRefreshed value: cannot parse '%s' to bool",
-				c.resources[afterDiffField]))
-		}
+	afterRefreshed, ok := c.resources[afterDiffField].(bool)
+	if !ok {
+		panic(fmt.Sprintf("invalid afterRefreshed value: cannot parse '%s' to bool",
+			c.resources[afterDiffField]))
 	}
 
 	beforeDiffOutput := clusterRefreshDiffOutput{
