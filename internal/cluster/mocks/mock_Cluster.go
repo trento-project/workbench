@@ -123,6 +123,54 @@ func (_c *MockCluster_IsIdle_Call) RunAndReturn(run func(context.Context) (bool,
 	return _c
 }
 
+// ResourceRefresh provides a mock function with given fields: ctx, resourceID, nodeID
+func (_m *MockCluster) ResourceRefresh(ctx context.Context, resourceID string, nodeID string) error {
+	ret := _m.Called(ctx, resourceID, nodeID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ResourceRefresh")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) error); ok {
+		r0 = rf(ctx, resourceID, nodeID)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// MockCluster_ResourceRefresh_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ResourceRefresh'
+type MockCluster_ResourceRefresh_Call struct {
+	*mock.Call
+}
+
+// ResourceRefresh is a helper method to define mock.On call
+//   - ctx context.Context
+//   - resourceID string
+//   - nodeID string
+func (_e *MockCluster_Expecter) ResourceRefresh(ctx interface{}, resourceID interface{}, nodeID interface{}) *MockCluster_ResourceRefresh_Call {
+	return &MockCluster_ResourceRefresh_Call{Call: _e.mock.On("ResourceRefresh", ctx, resourceID, nodeID)}
+}
+
+func (_c *MockCluster_ResourceRefresh_Call) Run(run func(ctx context.Context, resourceID string, nodeID string)) *MockCluster_ResourceRefresh_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string), args[2].(string))
+	})
+	return _c
+}
+
+func (_c *MockCluster_ResourceRefresh_Call) Return(_a0 error) *MockCluster_ResourceRefresh_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *MockCluster_ResourceRefresh_Call) RunAndReturn(run func(context.Context, string, string) error) *MockCluster_ResourceRefresh_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // StartCluster provides a mock function with given fields: ctx
 func (_m *MockCluster) StartCluster(ctx context.Context) error {
 	ret := _m.Called(ctx)
