@@ -5,25 +5,35 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
+	clusterMocks "github.com/trento-project/workbench/internal/cluster/mocks"
 	"github.com/trento-project/workbench/internal/support/mocks"
 	"github.com/trento-project/workbench/pkg/operator"
 )
 
 const fakeID = "some-id"
 
-func TestClusterMaintenanceChangeSuccessOn(t *testing.T) {
-	mockCmdExecutor := mocks.NewMockCmdExecutor(t)
+type ClusterMaintenanceChangeOperatorTestSuite struct {
+	suite.Suite
+	mockCmdExecutor   *mocks.MockCmdExecutor
+	mockClusterClient *clusterMocks.MockCluster
+}
+
+func TestClusterMaintenanceChangeOperator(t *testing.T) {
+	suite.Run(t, new(ClusterMaintenanceChangeOperatorTestSuite))
+}
+
+func (suite *ClusterMaintenanceChangeOperatorTestSuite) SetupTest() {
+	suite.mockCmdExecutor = mocks.NewMockCmdExecutor(suite.T())
+	suite.mockClusterClient = clusterMocks.NewMockCluster(suite.T())
+}
+
+func (suite *ClusterMaintenanceChangeOperatorTestSuite) TestClusterMaintenanceChangeSuccessOn() {
 	ctx := context.Background()
 
-	mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"crm",
-		"status",
-	).Return([]byte("ok"), nil)
+	suite.mockClusterClient.On("IsHostOnline", ctx).Return(true)
 
-	mockCmdExecutor.On(
+	suite.mockCmdExecutor.On(
 		"Exec",
 		ctx,
 		"crm",
@@ -33,14 +43,9 @@ func TestClusterMaintenanceChangeSuccessOn(t *testing.T) {
 		"maintenance-mode",
 	).Return([]byte("false"), nil).Once()
 
-	mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"cs_clusterstate",
-		"-i",
-	).Return([]byte("S_IDLE"), nil)
+	suite.mockClusterClient.On("IsIdle", ctx).Return(true, nil)
 
-	mockCmdExecutor.On(
+	suite.mockCmdExecutor.On(
 		"Exec",
 		ctx,
 		"crm",
@@ -48,7 +53,7 @@ func TestClusterMaintenanceChangeSuccessOn(t *testing.T) {
 		"on",
 	).Return([]byte("ok"), nil)
 
-	mockCmdExecutor.On(
+	suite.mockCmdExecutor.On(
 		"Exec",
 		ctx,
 		"crm",
@@ -65,7 +70,8 @@ func TestClusterMaintenanceChangeSuccessOn(t *testing.T) {
 		"test-op",
 		operator.Options[operator.ClusterMaintenanceChange]{
 			OperatorOptions: []operator.Option[operator.ClusterMaintenanceChange]{
-				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(mockCmdExecutor)),
+				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(suite.mockCmdExecutor)),
+				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceClient(suite.mockClusterClient)),
 			},
 		},
 	)
@@ -77,23 +83,17 @@ func TestClusterMaintenanceChangeSuccessOn(t *testing.T) {
 		"after":  "{\"maintenance\":true}",
 	}
 
-	assert.Nil(t, report.Error)
-	assert.Equal(t, report.Success.LastPhase, operator.VERIFY)
-	assert.EqualValues(t, report.Success.Diff, expectedDiff)
+	suite.Nil(report.Error)
+	suite.Equal(report.Success.LastPhase, operator.VERIFY)
+	suite.EqualValues(report.Success.Diff, expectedDiff)
 }
 
-func TestClusterMaintenanceChangeSuccessOff(t *testing.T) {
-	mockCmdExecutor := mocks.NewMockCmdExecutor(t)
+func (suite *ClusterMaintenanceChangeOperatorTestSuite) TestClusterMaintenanceChangeSuccessOff() {
 	ctx := context.Background()
 
-	mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"crm",
-		"status",
-	).Return([]byte("ok"), nil)
+	suite.mockClusterClient.On("IsHostOnline", ctx).Return(true)
 
-	mockCmdExecutor.On(
+	suite.mockCmdExecutor.On(
 		"Exec",
 		ctx,
 		"crm",
@@ -103,14 +103,9 @@ func TestClusterMaintenanceChangeSuccessOff(t *testing.T) {
 		"maintenance-mode",
 	).Return([]byte("true"), nil).Once()
 
-	mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"cs_clusterstate",
-		"-i",
-	).Return([]byte("S_IDLE"), nil)
+	suite.mockClusterClient.On("IsIdle", ctx).Return(true, nil)
 
-	mockCmdExecutor.On(
+	suite.mockCmdExecutor.On(
 		"Exec",
 		ctx,
 		"crm",
@@ -119,7 +114,7 @@ func TestClusterMaintenanceChangeSuccessOff(t *testing.T) {
 		"",
 	).Return([]byte("ok"), nil)
 
-	mockCmdExecutor.On(
+	suite.mockCmdExecutor.On(
 		"Exec",
 		ctx,
 		"crm",
@@ -127,7 +122,7 @@ func TestClusterMaintenanceChangeSuccessOff(t *testing.T) {
 		"off",
 	).Return([]byte("ok"), nil)
 
-	mockCmdExecutor.On(
+	suite.mockCmdExecutor.On(
 		"Exec",
 		ctx,
 		"crm",
@@ -144,7 +139,8 @@ func TestClusterMaintenanceChangeSuccessOff(t *testing.T) {
 		"test-op",
 		operator.Options[operator.ClusterMaintenanceChange]{
 			OperatorOptions: []operator.Option[operator.ClusterMaintenanceChange]{
-				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(mockCmdExecutor)),
+				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(suite.mockCmdExecutor)),
+				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceClient(suite.mockClusterClient)),
 			},
 		},
 	)
@@ -156,24 +152,18 @@ func TestClusterMaintenanceChangeSuccessOff(t *testing.T) {
 		"after":  "{\"maintenance\":false}",
 	}
 
-	assert.Nil(t, report.Error)
-	assert.Equal(t, report.Success.LastPhase, operator.VERIFY)
-	assert.EqualValues(t, report.Success.Diff, expectedDiff)
+	suite.Nil(report.Error)
+	suite.Equal(report.Success.LastPhase, operator.VERIFY)
+	suite.EqualValues(report.Success.Diff, expectedDiff)
 }
 
-func TestClusterMaintenanceChangeResourceSuccess(t *testing.T) {
-	mockCmdExecutor := mocks.NewMockCmdExecutor(t)
+func (suite *ClusterMaintenanceChangeOperatorTestSuite) TestClusterMaintenanceChangeResourceSuccess() {
 	ctx := context.Background()
 	resourceID := fakeID
 
-	mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"crm",
-		"status",
-	).Return([]byte("ok"), nil)
+	suite.mockClusterClient.On("IsHostOnline", ctx).Return(true)
 
-	mockCmdExecutor.On(
+	suite.mockCmdExecutor.On(
 		"Exec",
 		ctx,
 		"crm",
@@ -184,14 +174,9 @@ func TestClusterMaintenanceChangeResourceSuccess(t *testing.T) {
 		"maintenance",
 	).Return([]byte("false"), nil).Once()
 
-	mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"cs_clusterstate",
-		"-i",
-	).Return([]byte("S_IDLE"), nil)
+	suite.mockClusterClient.On("IsIdle", ctx).Return(true, nil)
 
-	mockCmdExecutor.On(
+	suite.mockCmdExecutor.On(
 		"Exec",
 		ctx,
 		"crm",
@@ -200,7 +185,7 @@ func TestClusterMaintenanceChangeResourceSuccess(t *testing.T) {
 		resourceID,
 	).Return([]byte("ok"), nil)
 
-	mockCmdExecutor.On(
+	suite.mockCmdExecutor.On(
 		"Exec",
 		ctx,
 		"crm",
@@ -219,7 +204,8 @@ func TestClusterMaintenanceChangeResourceSuccess(t *testing.T) {
 		"test-op",
 		operator.Options[operator.ClusterMaintenanceChange]{
 			OperatorOptions: []operator.Option[operator.ClusterMaintenanceChange]{
-				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(mockCmdExecutor)),
+				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(suite.mockCmdExecutor)),
+				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceClient(suite.mockClusterClient)),
 			},
 		},
 	)
@@ -231,24 +217,18 @@ func TestClusterMaintenanceChangeResourceSuccess(t *testing.T) {
 		"after":  "{\"maintenance\":true,\"resource_id\":\"some-id\"}",
 	}
 
-	assert.Nil(t, report.Error)
-	assert.Equal(t, report.Success.LastPhase, operator.VERIFY)
-	assert.EqualValues(t, report.Success.Diff, expectedDiff)
+	suite.Nil(report.Error)
+	suite.Equal(report.Success.LastPhase, operator.VERIFY)
+	suite.EqualValues(report.Success.Diff, expectedDiff)
 }
 
-func TestClusterMaintenanceChangeResourceWithIsManagedSuccess(t *testing.T) {
-	mockCmdExecutor := mocks.NewMockCmdExecutor(t)
+func (suite *ClusterMaintenanceChangeOperatorTestSuite) TestClusterMaintenanceChangeResourceWithIsManagedSuccess() {
 	ctx := context.Background()
 	resourceID := fakeID
 
-	mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"crm",
-		"status",
-	).Return([]byte("ok"), nil)
+	suite.mockClusterClient.On("IsHostOnline", ctx).Return(true)
 
-	mockCmdExecutor.On(
+	suite.mockCmdExecutor.On(
 		"Exec",
 		ctx,
 		"crm",
@@ -261,7 +241,7 @@ func TestClusterMaintenanceChangeResourceWithIsManagedSuccess(t *testing.T) {
 
 	// is-managed has the reverse boolean logic than `maintenance`
 	// so is-managed=true means maintenance=false
-	mockCmdExecutor.On(
+	suite.mockCmdExecutor.On(
 		"Exec",
 		ctx,
 		"crm",
@@ -272,14 +252,9 @@ func TestClusterMaintenanceChangeResourceWithIsManagedSuccess(t *testing.T) {
 		"is-managed",
 	).Return([]byte("true"), nil).Once()
 
-	mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"cs_clusterstate",
-		"-i",
-	).Return([]byte("S_IDLE"), nil)
+	suite.mockClusterClient.On("IsIdle", ctx).Return(true, nil)
 
-	mockCmdExecutor.On(
+	suite.mockCmdExecutor.On(
 		"Exec",
 		ctx,
 		"crm",
@@ -288,7 +263,7 @@ func TestClusterMaintenanceChangeResourceWithIsManagedSuccess(t *testing.T) {
 		resourceID,
 	).Return([]byte("ok"), nil)
 
-	mockCmdExecutor.On(
+	suite.mockCmdExecutor.On(
 		"Exec",
 		ctx,
 		"crm",
@@ -307,7 +282,8 @@ func TestClusterMaintenanceChangeResourceWithIsManagedSuccess(t *testing.T) {
 		"test-op",
 		operator.Options[operator.ClusterMaintenanceChange]{
 			OperatorOptions: []operator.Option[operator.ClusterMaintenanceChange]{
-				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(mockCmdExecutor)),
+				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(suite.mockCmdExecutor)),
+				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceClient(suite.mockClusterClient)),
 			},
 		},
 	)
@@ -319,24 +295,18 @@ func TestClusterMaintenanceChangeResourceWithIsManagedSuccess(t *testing.T) {
 		"after":  "{\"maintenance\":true,\"resource_id\":\"some-id\"}",
 	}
 
-	assert.Nil(t, report.Error)
-	assert.Equal(t, report.Success.LastPhase, operator.VERIFY)
-	assert.EqualValues(t, report.Success.Diff, expectedDiff)
+	suite.Nil(report.Error)
+	suite.Equal(report.Success.LastPhase, operator.VERIFY)
+	suite.EqualValues(report.Success.Diff, expectedDiff)
 }
 
-func TestClusterMaintenanceChangeResourceDefaultSuccess(t *testing.T) {
-	mockCmdExecutor := mocks.NewMockCmdExecutor(t)
+func (suite *ClusterMaintenanceChangeOperatorTestSuite) TestClusterMaintenanceChangeResourceDefaultSuccess() {
 	ctx := context.Background()
 	resourceID := fakeID
 
-	mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"crm",
-		"status",
-	).Return([]byte("ok"), nil)
+	suite.mockClusterClient.On("IsHostOnline", ctx).Return(true)
 
-	mockCmdExecutor.On(
+	suite.mockCmdExecutor.On(
 		"Exec",
 		ctx,
 		"crm",
@@ -347,7 +317,7 @@ func TestClusterMaintenanceChangeResourceDefaultSuccess(t *testing.T) {
 		"maintenance",
 	).Return([]byte("not found"), nil).Once()
 
-	mockCmdExecutor.On(
+	suite.mockCmdExecutor.On(
 		"Exec",
 		ctx,
 		"crm",
@@ -358,14 +328,9 @@ func TestClusterMaintenanceChangeResourceDefaultSuccess(t *testing.T) {
 		"is-managed",
 	).Return([]byte("not found"), nil)
 
-	mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"cs_clusterstate",
-		"-i",
-	).Return([]byte("S_IDLE"), nil)
+	suite.mockClusterClient.On("IsIdle", ctx).Return(true, nil)
 
-	mockCmdExecutor.On(
+	suite.mockCmdExecutor.On(
 		"Exec",
 		ctx,
 		"crm",
@@ -374,7 +339,7 @@ func TestClusterMaintenanceChangeResourceDefaultSuccess(t *testing.T) {
 		resourceID,
 	).Return([]byte("ok"), nil)
 
-	mockCmdExecutor.On(
+	suite.mockCmdExecutor.On(
 		"Exec",
 		ctx,
 		"crm",
@@ -393,7 +358,8 @@ func TestClusterMaintenanceChangeResourceDefaultSuccess(t *testing.T) {
 		"test-op",
 		operator.Options[operator.ClusterMaintenanceChange]{
 			OperatorOptions: []operator.Option[operator.ClusterMaintenanceChange]{
-				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(mockCmdExecutor)),
+				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(suite.mockCmdExecutor)),
+				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceClient(suite.mockClusterClient)),
 			},
 		},
 	)
@@ -405,24 +371,18 @@ func TestClusterMaintenanceChangeResourceDefaultSuccess(t *testing.T) {
 		"after":  "{\"maintenance\":true,\"resource_id\":\"some-id\"}",
 	}
 
-	assert.Nil(t, report.Error)
-	assert.Equal(t, report.Success.LastPhase, operator.VERIFY)
-	assert.EqualValues(t, report.Success.Diff, expectedDiff)
+	suite.Nil(report.Error)
+	suite.Equal(report.Success.LastPhase, operator.VERIFY)
+	suite.EqualValues(report.Success.Diff, expectedDiff)
 }
 
-func TestClusterMaintenanceChangeNodeSuccessOn(t *testing.T) {
-	mockCmdExecutor := mocks.NewMockCmdExecutor(t)
+func (suite *ClusterMaintenanceChangeOperatorTestSuite) TestClusterMaintenanceChangeNodeSuccessOn() {
 	ctx := context.Background()
 	nodeID := fakeID
 
-	mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"crm",
-		"status",
-	).Return([]byte("ok"), nil)
+	suite.mockClusterClient.On("IsHostOnline", ctx).Return(true)
 
-	mockCmdExecutor.On(
+	suite.mockCmdExecutor.On(
 		"Exec",
 		ctx,
 		"crm",
@@ -433,14 +393,9 @@ func TestClusterMaintenanceChangeNodeSuccessOn(t *testing.T) {
 		"maintenance",
 	).Return([]byte("scope=nodes  name=maintenance value=off"), nil).Once()
 
-	mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"cs_clusterstate",
-		"-i",
-	).Return([]byte("S_IDLE"), nil)
+	suite.mockClusterClient.On("IsIdle", ctx).Return(true, nil)
 
-	mockCmdExecutor.On(
+	suite.mockCmdExecutor.On(
 		"Exec",
 		ctx,
 		"crm",
@@ -450,7 +405,7 @@ func TestClusterMaintenanceChangeNodeSuccessOn(t *testing.T) {
 		nodeID,
 	).Return([]byte("ok"), nil)
 
-	mockCmdExecutor.On(
+	suite.mockCmdExecutor.On(
 		"Exec",
 		ctx,
 		"crm",
@@ -469,7 +424,8 @@ func TestClusterMaintenanceChangeNodeSuccessOn(t *testing.T) {
 		"test-op",
 		operator.Options[operator.ClusterMaintenanceChange]{
 			OperatorOptions: []operator.Option[operator.ClusterMaintenanceChange]{
-				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(mockCmdExecutor)),
+				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(suite.mockCmdExecutor)),
+				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceClient(suite.mockClusterClient)),
 			},
 		},
 	)
@@ -481,24 +437,18 @@ func TestClusterMaintenanceChangeNodeSuccessOn(t *testing.T) {
 		"after":  "{\"maintenance\":true,\"node_id\":\"some-id\"}",
 	}
 
-	assert.Nil(t, report.Error)
-	assert.Equal(t, report.Success.LastPhase, operator.VERIFY)
-	assert.EqualValues(t, report.Success.Diff, expectedDiff)
+	suite.Nil(report.Error)
+	suite.Equal(report.Success.LastPhase, operator.VERIFY)
+	suite.EqualValues(report.Success.Diff, expectedDiff)
 }
 
-func TestClusterMaintenanceChangeNodeSuccessOnWithoutPreviousState(t *testing.T) {
-	mockCmdExecutor := mocks.NewMockCmdExecutor(t)
+func (suite *ClusterMaintenanceChangeOperatorTestSuite) TestClusterMaintenanceChangeNodeSuccessOnWithoutPreviousState() {
 	ctx := context.Background()
 	nodeID := fakeID
 
-	mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"crm",
-		"status",
-	).Return([]byte("ok"), nil)
+	suite.mockClusterClient.On("IsHostOnline", ctx).Return(true)
 
-	mockCmdExecutor.On(
+	suite.mockCmdExecutor.On(
 		"Exec",
 		ctx,
 		"crm",
@@ -512,14 +462,9 @@ func TestClusterMaintenanceChangeNodeSuccessOnWithoutPreviousState(t *testing.T)
 		errors.New("error getting node state"),
 	).Once()
 
-	mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"cs_clusterstate",
-		"-i",
-	).Return([]byte("S_IDLE"), nil)
+	suite.mockClusterClient.On("IsIdle", ctx).Return(true, nil)
 
-	mockCmdExecutor.On(
+	suite.mockCmdExecutor.On(
 		"Exec",
 		ctx,
 		"crm",
@@ -529,7 +474,7 @@ func TestClusterMaintenanceChangeNodeSuccessOnWithoutPreviousState(t *testing.T)
 		nodeID,
 	).Return([]byte("ok"), nil)
 
-	mockCmdExecutor.On(
+	suite.mockCmdExecutor.On(
 		"Exec",
 		ctx,
 		"crm",
@@ -548,7 +493,8 @@ func TestClusterMaintenanceChangeNodeSuccessOnWithoutPreviousState(t *testing.T)
 		"test-op",
 		operator.Options[operator.ClusterMaintenanceChange]{
 			OperatorOptions: []operator.Option[operator.ClusterMaintenanceChange]{
-				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(mockCmdExecutor)),
+				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(suite.mockCmdExecutor)),
+				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceClient(suite.mockClusterClient)),
 			},
 		},
 	)
@@ -560,24 +506,18 @@ func TestClusterMaintenanceChangeNodeSuccessOnWithoutPreviousState(t *testing.T)
 		"after":  "{\"maintenance\":true,\"node_id\":\"some-id\"}",
 	}
 
-	assert.Nil(t, report.Error)
-	assert.Equal(t, report.Success.LastPhase, operator.VERIFY)
-	assert.EqualValues(t, report.Success.Diff, expectedDiff)
+	suite.Nil(report.Error)
+	suite.Equal(report.Success.LastPhase, operator.VERIFY)
+	suite.EqualValues(report.Success.Diff, expectedDiff)
 }
 
-func TestClusterMaintenanceChangeNodeSuccessOff(t *testing.T) {
-	mockCmdExecutor := mocks.NewMockCmdExecutor(t)
+func (suite *ClusterMaintenanceChangeOperatorTestSuite) TestClusterMaintenanceChangeNodeSuccessOff() {
 	ctx := context.Background()
 	nodeID := fakeID
 
-	mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"crm",
-		"status",
-	).Return([]byte("ok"), nil)
+	suite.mockClusterClient.On("IsHostOnline", ctx).Return(true)
 
-	mockCmdExecutor.On(
+	suite.mockCmdExecutor.On(
 		"Exec",
 		ctx,
 		"crm",
@@ -588,14 +528,9 @@ func TestClusterMaintenanceChangeNodeSuccessOff(t *testing.T) {
 		"maintenance",
 	).Return([]byte("scope=nodes  name=maintenance value=true"), nil).Once()
 
-	mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"cs_clusterstate",
-		"-i",
-	).Return([]byte("S_IDLE"), nil)
+	suite.mockClusterClient.On("IsIdle", ctx).Return(true, nil)
 
-	mockCmdExecutor.On(
+	suite.mockCmdExecutor.On(
 		"Exec",
 		ctx,
 		"crm",
@@ -604,7 +539,7 @@ func TestClusterMaintenanceChangeNodeSuccessOff(t *testing.T) {
 		"",
 	).Return([]byte("ok"), nil)
 
-	mockCmdExecutor.On(
+	suite.mockCmdExecutor.On(
 		"Exec",
 		ctx,
 		"crm",
@@ -614,7 +549,7 @@ func TestClusterMaintenanceChangeNodeSuccessOff(t *testing.T) {
 		nodeID,
 	).Return([]byte("ok"), nil)
 
-	mockCmdExecutor.On(
+	suite.mockCmdExecutor.On(
 		"Exec",
 		ctx,
 		"crm",
@@ -633,7 +568,8 @@ func TestClusterMaintenanceChangeNodeSuccessOff(t *testing.T) {
 		"test-op",
 		operator.Options[operator.ClusterMaintenanceChange]{
 			OperatorOptions: []operator.Option[operator.ClusterMaintenanceChange]{
-				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(mockCmdExecutor)),
+				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(suite.mockCmdExecutor)),
+				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceClient(suite.mockClusterClient)),
 			},
 		},
 	)
@@ -645,13 +581,12 @@ func TestClusterMaintenanceChangeNodeSuccessOff(t *testing.T) {
 		"after":  "{\"maintenance\":false,\"node_id\":\"some-id\"}",
 	}
 
-	assert.Nil(t, report.Error)
-	assert.Equal(t, report.Success.LastPhase, operator.VERIFY)
-	assert.EqualValues(t, report.Success.Diff, expectedDiff)
+	suite.Nil(report.Error)
+	suite.Equal(report.Success.LastPhase, operator.VERIFY)
+	suite.EqualValues(report.Success.Diff, expectedDiff)
 }
 
-func TestClusterMaintenanceChangeMissingArgument(t *testing.T) {
-	mockCmdExecutor := mocks.NewMockCmdExecutor(t)
+func (suite *ClusterMaintenanceChangeOperatorTestSuite) TestClusterMaintenanceChangeMissingArgument() {
 	ctx := context.Background()
 
 	clusterMaintenanceChangeOperator := operator.NewClusterMaintenanceChange(
@@ -659,20 +594,19 @@ func TestClusterMaintenanceChangeMissingArgument(t *testing.T) {
 		"test-op",
 		operator.Options[operator.ClusterMaintenanceChange]{
 			OperatorOptions: []operator.Option[operator.ClusterMaintenanceChange]{
-				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(mockCmdExecutor)),
+				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(suite.mockCmdExecutor)),
 			},
 		},
 	)
 
 	report := clusterMaintenanceChangeOperator.Run(ctx)
 
-	assert.Nil(t, report.Success)
-	assert.Equal(t, report.Error.ErrorPhase, operator.PLAN)
-	assert.EqualValues(t, "argument maintenance not provided, could not use the operator", report.Error.Message)
+	suite.Nil(report.Success)
+	suite.Equal(report.Error.ErrorPhase, operator.PLAN)
+	suite.EqualValues("argument maintenance not provided, could not use the operator", report.Error.Message)
 }
 
-func TestClusterMaintenanceChangeInvalidArgument(t *testing.T) {
-	mockCmdExecutor := mocks.NewMockCmdExecutor(t)
+func (suite *ClusterMaintenanceChangeOperatorTestSuite) TestClusterMaintenanceChangeInvalidArgument() {
 	ctx := context.Background()
 
 	clusterMaintenanceChangeOperator := operator.NewClusterMaintenanceChange(
@@ -682,20 +616,19 @@ func TestClusterMaintenanceChangeInvalidArgument(t *testing.T) {
 		"test-op",
 		operator.Options[operator.ClusterMaintenanceChange]{
 			OperatorOptions: []operator.Option[operator.ClusterMaintenanceChange]{
-				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(mockCmdExecutor)),
+				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(suite.mockCmdExecutor)),
 			},
 		},
 	)
 
 	report := clusterMaintenanceChangeOperator.Run(ctx)
 
-	assert.Nil(t, report.Success)
-	assert.Equal(t, report.Error.ErrorPhase, operator.PLAN)
-	assert.EqualValues(t, "could not parse maintenance argument as bool, argument provided: on", report.Error.Message)
+	suite.Nil(report.Success)
+	suite.Equal(report.Error.ErrorPhase, operator.PLAN)
+	suite.EqualValues("could not parse maintenance argument as bool, argument provided: on", report.Error.Message)
 }
 
-func TestClusterMaintenanceChangeInvalidResourceIDArgument(t *testing.T) {
-	mockCmdExecutor := mocks.NewMockCmdExecutor(t)
+func (suite *ClusterMaintenanceChangeOperatorTestSuite) TestClusterMaintenanceChangeInvalidResourceIDArgument() {
 	ctx := context.Background()
 
 	clusterMaintenanceChangeOperator := operator.NewClusterMaintenanceChange(
@@ -706,20 +639,19 @@ func TestClusterMaintenanceChangeInvalidResourceIDArgument(t *testing.T) {
 		"test-op",
 		operator.Options[operator.ClusterMaintenanceChange]{
 			OperatorOptions: []operator.Option[operator.ClusterMaintenanceChange]{
-				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(mockCmdExecutor)),
+				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(suite.mockCmdExecutor)),
 			},
 		},
 	)
 
 	report := clusterMaintenanceChangeOperator.Run(ctx)
 
-	assert.Nil(t, report.Success)
-	assert.Equal(t, report.Error.ErrorPhase, operator.PLAN)
-	assert.EqualValues(t, "could not parse resource_id argument as string, argument provided: 1", report.Error.Message)
+	suite.Nil(report.Success)
+	suite.Equal(report.Error.ErrorPhase, operator.PLAN)
+	suite.EqualValues("could not parse resource_id argument as string, argument provided: 1", report.Error.Message)
 }
 
-func TestClusterMaintenanceChangeInvalidNodeIDArgument(t *testing.T) {
-	mockCmdExecutor := mocks.NewMockCmdExecutor(t)
+func (suite *ClusterMaintenanceChangeOperatorTestSuite) TestClusterMaintenanceChangeInvalidNodeIDArgument() {
 	ctx := context.Background()
 
 	clusterMaintenanceChangeOperator := operator.NewClusterMaintenanceChange(
@@ -730,20 +662,19 @@ func TestClusterMaintenanceChangeInvalidNodeIDArgument(t *testing.T) {
 		"test-op",
 		operator.Options[operator.ClusterMaintenanceChange]{
 			OperatorOptions: []operator.Option[operator.ClusterMaintenanceChange]{
-				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(mockCmdExecutor)),
+				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(suite.mockCmdExecutor)),
 			},
 		},
 	)
 
 	report := clusterMaintenanceChangeOperator.Run(ctx)
 
-	assert.Nil(t, report.Success)
-	assert.Equal(t, report.Error.ErrorPhase, operator.PLAN)
-	assert.EqualValues(t, "could not parse node_id argument as string, argument provided: 1", report.Error.Message)
+	suite.Nil(report.Success)
+	suite.Equal(report.Error.ErrorPhase, operator.PLAN)
+	suite.EqualValues("could not parse node_id argument as string, argument provided: 1", report.Error.Message)
 }
 
-func TestClusterMaintenanceChangeMutuallyExclusiveArgument(t *testing.T) {
-	mockCmdExecutor := mocks.NewMockCmdExecutor(t)
+func (suite *ClusterMaintenanceChangeOperatorTestSuite) TestClusterMaintenanceChangeMutuallyExclusiveArgument() {
 	ctx := context.Background()
 
 	clusterMaintenanceChangeOperator := operator.NewClusterMaintenanceChange(
@@ -755,28 +686,22 @@ func TestClusterMaintenanceChangeMutuallyExclusiveArgument(t *testing.T) {
 		"test-op",
 		operator.Options[operator.ClusterMaintenanceChange]{
 			OperatorOptions: []operator.Option[operator.ClusterMaintenanceChange]{
-				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(mockCmdExecutor)),
+				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(suite.mockCmdExecutor)),
 			},
 		},
 	)
 
 	report := clusterMaintenanceChangeOperator.Run(ctx)
 
-	assert.Nil(t, report.Success)
-	assert.Equal(t, report.Error.ErrorPhase, operator.PLAN)
-	assert.EqualValues(t, "resource_id and node_id arguments are mutually exclusive, use only one of them", report.Error.Message)
+	suite.Nil(report.Success)
+	suite.Equal(report.Error.ErrorPhase, operator.PLAN)
+	suite.EqualValues("resource_id and node_id arguments are mutually exclusive, use only one of them", report.Error.Message)
 }
 
-func TestClusterMaintenanceChangePlanClusterNotFound(t *testing.T) {
-	mockCmdExecutor := mocks.NewMockCmdExecutor(t)
+func (suite *ClusterMaintenanceChangeOperatorTestSuite) TestClusterMaintenanceChangePlanClusterNotFound() {
 	ctx := context.Background()
 
-	mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"crm",
-		"status",
-	).Return([]byte("error"), errors.New("cluster not found"))
+	suite.mockClusterClient.On("IsHostOnline", ctx).Return(false)
 
 	clusterMaintenanceChangeOperator := operator.NewClusterMaintenanceChange(
 		operator.Arguments{
@@ -785,30 +710,25 @@ func TestClusterMaintenanceChangePlanClusterNotFound(t *testing.T) {
 		"test-op",
 		operator.Options[operator.ClusterMaintenanceChange]{
 			OperatorOptions: []operator.Option[operator.ClusterMaintenanceChange]{
-				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(mockCmdExecutor)),
+				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(suite.mockCmdExecutor)),
+				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceClient(suite.mockClusterClient)),
 			},
 		},
 	)
 
 	report := clusterMaintenanceChangeOperator.Run(ctx)
 
-	assert.Nil(t, report.Success)
-	assert.Equal(t, report.Error.ErrorPhase, operator.PLAN)
-	assert.EqualValues(t, "error getting cluster status: cluster not found", report.Error.Message)
+	suite.Nil(report.Success)
+	suite.Equal(report.Error.ErrorPhase, operator.PLAN)
+	suite.EqualValues("cluster is not runnint on host", report.Error.Message)
 }
 
-func TestClusterMaintenanceChangePlanGetMaintenanceError(t *testing.T) {
-	mockCmdExecutor := mocks.NewMockCmdExecutor(t)
+func (suite *ClusterMaintenanceChangeOperatorTestSuite) TestClusterMaintenanceChangePlanGetMaintenanceError() {
 	ctx := context.Background()
 
-	mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"crm",
-		"status",
-	).Return([]byte("ok"), nil)
+	suite.mockClusterClient.On("IsHostOnline", ctx).Return(true)
 
-	mockCmdExecutor.On(
+	suite.mockCmdExecutor.On(
 		"Exec",
 		ctx,
 		"crm",
@@ -825,30 +745,25 @@ func TestClusterMaintenanceChangePlanGetMaintenanceError(t *testing.T) {
 		"test-op",
 		operator.Options[operator.ClusterMaintenanceChange]{
 			OperatorOptions: []operator.Option[operator.ClusterMaintenanceChange]{
-				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(mockCmdExecutor)),
+				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(suite.mockCmdExecutor)),
+				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceClient(suite.mockClusterClient)),
 			},
 		},
 	)
 
 	report := clusterMaintenanceChangeOperator.Run(ctx)
 
-	assert.Nil(t, report.Success)
-	assert.Equal(t, report.Error.ErrorPhase, operator.PLAN)
-	assert.EqualValues(t, "error getting maintenance-mode: cannot get state", report.Error.Message)
+	suite.Nil(report.Success)
+	suite.Equal(report.Error.ErrorPhase, operator.PLAN)
+	suite.EqualValues("error getting maintenance-mode: cannot get state", report.Error.Message)
 }
 
-func TestClusterMaintenanceChangePlanEmptyMaintenanceState(t *testing.T) {
-	mockCmdExecutor := mocks.NewMockCmdExecutor(t)
+func (suite *ClusterMaintenanceChangeOperatorTestSuite) TestClusterMaintenanceChangePlanEmptyMaintenanceState() {
 	ctx := context.Background()
 
-	mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"crm",
-		"status",
-	).Return([]byte("ok"), nil)
+	suite.mockClusterClient.On("IsHostOnline", ctx).Return(true)
 
-	mockCmdExecutor.On(
+	suite.mockCmdExecutor.On(
 		"Exec",
 		ctx,
 		"crm",
@@ -865,31 +780,26 @@ func TestClusterMaintenanceChangePlanEmptyMaintenanceState(t *testing.T) {
 		"test-op",
 		operator.Options[operator.ClusterMaintenanceChange]{
 			OperatorOptions: []operator.Option[operator.ClusterMaintenanceChange]{
-				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(mockCmdExecutor)),
+				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(suite.mockCmdExecutor)),
+				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceClient(suite.mockClusterClient)),
 			},
 		},
 	)
 
 	report := clusterMaintenanceChangeOperator.Run(ctx)
 
-	assert.Nil(t, report.Success)
-	assert.Equal(t, report.Error.ErrorPhase, operator.PLAN)
-	assert.EqualValues(t, "error decoding maintenance-mode attribute: empty command output", report.Error.Message)
+	suite.Nil(report.Success)
+	suite.Equal(report.Error.ErrorPhase, operator.PLAN)
+	suite.EqualValues("error decoding maintenance-mode attribute: empty command output", report.Error.Message)
 }
 
-func TestClusterMaintenanceChangePlanNodeNotFound(t *testing.T) {
-	mockCmdExecutor := mocks.NewMockCmdExecutor(t)
+func (suite *ClusterMaintenanceChangeOperatorTestSuite) TestClusterMaintenanceChangePlanNodeNotFound() {
 	ctx := context.Background()
 	nodeID := fakeID
 
-	mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"crm",
-		"status",
-	).Return([]byte("ok"), nil)
+	suite.mockClusterClient.On("IsHostOnline", ctx).Return(true)
 
-	mockCmdExecutor.On(
+	suite.mockCmdExecutor.On(
 		"Exec",
 		ctx,
 		"crm",
@@ -908,30 +818,25 @@ func TestClusterMaintenanceChangePlanNodeNotFound(t *testing.T) {
 		"test-op",
 		operator.Options[operator.ClusterMaintenanceChange]{
 			OperatorOptions: []operator.Option[operator.ClusterMaintenanceChange]{
-				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(mockCmdExecutor)),
+				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(suite.mockCmdExecutor)),
+				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceClient(suite.mockClusterClient)),
 			},
 		},
 	)
 
 	report := clusterMaintenanceChangeOperator.Run(ctx)
 
-	assert.Nil(t, report.Success)
-	assert.Equal(t, report.Error.ErrorPhase, operator.PLAN)
-	assert.EqualValues(t, "error getting node maintenance attribute: error getting node", report.Error.Message)
+	suite.Nil(report.Success)
+	suite.Equal(report.Error.ErrorPhase, operator.PLAN)
+	suite.EqualValues("error getting node maintenance attribute: error getting node", report.Error.Message)
 }
 
-func TestClusterMaintenanceChangeCommitAlreadyApplied(t *testing.T) {
-	mockCmdExecutor := mocks.NewMockCmdExecutor(t)
+func (suite *ClusterMaintenanceChangeOperatorTestSuite) TestClusterMaintenanceChangeCommitAlreadyApplied() {
 	ctx := context.Background()
 
-	mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"crm",
-		"status",
-	).Return([]byte("ok"), nil)
+	suite.mockClusterClient.On("IsHostOnline", ctx).Return(true)
 
-	mockCmdExecutor.On(
+	suite.mockCmdExecutor.On(
 		"Exec",
 		ctx,
 		"crm",
@@ -948,7 +853,8 @@ func TestClusterMaintenanceChangeCommitAlreadyApplied(t *testing.T) {
 		"test-op",
 		operator.Options[operator.ClusterMaintenanceChange]{
 			OperatorOptions: []operator.Option[operator.ClusterMaintenanceChange]{
-				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(mockCmdExecutor)),
+				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(suite.mockCmdExecutor)),
+				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceClient(suite.mockClusterClient)),
 			},
 		},
 	)
@@ -960,23 +866,17 @@ func TestClusterMaintenanceChangeCommitAlreadyApplied(t *testing.T) {
 		"after":  "{\"maintenance\":true}",
 	}
 
-	assert.Nil(t, report.Error)
-	assert.Equal(t, report.Success.LastPhase, operator.PLAN)
-	assert.EqualValues(t, report.Success.Diff, expectedDiff)
+	suite.Nil(report.Error)
+	suite.Equal(report.Success.LastPhase, operator.PLAN)
+	suite.EqualValues(report.Success.Diff, expectedDiff)
 }
 
-func TestClusterMaintenanceChangeCommitNotIdle(t *testing.T) {
-	mockCmdExecutor := mocks.NewMockCmdExecutor(t)
+func (suite *ClusterMaintenanceChangeOperatorTestSuite) TestClusterMaintenanceChangeCommitNotIdle() {
 	ctx := context.Background()
 
-	mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"crm",
-		"status",
-	).Return([]byte("ok"), nil)
+	suite.mockClusterClient.On("IsHostOnline", ctx).Return(true)
 
-	mockCmdExecutor.On(
+	suite.mockCmdExecutor.On(
 		"Exec",
 		ctx,
 		"crm",
@@ -986,21 +886,10 @@ func TestClusterMaintenanceChangeCommitNotIdle(t *testing.T) {
 		"maintenance-mode",
 	).Return([]byte("false"), nil)
 
-	mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"cs_clusterstate",
-		"-i",
-	).Return([]byte("S_TRANSITION"), nil).Once()
+	suite.mockClusterClient.On("IsIdle", ctx).Return(false, nil).Once()
+	suite.mockClusterClient.On("IsIdle", ctx).Return(true, nil)
 
-	mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"cs_clusterstate",
-		"-i",
-	).Return([]byte("S_IDLE"), nil)
-
-	mockCmdExecutor.On(
+	suite.mockCmdExecutor.On(
 		"Exec",
 		ctx,
 		"crm",
@@ -1015,30 +904,25 @@ func TestClusterMaintenanceChangeCommitNotIdle(t *testing.T) {
 		"test-op",
 		operator.Options[operator.ClusterMaintenanceChange]{
 			OperatorOptions: []operator.Option[operator.ClusterMaintenanceChange]{
-				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(mockCmdExecutor)),
+				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(suite.mockCmdExecutor)),
+				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceClient(suite.mockClusterClient)),
 			},
 		},
 	)
 
 	report := clusterMaintenanceChangeOperator.Run(ctx)
 
-	assert.Nil(t, report.Success)
-	assert.Equal(t, report.Error.ErrorPhase, operator.COMMIT)
-	assert.EqualValues(t, "cluster is not in S_IDLE state", report.Error.Message)
+	suite.Nil(report.Success)
+	suite.Equal(report.Error.ErrorPhase, operator.COMMIT)
+	suite.EqualValues("cluster is not in S_IDLE state", report.Error.Message)
 }
 
-func TestClusterMaintenanceChangeVerifyError(t *testing.T) {
-	mockCmdExecutor := mocks.NewMockCmdExecutor(t)
+func (suite *ClusterMaintenanceChangeOperatorTestSuite) TestClusterMaintenanceChangeVerifyError() {
 	ctx := context.Background()
 
-	mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"crm",
-		"status",
-	).Return([]byte("ok"), nil)
+	suite.mockClusterClient.On("IsHostOnline", ctx).Return(true)
 
-	mockCmdExecutor.On(
+	suite.mockCmdExecutor.On(
 		"Exec",
 		ctx,
 		"crm",
@@ -1048,14 +932,9 @@ func TestClusterMaintenanceChangeVerifyError(t *testing.T) {
 		"maintenance-mode",
 	).Return([]byte("false"), nil).Once()
 
-	mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"cs_clusterstate",
-		"-i",
-	).Return([]byte("S_IDLE"), nil)
+	suite.mockClusterClient.On("IsIdle", ctx).Return(true, nil)
 
-	mockCmdExecutor.On(
+	suite.mockCmdExecutor.On(
 		"Exec",
 		ctx,
 		"crm",
@@ -1063,7 +942,7 @@ func TestClusterMaintenanceChangeVerifyError(t *testing.T) {
 		"on",
 	).Return([]byte("ok"), nil).Once()
 
-	mockCmdExecutor.On(
+	suite.mockCmdExecutor.On(
 		"Exec",
 		ctx,
 		"crm",
@@ -1073,7 +952,7 @@ func TestClusterMaintenanceChangeVerifyError(t *testing.T) {
 		"maintenance-mode",
 	).Return([]byte("false"), nil)
 
-	mockCmdExecutor.On(
+	suite.mockCmdExecutor.On(
 		"Exec",
 		ctx,
 		"crm",
@@ -1088,30 +967,25 @@ func TestClusterMaintenanceChangeVerifyError(t *testing.T) {
 		"test-op",
 		operator.Options[operator.ClusterMaintenanceChange]{
 			OperatorOptions: []operator.Option[operator.ClusterMaintenanceChange]{
-				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(mockCmdExecutor)),
+				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(suite.mockCmdExecutor)),
+				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceClient(suite.mockClusterClient)),
 			},
 		},
 	)
 
 	report := clusterMaintenanceChangeOperator.Run(ctx)
 
-	assert.Nil(t, report.Success)
-	assert.Equal(t, report.Error.ErrorPhase, operator.VERIFY)
-	assert.EqualValues(t, "verify cluster maintenance failed, the maintenance value true was not set in commit phase", report.Error.Message)
+	suite.Nil(report.Success)
+	suite.Equal(report.Error.ErrorPhase, operator.VERIFY)
+	suite.EqualValues("verify cluster maintenance failed, the maintenance value true was not set in commit phase", report.Error.Message)
 }
 
-func TestClusterMaintenanceChangeRollbackNotIdle(t *testing.T) {
-	mockCmdExecutor := mocks.NewMockCmdExecutor(t)
+func (suite *ClusterMaintenanceChangeOperatorTestSuite) TestClusterMaintenanceChangeRollbackNotIdle() {
 	ctx := context.Background()
 
-	mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"crm",
-		"status",
-	).Return([]byte("ok"), nil)
+	suite.mockClusterClient.On("IsHostOnline", ctx).Return(true)
 
-	mockCmdExecutor.On(
+	suite.mockCmdExecutor.On(
 		"Exec",
 		ctx,
 		"crm",
@@ -1121,14 +995,9 @@ func TestClusterMaintenanceChangeRollbackNotIdle(t *testing.T) {
 		"maintenance-mode",
 	).Return([]byte("false"), nil)
 
-	mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"cs_clusterstate",
-		"-i",
-	).Return([]byte("S_IDLE"), nil).Once()
+	suite.mockClusterClient.On("IsIdle", ctx).Return(true, nil).Once()
 
-	mockCmdExecutor.On(
+	suite.mockCmdExecutor.On(
 		"Exec",
 		ctx,
 		"crm",
@@ -1136,12 +1005,7 @@ func TestClusterMaintenanceChangeRollbackNotIdle(t *testing.T) {
 		"on",
 	).Return([]byte("error"), errors.New("error changing"))
 
-	mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"cs_clusterstate",
-		"-i",
-	).Return([]byte("S_TRANSITION"), nil)
+	suite.mockClusterClient.On("IsIdle", ctx).Return(false, nil)
 
 	clusterMaintenanceChangeOperator := operator.NewClusterMaintenanceChange(
 		operator.Arguments{
@@ -1150,30 +1014,25 @@ func TestClusterMaintenanceChangeRollbackNotIdle(t *testing.T) {
 		"test-op",
 		operator.Options[operator.ClusterMaintenanceChange]{
 			OperatorOptions: []operator.Option[operator.ClusterMaintenanceChange]{
-				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(mockCmdExecutor)),
+				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(suite.mockCmdExecutor)),
+				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceClient(suite.mockClusterClient)),
 			},
 		},
 	)
 
 	report := clusterMaintenanceChangeOperator.Run(ctx)
 
-	assert.Nil(t, report.Success)
-	assert.Equal(t, report.Error.ErrorPhase, operator.ROLLBACK)
-	assert.EqualValues(t, "cluster is not in S_IDLE state\nerror updating maintenance state: error changing", report.Error.Message)
+	suite.Nil(report.Success)
+	suite.Equal(report.Error.ErrorPhase, operator.ROLLBACK)
+	suite.EqualValues("cluster is not in S_IDLE state\nerror updating maintenance state: error changing", report.Error.Message)
 }
 
-func TestClusterMaintenanceChangeRollbackErrorReverting(t *testing.T) {
-	mockCmdExecutor := mocks.NewMockCmdExecutor(t)
+func (suite *ClusterMaintenanceChangeOperatorTestSuite) TestClusterMaintenanceChangeRollbackErrorReverting() {
 	ctx := context.Background()
 
-	mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"crm",
-		"status",
-	).Return([]byte("ok"), nil)
+	suite.mockClusterClient.On("IsHostOnline", ctx).Return(true)
 
-	mockCmdExecutor.On(
+	suite.mockCmdExecutor.On(
 		"Exec",
 		ctx,
 		"crm",
@@ -1183,14 +1042,9 @@ func TestClusterMaintenanceChangeRollbackErrorReverting(t *testing.T) {
 		"maintenance-mode",
 	).Return([]byte("false"), nil)
 
-	mockCmdExecutor.On(
-		"Exec",
-		ctx,
-		"cs_clusterstate",
-		"-i",
-	).Return([]byte("S_IDLE"), nil)
+	suite.mockClusterClient.On("IsIdle", ctx).Return(true, nil)
 
-	mockCmdExecutor.On(
+	suite.mockCmdExecutor.On(
 		"Exec",
 		ctx,
 		"crm",
@@ -1198,7 +1052,7 @@ func TestClusterMaintenanceChangeRollbackErrorReverting(t *testing.T) {
 		"on",
 	).Return([]byte("error"), errors.New("error changing"))
 
-	mockCmdExecutor.On(
+	suite.mockCmdExecutor.On(
 		"Exec",
 		ctx,
 		"crm",
@@ -1213,14 +1067,15 @@ func TestClusterMaintenanceChangeRollbackErrorReverting(t *testing.T) {
 		"test-op",
 		operator.Options[operator.ClusterMaintenanceChange]{
 			OperatorOptions: []operator.Option[operator.ClusterMaintenanceChange]{
-				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(mockCmdExecutor)),
+				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceExecutor(suite.mockCmdExecutor)),
+				operator.Option[operator.ClusterMaintenanceChange](operator.WithCustomClusterMaintenanceClient(suite.mockClusterClient)),
 			},
 		},
 	)
 
 	report := clusterMaintenanceChangeOperator.Run(ctx)
 
-	assert.Nil(t, report.Success)
-	assert.Equal(t, report.Error.ErrorPhase, operator.ROLLBACK)
-	assert.EqualValues(t, "error rolling back maintenance state: error reverting\nerror updating maintenance state: error changing", report.Error.Message)
+	suite.Nil(report.Success)
+	suite.Equal(report.Error.ErrorPhase, operator.ROLLBACK)
+	suite.EqualValues("error rolling back maintenance state: error reverting\nerror updating maintenance state: error changing", report.Error.Message)
 }
