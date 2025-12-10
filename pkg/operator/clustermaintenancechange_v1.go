@@ -227,6 +227,7 @@ func (c *ClusterMaintenanceChange) rollback(ctx context.Context) error {
 	return nil
 }
 
+// nolint: dupl
 func (c *ClusterMaintenanceChange) operationDiff(_ context.Context) map[string]any {
 	diff := make(map[string]any)
 
