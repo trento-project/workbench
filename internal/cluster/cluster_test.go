@@ -81,3 +81,80 @@ func (suite *CrmTestSuite) TestIsIdleDifferentState() {
 	suite.NoError(err, "IsIdle should not return an error")
 	suite.False(isIdle, "Cluster should not be idle")
 }
+
+func (suite *CrmTestSuite) TestResourceRefresh() {
+	ctx := context.Background()
+
+	mockExecutor := mocks.NewMockCmdExecutor(suite.T())
+	mockExecutor.On("Exec", ctx, "crm", "resource", "refresh").Return([]byte("got reply (done)"), nil)
+
+	crmClient := cluster.NewClusterClient(mockExecutor, slog.Default())
+
+	err := crmClient.ResourceRefresh(ctx, "", "")
+	suite.NoError(err)
+}
+
+func (suite *CrmTestSuite) TestResourceRefreshWithResource() {
+	ctx := context.Background()
+
+	mockExecutor := mocks.NewMockCmdExecutor(suite.T())
+	mockExecutor.On("Exec", ctx, "crm", "resource", "refresh", "my-resource").Return([]byte("got reply (done)"), nil)
+
+	crmClient := cluster.NewClusterClient(mockExecutor, slog.Default())
+
+	err := crmClient.ResourceRefresh(ctx, "my-resource", "")
+	suite.NoError(err)
+}
+
+func (suite *CrmTestSuite) TestResourceRefreshWithResourceAndNode() {
+	ctx := context.Background()
+
+	mockExecutor := mocks.NewMockCmdExecutor(suite.T())
+	mockExecutor.On("Exec", ctx, "crm", "resource", "refresh", "my-resource", "my-node").Return([]byte("got reply (done)"), nil)
+
+	crmClient := cluster.NewClusterClient(mockExecutor, slog.Default())
+
+	err := crmClient.ResourceRefresh(ctx, "my-resource", "my-node")
+	suite.NoError(err)
+}
+
+func (suite *CrmTestSuite) TestResourceRefreshWithNodeOnlyError() {
+	ctx := context.Background()
+
+	mockExecutor := mocks.NewMockCmdExecutor(suite.T())
+
+	crmClient := cluster.NewClusterClient(mockExecutor, slog.Default())
+
+	err := crmClient.ResourceRefresh(ctx, "", "my-node")
+	suite.Error(err)
+	suite.EqualError(err, "nodeID cannot be provided without a resourceID")
+}
+
+func (suite *CrmTestSuite) TestResourceRefreshError() {
+	ctx := context.Background()
+
+	mockExecutor := mocks.NewMockCmdExecutor(suite.T())
+	mockExecutor.On("Exec", ctx, "crm", "resource", "refresh").Return([]byte("error output"), errors.New("some error"))
+
+	crmClient := cluster.NewClusterClient(mockExecutor, slog.Default())
+
+	err := crmClient.ResourceRefresh(ctx, "", "")
+	suite.Error(err)
+	suite.Contains(err.Error(), "failed to refresh resource")
+	suite.Contains(err.Error(), "some error")
+	suite.Contains(err.Error(), "error output")
+}
+
+func (suite *CrmTestSuite) TestResourceRefreshUnexpectedOutputError() {
+	ctx := context.Background()
+
+	mockExecutor := mocks.NewMockCmdExecutor(suite.T())
+	mockExecutor.On("Exec", ctx, "crm", "resource", "refresh").Return([]byte("unexpected output"), nil)
+
+	crmClient := cluster.NewClusterClient(mockExecutor, slog.Default())
+
+	err := crmClient.ResourceRefresh(ctx, "", "")
+	suite.Error(err)
+	suite.Contains(err.Error(), "failed to refresh resource, unexpected output")
+	suite.Contains(err.Error(), "unexpected output")
+}
