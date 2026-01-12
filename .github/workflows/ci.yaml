@@ -91,7 +91,7 @@ jobs:
         run: |
           set -x
           find ./build -maxdepth 1 -mindepth 1 -type d -exec sh -c 'tar -zcf build/workbench-$(basename {}).tgz -C {} workbench' \;
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         with:
           name: workbench-binaries
           path: |
