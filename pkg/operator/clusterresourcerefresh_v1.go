@@ -123,6 +123,7 @@ func (c *ClusterResourceRefresh) commit(ctx context.Context) error {
 func (c *ClusterResourceRefresh) verify(_ context.Context) error {
 	// A refresh operation is an action that doesn't change a verifiable state.
 	// If commit was successful, we consider it done.
+	c.logger.Debug("Verify is not applicable for cluster refresh operation.")
 	c.resources[afterDiffField] = true
 	return nil
 }
