@@ -101,9 +101,10 @@ func (c *Client) ResourceRefresh(ctx context.Context, resourceID, nodeID string)
 	args := []string{"resource", "refresh"}
 	if resourceID != "" {
 		args = append(args, resourceID)
-		if nodeID != "" {
-			args = append(args, nodeID)
-		}
+	}
+
+	if nodeID != "" {
+		args = append(args, nodeID)
 	}
 
 	c.logger.Info("Refreshing cluster resource", "resourceID", resourceID, "nodeID", nodeID)
