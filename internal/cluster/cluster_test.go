@@ -84,9 +84,11 @@ func (suite *CrmTestSuite) TestIsIdleDifferentState() {
 
 func (suite *CrmTestSuite) TestResourceRefresh() {
 	ctx := context.Background()
+	commandOutput := `Waiting for 1 reply from the controller
+... got reply (done)`
 
 	mockExecutor := mocks.NewMockCmdExecutor(suite.T())
-	mockExecutor.On("Exec", ctx, "crm", "resource", "refresh").Return([]byte("got reply (done)"), nil)
+	mockExecutor.On("Exec", ctx, "crm", "resource", "refresh").Return([]byte(commandOutput), nil)
 
 	crmClient := cluster.NewClusterClient(mockExecutor, slog.Default())
 
