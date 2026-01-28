@@ -3,7 +3,7 @@ module github.com/trento-project/workbench
 go 1.25.0
 
 require (
-	github.com/coreos/go-systemd/v22 v22.6.0
+	github.com/coreos/go-systemd/v22 v22.7.0
 	github.com/godbus/dbus/v5 v5.2.2
 	github.com/hooklift/gowsdl v0.5.0
 	github.com/jessevdk/go-flags v1.6.1
