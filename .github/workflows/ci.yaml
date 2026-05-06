@@ -49,6 +49,8 @@ jobs:
           version: v2.4.0
           skip-cache: true
           args: "--timeout=3m"
+      - uses: apache/skywalking-eyes/header@61275cc80d0798a405cb070f7d3a8aaf7cf2c2c1 # v0.8.0
+        name: Check license headers
 
   test:
     runs-on: ubuntu-24.04
