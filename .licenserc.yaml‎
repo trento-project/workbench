@@ -6,7 +6,7 @@ header:
   license:
     spdx-id: Apache-2.0
     copyright-owner: SUSE LLC
-    software-name: mcp-server-trento
+    software-name: trento-workbench
     content: |
       SPDX-FileCopyrightText: SUSE LLC
       SPDX-License-Identifier: Apache-2.0
