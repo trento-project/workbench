@@ -1,0 +1,22 @@
+# SPDX-FileCopyrightText: SUSE LLC
+# SPDX-License-Identifier: Apache-2.0
+
+header:
+  comment: on-failure
+  license:
+    spdx-id: Apache-2.0
+    copyright-owner: SUSE LLC
+    software-name: trento-workbench
+    content: |
+      SPDX-FileCopyrightText: SUSE LLC
+      SPDX-License-Identifier: Apache-2.0
+  paths-ignore:
+    - "**/*.adoc"
+    - "**/*.json"
+    - "**/*.md"
+    - "**/*.output"
+    - ".github/CODEOWNERS"
+    - ".github/dependabot.yaml"
+    - ".tool-versions"
+    - "LICENSE"
+    - "go.sum"
