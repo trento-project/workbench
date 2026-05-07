@@ -131,7 +131,7 @@ jobs:
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
           name: workbench-binaries
-      - uses: AButler/upload-release-assets@3d6774fae0ed91407dc5ae29d576b166536d1777 # v3.0
+      - uses: AButler/upload-release-assets@45be2facf3acc71812c1c17b4cefef5f6e8cac8a # v3.0.1
         with:
           files: "workbench-*"
           repo-token: ${{ secrets.GITHUB_TOKEN }}
