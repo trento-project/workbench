@@ -11,7 +11,7 @@ require (
 	github.com/hooklift/gowsdl v0.5.0
 	github.com/jessevdk/go-flags v1.6.1
 	github.com/stretchr/testify v1.11.1
-	github.com/tidwall/gjson v1.18.0
+	github.com/tidwall/gjson v1.19.0
 	golang.org/x/mod v0.37.0
 )
 
